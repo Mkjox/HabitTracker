@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+
 const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
 export const initializeDatabase = async () => {
@@ -11,6 +12,7 @@ export const initializeDatabase = async () => {
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         );`
   );
+
   await db.execAsync(
     `CREATE TABLE IF NOT EXISTS habits (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,24 +20,35 @@ export const initializeDatabase = async () => {
           category_id INTEGER,
           added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (category_id) REFERENCES categories(id)
+          FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
         );`
   );
+
+  await db.execAsync(
+    `CREATE TRIGGER IF NOT EXISTS update_habit_timestamp
+      AFTER UPDATE ON habits
+      FOR EACH ROW
+      BEGIN
+        UPDATE habits SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+      END;`
+  );
+
   await db.execAsync(
     `CREATE TABLE IF NOT EXISTS habit_progress (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           habit_id INTEGER NOT NULL,
           progress INTEGER NOT NULL DEFAULT 0,
           date DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (habit_id) REFERENCES habits(id)
+          FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
         );`
   );
+
   await db.execAsync(
     `CREATE TABLE IF NOT EXISTS recycle_bin (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           habit_id INTEGER NOT NULL,
           deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (habit_id) REFERENCES habits(id)
+          FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
         );`
   );
 };
@@ -45,21 +58,30 @@ export const addHabit = async (name: string, categoryId: number) => {
   await db.runAsync("INSERT INTO habits (name, category_id) VALUES (?, ?);", [name, categoryId]);
 };
 
-// Function to update a habit
 export const updateHabit = async (id: number, name: string, categoryId: number) => {
   const db = await dbPromise;
-  await db.runAsync("UPDATE habits SET name = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;", [name, categoryId, id]);
+  await db.runAsync("UPDATE habits SET name = ?, category_id = ? WHERE id = ?;", [name, categoryId, id]);
 };
 
-// Function to delete (move habit to recycle bin)
 export const deleteHabit = async (id: number) => {
   const db = await dbPromise;
   await db.runAsync("INSERT INTO recycle_bin (habit_id) VALUES (?);", [id]);
   await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
 };
 
-// Function to fetch progress
-export const getProgress = async () => {
+export const restoreHabit = async (id: number) => {
+  const db = await dbPromise;
+  await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
+};
+
+export const cleanRecycleBin = async () => {
+  const db = await dbPromise;
+  await db.runAsync(
+    "DELETE FROM recycle_bin WHERE deleted_at <= datetime('now', '-30 days');"
+  );
+};
+
+export const getProgress = async (): Promise<{ habit_id: number; total_progress: number; date: string }[]> => {
   const db = await dbPromise;
   const rows = await db.getAllAsync(`
       SELECT habit_id, SUM(progress) AS total_progress, date 
@@ -67,19 +89,16 @@ export const getProgress = async () => {
       GROUP BY habit_id, date 
       ORDER BY date DESC;
     `);
-  return rows;
+  return rows as { habit_id: number; total_progress: number; date: string }[];
 };
 
 export const addCategory = async (categoryName: string): Promise<void> => {
   const db = await dbPromise;
-  await db.runAsync(
-    "INSERT INTO categories (name, created_at) VALUES (?, datetime('now'))",
-    [categoryName]
-  );
+  await db.runAsync("INSERT INTO categories (name) VALUES (?);", [categoryName]);
 };
 
 export const getCategories = async (): Promise<{ id: number; name: string; created_at: string }[]> => {
   const db = await dbPromise;
   const result = await db.getAllAsync("SELECT * FROM categories ORDER BY created_at DESC");
   return result as { id: number; name: string; created_at: string }[];
-}
+};
