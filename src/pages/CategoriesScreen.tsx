@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet, StatusBar } from 'react-native';
 import { addCategory, getCategories } from '../assets/data/database';
 
 const CategoriesScreen = () => {
@@ -36,29 +36,31 @@ const CategoriesScreen = () => {
     };
 
     return (
-        <View>
-            <Text>
-                Categories
-            </Text>
+        <View style={styles.container}>
+            <View style={styles.top}>
+                <Text>
+                    Categories
+                </Text>
 
-            <TextInput
-                placeholder='Enter category name'
-                value={categoryName}
-                onChangeText={setCategoryName}
-            />
+                <TextInput
+                    placeholder='Enter category name'
+                    value={categoryName}
+                    onChangeText={setCategoryName}
+                />
 
-            <Button title='Add Category' onPress={handleAddCategory} />
+                <Button title='Add Category' onPress={handleAddCategory} />
 
-            <FlatList
-                data={categories}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({item}) => (
-                    <View>
-                        <Text>{item.name}</Text>
-                        <Text>Created at: {item.created_at}</Text>
-                    </View>
-                )}
-            />
+                <FlatList
+                    data={categories}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View>
+                            <Text>{item.name}</Text>
+                            <Text>Created at: {item.created_at}</Text>
+                        </View>
+                    )}
+                />
+            </View>
         </View>
     )
 }
@@ -66,7 +68,10 @@ const CategoriesScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20
+       margin: 10
+    },
+    top: {
+        marginTop: StatusBar.currentHeight
     },
     title: {
         fontSize: 20,
