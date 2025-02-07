@@ -1,28 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Alert, StyleSheet, StatusBar } from "react-native";
+import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList } from "react-native";
 import { Button, Divider, Menu } from "react-native-paper";
-import { addHabit, getCategories } from "../assets/data/database";
+import { addHabit, getCategories, getHabits } from "../assets/data/database";
 
 const HomeScreen = () => {
   const [habitName, setHabitName] = useState("");
   const [categories, setCategories] = useState<{ id: number; name: string; }[]>([]);
+  const [habits, setHabits] = useState<{ id: number; name: string; category_id: number }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getCategories();
-        setCategories(data);
-        if (data.length > 0) setSelectedCategory(data[0].id);
-      }
-      catch (error) {
-        console.error("Failed to fetch categories:", error);
-        Alert.alert("Error", "Could not load categories.");
-      }
-    };
     fetchCategories();
+    fetchHabits();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+      if (data.length > 0) setSelectedCategory(data[0].id);
+    }
+    catch (error) {
+      console.error("Failed to fetch categories:", error);
+      Alert.alert("Error", "Could not load categories.");
+    }
+  };
+
+  const fetchHabits = async () => {
+    try {
+      const data = await getHabits();
+      setHabits(data);
+    }
+    catch (error) {
+      console.error("Failed to fetch habits:", error);
+      Alert.alert("Error", "Could not load habits.");
+    }
+  };
 
   const handleAddHabit = async () => {
     if (!habitName.trim()) {
@@ -39,6 +53,7 @@ const HomeScreen = () => {
       await addHabit(habitName, selectedCategory);
       Alert.alert("Success", "Habit added successfully!");
       setHabitName("");
+      fetchHabits();
     }
 
     catch (error) {
@@ -50,7 +65,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Text>
+        <Text style={styles.habitAddTitle}>
           Add a New Habit
         </Text>
 
@@ -58,6 +73,7 @@ const HomeScreen = () => {
           placeholder="Enter habit name..."
           value={habitName}
           onChangeText={setHabitName}
+          style={styles.habitAddInput}
         />
 
         <Menu
@@ -85,6 +101,25 @@ const HomeScreen = () => {
         <Button mode="contained" onPress={handleAddHabit} style={{ marginTop: 10 }}>
           Add Habit
         </Button>
+
+        <Text style={styles.habitTitle}>
+          Added Habits:
+        </Text>
+
+        <FlatList
+          data={habits}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => {
+            const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
+            return (
+              <View style={styles.habitWrapper}>
+                <Text style={styles.habitName}>{item.name}</Text>
+                <Text style={styles.habitCategory}>Category: {categoryName}</Text>
+              </View>
+            )
+          }}
+        />
+
       </View>
     </View>
   )
@@ -97,6 +132,32 @@ const styles = StyleSheet.create({
   },
   top: {
     marginTop: StatusBar.currentHeight
+  },
+  habitAddTitle: {
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  habitAddInput: {
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 8
+  },
+  habitTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20
+  },
+  habitWrapper: {
+    padding: 10,
+    borderBottomWidth: 1
+  },
+  habitName: {
+    fontSize: 16,
+  },
+  habitCategory: {
+    fontSize: 14,
+    color: 'gray'
   }
 })
 

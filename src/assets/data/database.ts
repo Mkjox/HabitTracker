@@ -63,6 +63,12 @@ export const updateHabit = async (id: number, name: string, categoryId: number) 
   await db.runAsync("UPDATE habits SET name = ?, category_id = ? WHERE id = ?;", [name, categoryId, id]);
 };
 
+export const getHabits = async (): Promise<{ id: number; name: string; category_id: number }[]> => {
+  const db = await dbPromise;
+  const rows = await db.getAllAsync("SELECT * FROM habits;");
+  return rows as { id: number; name: string; category_id: number }[];
+};
+
 export const deleteHabit = async (id: number) => {
   const db = await dbPromise;
   await db.runAsync("INSERT INTO recycle_bin (habit_id) VALUES (?);", [id]);

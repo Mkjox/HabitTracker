@@ -1,4 +1,4 @@
-import { addHabit, updateHabit, deleteHabit, restoreHabit, getProgress, addCategory, getCategories, cleanRecycleBin } from '../data/database';
+import { addHabit, updateHabit, getHabits, deleteHabit, restoreHabit, getProgress, addCategory, getCategories, cleanRecycleBin } from '../data/database';
 
 export const createHabit = async (name: string, categoryId: number): Promise<void> => {
   try {
@@ -15,6 +15,16 @@ export const editHabit = async (id: number, name: string, categoryId: number): P
   } catch (error) {
     console.error("Error updating habit:", error);
     throw new Error("Failed to update habit.");
+  }
+};
+
+export const fetchHabits = async (): Promise<{ id: number; name: string; category_id: number }[]> => {
+  try {
+    return await getHabits();
+  }
+  catch (error) {
+    console.error("Error fetching habits:", error);
+    throw new Error("Failed to retrieve habits.");
   }
 };
 
