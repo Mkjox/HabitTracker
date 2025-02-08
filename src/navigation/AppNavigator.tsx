@@ -2,9 +2,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../pages/HomeScreen';
 import ProgressScreen from '../pages/ProgressScreen';
 import CategoriesScreen from '../pages/CategoriesScreen';
+import HabitDetailsScreen from '../pages/HabitDetailsScreen';
 import { NavigationContainer } from '@react-navigation/native';
-
-
 
 const Tab = createBottomTabNavigator();
 
@@ -34,6 +33,15 @@ function TabNavigator() {
                     headerShown: false
                 }}
             />
+
+            <Tab.Screen
+                name='HabitDetails'
+                component={HabitDetailsScreen}
+                options={{
+                    headerShown: false
+                }}
+            />
+
         </Tab.Navigator>
     );
 }

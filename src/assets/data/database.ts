@@ -87,15 +87,54 @@ export const cleanRecycleBin = async () => {
   );
 };
 
+export const addProgress = async (habitId: number, progress: number) => {
+  const db = await dbPromise;
+  await db.runAsync("INSERT INTO habit_progress (habit_id, progress, date) VALUES (?, ?, date('now'));", [habitId, progress])
+};
+
+// export const getProgressByHabit = async (habitId: number) => {
+//   const db = await dbPromise;
+//   const rows = await db.getAllAsync(`
+//     SELECT habit_id, SUM(progress) AS total_progress, date 
+//     FROM habit_progress 
+//     WHERE habit_id = ? 
+//     GROUP BY date 
+//     ORDER BY date DESC;
+//     `, [habitId]);
+//   return rows;
+// };
+
+export const getProgressByHabit = async (habitId: number) => {
+  try {
+    const db = await dbPromise;
+    const rows = await db.getAllAsync(`
+      SELECT habit_id, SUM(progress) AS total_progress, date 
+      FROM habit_progress 
+      WHERE habit_id = ? 
+      GROUP BY date 
+      ORDER BY date DESC;
+      `, [habitId]);
+    return rows[0].rows._array || [];
+  }
+  catch (error) {
+    console.error("Error fetching progress data:", error);
+    return [];
+  }
+};
+
 export const getProgress = async (): Promise<{ habit_id: number; total_progress: number; date: string }[]> => {
   const db = await dbPromise;
   const rows = await db.getAllAsync(`
-      SELECT habit_id, SUM(progress) AS total_progress, date 
+      SELECT habit_id, COALESCE(SUM(progress), 0) AS total_progress, date 
       FROM habit_progress 
       GROUP BY habit_id, date 
       ORDER BY date DESC;
     `);
   return rows as { habit_id: number; total_progress: number; date: string }[];
+  // return rows.map((row) => ({
+  //   ...row,
+  //   total_progress: Number(row.total_progress),
+  // }));
 };
 
 export const addCategory = async (categoryName: string): Promise<void> => {

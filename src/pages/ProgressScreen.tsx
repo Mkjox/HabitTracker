@@ -6,17 +6,55 @@ import { getProgress } from "../assets/data/database"; // Fetch progress from DB
 const ProgressScreen = () => {
   const [progressData, setProgressData] = useState([]);
 
+  // useEffect(() => {
+  //   const fetchProgress = async () => {
+  //     try{
+  //       const data = await getProgress();
+  //       console.log("Fetched progress data:", data);
+
+  //       const filteredData = data
+  //       .filter((item) => !isNaN(item.total_progress) && item.total_progress !== null)
+  //       .map((item) => ({
+  //         ...item,
+  //         total_progress: Number(item.total_progress),
+  //       }));
+
+  //       console.log("Filtered progress data:", filteredData);
+  //       setProgressData(filteredData);
+  //     }
+  //     catch (error) {
+  //       console.error("Error fetching progress:", error);
+  //     }
+  //   };
+  //   fetchProgress();
+  // }, []);
+
   useEffect(() => {
     const fetchProgress = async () => {
       const data = await getProgress();
+      console.log("Raw progress data from DB:", data);
+
+      if (!Array.isArray(data) || data.length === 0) {
+        console.warn("No progress data found");
+      }
+
       setProgressData(data);
     };
+
     fetchProgress();
   }, []);
 
+
   // Transform data for chart
   const dates = progressData.map((item) => item.date);
-  const values = progressData.map((item) => item.total_progress);
+  // const values = progressData.map((item) => item.total_progress);
+  const values = progressData.map((item) =>
+    isNaN(item.total_progress) || !isFinite(item.total_progress) ? 0 : item.total_progress
+  );
+
+  if (dates.length !== values.length) {
+    console.error("Data mismatch: labels and values have different lengths!", { dates, values });
+  }
 
   return (
     <ScrollView>

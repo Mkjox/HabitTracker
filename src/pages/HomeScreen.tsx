@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList } from "react-native";
+import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity } from "react-native";
 import { Button, Divider, Menu } from "react-native-paper";
 import { addHabit, getCategories, getHabits } from "../assets/data/database";
+import { useNavigation } from "@react-navigation/native";
 
 const HomeScreen = () => {
   const [habitName, setHabitName] = useState("");
@@ -9,6 +10,8 @@ const HomeScreen = () => {
   const [habits, setHabits] = useState<{ id: number; name: string; category_id: number }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [visible, setVisible] = useState(false);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchCategories();
@@ -112,10 +115,12 @@ const HomeScreen = () => {
           renderItem={({ item }) => {
             const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
             return (
-              <View style={styles.habitWrapper}>
-                <Text style={styles.habitName}>{item.name}</Text>
-                <Text style={styles.habitCategory}>Category: {categoryName}</Text>
-              </View>
+              <TouchableOpacity onPress={() => navigation.navigate("HabitDetails", {habitId: item.id, habitName: item.name})}>
+                <View style={styles.habitWrapper}>
+                  <Text style={styles.habitName}>{item.name}</Text>
+                  <Text style={styles.habitCategory}>Category: {categoryName}</Text>
+                </View>
+              </TouchableOpacity>
             )
           }}
         />
