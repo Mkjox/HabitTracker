@@ -3,18 +3,22 @@ import HomeScreen from '../pages/HomeScreen';
 import ProgressScreen from '../pages/ProgressScreen';
 import CategoriesScreen from '../pages/CategoriesScreen';
 import HabitDetailsScreen from '../pages/HabitDetailsScreen';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack';
+import CustomTabBar from '../component/CustomTabBar';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 function TabNavigator() {
     return (
-        <Tab.Navigator initialRouteName='Home'>
+        <Tab.Navigator initialRouteName='Home' tabBar={(props) => <CustomTabBar{...props} />}>
             <Tab.Screen
                 name='Home'
                 component={HomeScreen}
                 options={{
-                    headerShown: false
+                    headerShown: false,
+
                 }}
             />
 
@@ -34,22 +38,36 @@ function TabNavigator() {
                 }}
             />
 
-            <Tab.Screen
-                name='HabitDetails'
-                component={HabitDetailsScreen}
+        </Tab.Navigator>
+    );
+}
+
+function StackNavigator() {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen
+                name='TabNavigator'
+                component={TabNavigator}
                 options={{
                     headerShown: false
                 }}
             />
 
-        </Tab.Navigator>
-    );
+            <Stack.Screen
+                name='HabitDetails'
+                component={HabitDetailsScreen}
+                options={{
+                    headerShown: false,
+                }}
+            />
+        </Stack.Navigator>
+    )
 }
 
 export default function AppNavigator() {
     return (
         <NavigationContainer>
-            <TabNavigator />
+            <StackNavigator />
         </NavigationContainer>
     )
 }

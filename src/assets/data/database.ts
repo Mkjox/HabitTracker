@@ -147,3 +147,8 @@ export const getCategories = async (): Promise<{ id: number; name: string; creat
   const result = await db.getAllAsync("SELECT * FROM categories ORDER BY created_at DESC");
   return result as { id: number; name: string; created_at: string }[];
 };
+
+export const deleteCategory = async (categoryId: number): Promise<void> => {
+  const db = await dbPromise;
+  await db.runAsync("DELETE FROM categories WHERE id = ?;", [categoryId]);
+};

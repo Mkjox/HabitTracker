@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity } from "react-native";
 import { Button, Divider, Menu } from "react-native-paper";
-import { addHabit, getCategories, getHabits } from "../assets/data/database";
+import { addHabit, getCategories, getHabits, deleteHabit } from "../assets/data/database";
 import { useNavigation } from "@react-navigation/native";
+import { Entypo } from '@expo/vector-icons'
 
 const HomeScreen = () => {
   const [habitName, setHabitName] = useState("");
@@ -65,6 +66,24 @@ const HomeScreen = () => {
     }
   };
 
+  const handleDeleteHabit = async (id: number) => {
+    Alert.alert(
+      "Detele Habit",
+      "Are you sure you want to delete this habit?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          onPress: async () => {
+            await deleteHabit(id);
+            fetchHabits();
+          },
+          style: "destructive"
+        }
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
@@ -115,10 +134,15 @@ const HomeScreen = () => {
           renderItem={({ item }) => {
             const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
             return (
-              <TouchableOpacity onPress={() => navigation.navigate("HabitDetails", {habitId: item.id, habitName: item.name})}>
-                <View style={styles.habitWrapper}>
-                  <Text style={styles.habitName}>{item.name}</Text>
-                  <Text style={styles.habitCategory}>Category: {categoryName}</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("HabitDetails", { habitId: item.id, habitName: item.name })}>
+                <View style={{ flexDirection: 'row', borderBottomWidth: 1, justifyContent: 'space-between' }}>
+                  <View style={styles.habitWrapper}>
+                    <Text style={styles.habitName}>{item.name}</Text>
+                    <Text style={styles.habitCategory}>Category: {categoryName}</Text>
+                  </View>
+                  <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteHabit(item.id)}>
+                    <Entypo name="cross" size={16} style={styles.icon} />
+                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             )
@@ -155,7 +179,7 @@ const styles = StyleSheet.create({
   },
   habitWrapper: {
     padding: 10,
-    borderBottomWidth: 1
+    // borderBottomWidth: 1
   },
   habitName: {
     fontSize: 16,
@@ -163,6 +187,13 @@ const styles = StyleSheet.create({
   habitCategory: {
     fontSize: 14,
     color: 'gray'
+  },
+  icon: {
+
+  },
+  iconButton: {
+    justifyContent: 'center',
+    marginRight: 15
   }
 })
 

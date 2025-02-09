@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet, StatusBar } from 'react-native';
-import { addCategory, getCategories } from '../assets/data/database';
+import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
+import { useTheme } from '../context/ThemeContext';
+import { darkTheme, lightTheme } from "../assets/colors/colors";
+import { Entypo } from '@expo/vector-icons';
+import { IconButton } from 'react-native-paper';
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
     const [categories, setCategories] = useState<{ id: number; name: string; created_at: string }[]>([]);
+    const { isDark } = useTheme();
+
+    const themeStyles = isDark ? darkTheme : lightTheme;
 
     useEffect(() => {
         fetchCategories();
@@ -35,10 +42,28 @@ const CategoriesScreen = () => {
         }
     };
 
+    const handleDeleteCategory = async (id: number) => {
+        Alert.alert(
+            "Detele Habit",
+            "Are you sure you want to delete this habit?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    onPress: async () => {
+                        await deleteCategory(id);
+                        fetchCategories();
+                    },
+                    style: "destructive"
+                }
+            ]
+        );
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.top}>
-                <Text>
+                <Text style={styles.title}>
                     Categories
                 </Text>
 
@@ -46,6 +71,7 @@ const CategoriesScreen = () => {
                     placeholder='Enter category name'
                     value={categoryName}
                     onChangeText={setCategoryName}
+                    style={styles.textInput}
                 />
 
                 <Button title='Add Category' onPress={handleAddCategory} />
@@ -54,9 +80,14 @@ const CategoriesScreen = () => {
                     data={categories}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <View>
-                            <Text>{item.name}</Text>
-                            <Text>Created at: {item.created_at}</Text>
+                        <View style={{ flexDirection: 'row', borderBottomWidth: 1, justifyContent: 'space-between' }}>
+                            <View style={styles.list}>
+                                <Text style={styles.itemName}>{item.name}</Text>
+                                <Text style={styles.itemDate}>Created at: {item.created_at}</Text>
+                            </View>
+                            <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteCategory(item.id)}>
+                                <Entypo name='cross' size={16} style={styles.icon} />
+                            </TouchableOpacity>
                         </View>
                     )}
                 />
@@ -68,7 +99,7 @@ const CategoriesScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-       margin: 10
+        margin: 10
     },
     top: {
         marginTop: StatusBar.currentHeight
@@ -86,7 +117,7 @@ const styles = StyleSheet.create({
     },
     list: {
         padding: 10,
-        borderBottomWidth: 1
+        // borderBottomWidth: 1
     },
     itemName: {
         fontSize: 16
@@ -94,6 +125,10 @@ const styles = StyleSheet.create({
     itemDate: {
         fontSize: 12,
         color: 'gray'
+    },
+    iconButton: {
+        justifyContent: 'center',
+        marginRight: 15
     }
 })
 
