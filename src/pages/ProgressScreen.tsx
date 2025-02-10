@@ -1,81 +1,64 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Dimensions, ScrollView } from "react-native";
-import { LineChart } from "react-native-chart-kit";
-import { getProgress } from "../assets/data/database"; // Fetch progress from DB
+import { View, Text, ScrollView } from "react-native";
+import { Agenda } from "react-native-calendars";
+import { getProgress } from "../assets/data/database";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const ProgressScreen = () => {
-  const [progressData, setProgressData] = useState([]);
+  const [progressData, setProgressData] = useState<{ [date: string]: { name: string; progress: number }[] }>({});
 
-  // useEffect(() => {
-  //   const fetchProgress = async () => {
-  //     try{
-  //       const data = await getProgress();
-  //       console.log("Fetched progress data:", data);
+  // Fetch progress when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProgress = async () => {
+        try {
+          const data = await getProgress();
+          console.log("Raw progress data from DB:", data);
 
-  //       const filteredData = data
-  //       .filter((item) => !isNaN(item.total_progress) && item.total_progress !== null)
-  //       .map((item) => ({
-  //         ...item,
-  //         total_progress: Number(item.total_progress),
-  //       }));
+          if (!Array.isArray(data) || data.length === 0) {
+            console.warn("No progress data found");
+            setProgressData({});
+            return;
+          }
 
-  //       console.log("Filtered progress data:", filteredData);
-  //       setProgressData(filteredData);
-  //     }
-  //     catch (error) {
-  //       console.error("Error fetching progress:", error);
-  //     }
-  //   };
-  //   fetchProgress();
-  // }, []);
+          // Convert database data into calendar format
+          const formattedData: { [date: string]: { name: string; progress: number }[] } = {};
+          data.forEach((item) => {
+            if (!item.date || !item.name || isNaN(item.total_progress)) return;
 
-  useEffect(() => {
-    const fetchProgress = async () => {
-      const data = await getProgress();
-      console.log("Raw progress data from DB:", data);
+            if (!formattedData[item.date]) {
+              formattedData[item.date] = [];
+            }
+            formattedData[item.date].push({ name: item.name, progress: Number(item.total_progress) });
+          });
 
-      if (!Array.isArray(data) || data.length === 0) {
-        console.warn("No progress data found");
-      }
+          console.log("Formatted calendar data:", formattedData);
+          setProgressData(formattedData);
+        } catch (error) {
+          console.error("Error fetching progress:", error);
+        }
+      };
 
-      setProgressData(data);
-    };
-
-    fetchProgress();
-  }, []);
-
-
-  // Transform data for chart
-  const dates = progressData.map((item) => item.date);
-  // const values = progressData.map((item) => item.total_progress);
-  const values = progressData.map((item) =>
-    isNaN(item.total_progress) || !isFinite(item.total_progress) ? 0 : item.total_progress
+      fetchProgress();
+    }, [])
   );
-
-  if (dates.length !== values.length) {
-    console.error("Data mismatch: labels and values have different lengths!", { dates, values });
-  }
 
   return (
     <ScrollView>
-      <View style={{ padding: 20 }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Habit Progress</Text>
-        <LineChart
-          data={{
-            labels: dates,
-            datasets: [{ data: values }],
-          }}
-          width={Dimensions.get("window").width - 40}
-          height={250}
-          yAxisSuffix="%"
-          chartConfig={{
-            backgroundGradientFrom: "#f3f3f3",
-            backgroundGradientTo: "#fff",
-            decimalPlaces: 1,
-            color: (opacity = 1) => `rgba(34, 193, 195, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          style={{ borderRadius: 16, marginTop: 20 }}
+      <View style={{ flex: 1, padding: 10 }}>
+        <Text style={{ fontSize: 18, fontWeight: "bold", textAlign: "center", marginBottom: 10 }}>
+          Habit Progress Calendar
+        </Text>
+
+        <Agenda
+          items={progressData}
+          renderItem={(item, isFirst) => (
+            <View style={{ backgroundColor: "#f3f3f3", padding: 10, marginVertical: 5, borderRadius: 5 }}>
+              <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
+              <Text>Progress: {item.progress}%</Text>
+            </View>
+          )}
         />
       </View>
     </ScrollView>

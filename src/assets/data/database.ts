@@ -114,7 +114,7 @@ export const getProgressByHabit = async (habitId: number) => {
       GROUP BY date 
       ORDER BY date DESC;
       `, [habitId]);
-    return rows[0].rows._array || [];
+    return rows || [];
   }
   catch (error) {
     console.error("Error fetching progress data:", error);
