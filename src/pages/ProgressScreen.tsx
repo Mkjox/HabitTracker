@@ -1,68 +1,88 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
-import { Agenda } from "react-native-calendars";
+import { View, Text, StyleSheet, ActivityIndicator, StatusBar } from "react-native";
+import { Agenda, AgendaSchedule } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
 
 const ProgressScreen = () => {
-  const [progressData, setProgressData] = useState<{ [date: string]: { name: string; progress: number }[] }>({});
+  const [progressData, setProgressData] = useState<AgendaSchedule>({});
+  const [loading, setLoading] = useState(true);
 
-  // Fetch progress when screen is focused
-  useFocusEffect(
-    useCallback(() => {
-      const fetchProgress = async () => {
-        try {
-          const data = await getProgress();
-          console.log("Raw progress data from DB:", data);
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const data = await getProgress();
+        console.log("Raw progress data from DB:", data);
 
-          if (!Array.isArray(data) || data.length === 0) {
-            console.warn("No progress data found");
-            setProgressData({});
-            return;
-          }
+        const formattedData = formatProgressForCalendar(data);
+        console.log("Formatted calendar data:", formattedData);
 
-          // Convert database data into calendar format
-          const formattedData: { [date: string]: { name: string; progress: number }[] } = {};
-          data.forEach((item) => {
-            if (!item.date || !item.name || isNaN(item.total_progress)) return;
+        setProgressData(formattedData);
+      } catch (error) {
+        console.error("Error fetching progress:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-            if (!formattedData[item.date]) {
-              formattedData[item.date] = [];
-            }
-            formattedData[item.date].push({ name: item.name, progress: Number(item.total_progress) });
-          });
-
-          console.log("Formatted calendar data:", formattedData);
-          setProgressData(formattedData);
-        } catch (error) {
-          console.error("Error fetching progress:", error);
-        }
-      };
-
-      fetchProgress();
-    }, [])
-  );
+    fetchProgress();
+  }, []);
 
   return (
-    <ScrollView>
-      <View style={{ flex: 1, padding: 10 }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold", textAlign: "center", marginBottom: 10 }}>
-          Habit Progress Calendar
-        </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Habit Progress</Text>
 
+      {loading ? (
+        <ActivityIndicator size="large" color="#00adf5" />
+      ) : (
         <Agenda
           items={progressData}
-          renderItem={(item, isFirst) => (
-            <View style={{ backgroundColor: "#f3f3f3", padding: 10, marginVertical: 5, borderRadius: 5 }}>
-              <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
-              <Text>Progress: {item.progress}%</Text>
+          renderItem={(item) => (
+            <View style={styles.agendaItem}>
+              <Text style={styles.habitName}>{item.habit_name}</Text>
+              <Text>{`Progress: ${item.total_progress}%`}</Text>
             </View>
           )}
         />
-      </View>
-    </ScrollView>
+      )}
+    </View>
   );
 };
+
+const formatProgressForCalendar = (progressData: any[]): AgendaSchedule => {
+  return progressData.reduce((acc, item) => {
+    if (!item.date || item.total_progress == null) return acc;
+    acc[item.date] = acc[item.date] || [];
+    acc[item.date].push({
+      habit_name: item.habit_name, // Include habit name 
+      total_progress: item.total_progress
+    });
+    return acc;
+  }, {} as AgendaSchedule);
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  top: {
+    marginTop: StatusBar.currentHeight
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20
+  },
+  agendaItem: {
+    backgroundColor: "#e3f2fd",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10
+  },
+  habitName: {
+    fontWeight: "bold"
+  }
+});
 
 export default ProgressScreen;

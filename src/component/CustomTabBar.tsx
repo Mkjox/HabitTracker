@@ -11,7 +11,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
     const themeStyles = isDark ? darkTheme : lightTheme;
 
     return (
-        <View style={[styles.tabContainer,themeStyles.container]}>
+        <View style={[styles.tabContainer, themeStyles.container]}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
 
@@ -76,6 +76,8 @@ const getIconName = (routeName: string) => {
             return 'bar-chart-sharp';
         case 'Categories':
             return 'grid-sharp';
+        case 'RecycleBin':
+            return 'trash-outline';
         default:
             return 'home';
     }

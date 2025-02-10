@@ -6,6 +6,7 @@ import HabitDetailsScreen from '../pages/HabitDetailsScreen';
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack';
 import CustomTabBar from '../component/CustomTabBar';
+import RecycleBinScreen from '../pages/RecycleBinScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -33,6 +34,14 @@ function TabNavigator() {
             <Tab.Screen
                 name='Categories'
                 component={CategoriesScreen}
+                options={{
+                    headerShown: false
+                }}
+            />
+
+            <Tab.Screen
+                name='RecycleBin'
+                component={RecycleBinScreen}
                 options={{
                     headerShown: false
                 }}

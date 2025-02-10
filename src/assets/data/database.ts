@@ -75,6 +75,45 @@ export const deleteHabit = async (id: number) => {
   await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
 };
 
+export const deleteHabitPermanently = async (habitId: number) => {
+  try {
+    const db = await dbPromise;
+
+    const deletedHabit = await db.getFirstAsync("SELECT habit_id FROM recycle_bin WHERE habit_id = ?;", [habitId]);
+
+    if (!deletedHabit) {
+      console.warn(`Habit ${habitId} is not in the recycle bin.`);
+      return;
+    }
+
+    await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);
+    await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [habitId]);
+
+    console.log(`Habit ${habitId} permamently deleted.`);
+  }
+  catch (error) {
+    console.error("Error deleting habit permamently:", error);
+  }
+};
+
+export const getDeletedHabits = async () => {
+  try {
+    const db = await dbPromise;
+    const rows = await db.getAllAsync(`
+      SELECT rb.habit_id AS id, h.name, rb.deleted_at
+      FROM recycle_bin rb
+      JOIN habits h ON rb.habit_id = h.id
+      ORDER BY rb.deleted_at DESC;
+      `);
+
+    return rows || [];
+  }
+  catch (error) {
+    console.error("Error fetching deleted habits:", error);
+    return [];
+  }
+}
+
 export const restoreHabit = async (id: number) => {
   const db = await dbPromise;
   await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
