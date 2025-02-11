@@ -1,4 +1,13 @@
 import * as SQLite from 'expo-sqlite';
+import * as FileSystem from 'expo-file-system';
+
+const backupDatabase = async () => {
+  const dbPath = `${FileSystem.documentDirectory}SQLite/habits.db`;
+  const backupPath = `${FileSystem.documentDirectory}Backup/habits_backup.db`;
+
+  await FileSystem.copyAsync({from: dbPath, to: backupPath});
+  console.log("Backup created at:", backupPath);
+};
 
 const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
