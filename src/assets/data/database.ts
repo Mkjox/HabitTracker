@@ -1,17 +1,10 @@
 import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system';
-
-const backupDatabase = async () => {
-  const dbPath = `${FileSystem.documentDirectory}SQLite/habits.db`;
-  const backupPath = `${FileSystem.documentDirectory}Backup/habits_backup.db`;
-
-  await FileSystem.copyAsync({from: dbPath, to: backupPath});
-  console.log("Backup created at:", backupPath);
-};
+import { checkAndRestoreDatabase, backupDatabase } from './backup';
 
 const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
 export const initializeDatabase = async () => {
+  await checkAndRestoreDatabase();
   const db = await dbPromise;
 
   await db.execAsync(
@@ -65,11 +58,13 @@ export const initializeDatabase = async () => {
 export const addHabit = async (name: string, categoryId: number) => {
   const db = await dbPromise;
   await db.runAsync("INSERT INTO habits (name, category_id) VALUES (?, ?);", [name, categoryId]);
+  await backupDatabase();
 };
 
 export const updateHabit = async (id: number, name: string, categoryId: number) => {
   const db = await dbPromise;
   await db.runAsync("UPDATE habits SET name = ?, category_id = ? WHERE id = ?;", [name, categoryId, id]);
+  await backupDatabase();
 };
 
 export const getHabits = async (): Promise<{ id: number; name: string; category_id: number }[]> => {
@@ -82,6 +77,7 @@ export const deleteHabit = async (id: number) => {
   const db = await dbPromise;
   await db.runAsync("INSERT INTO recycle_bin (habit_id) VALUES (?);", [id]);
   await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
+  await backupDatabase();
 };
 
 export const deleteHabitPermanently = async (habitId: number) => {
@@ -97,6 +93,7 @@ export const deleteHabitPermanently = async (habitId: number) => {
 
     await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);
     await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [habitId]);
+    await backupDatabase();
 
     console.log(`Habit ${habitId} permamently deleted.`);
   }
@@ -126,6 +123,7 @@ export const getDeletedHabits = async () => {
 export const restoreHabit = async (id: number) => {
   const db = await dbPromise;
   await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
+  await backupDatabase();
 };
 
 export const cleanRecycleBin = async () => {
@@ -133,11 +131,13 @@ export const cleanRecycleBin = async () => {
   await db.runAsync(
     "DELETE FROM recycle_bin WHERE deleted_at <= datetime('now', '-30 days');"
   );
+  await backupDatabase();
 };
 
 export const addProgress = async (habitId: number, progress: number) => {
   const db = await dbPromise;
-  await db.runAsync("INSERT INTO habit_progress (habit_id, progress, date) VALUES (?, ?, date('now'));", [habitId, progress])
+  await db.runAsync("INSERT INTO habit_progress (habit_id, progress, date) VALUES (?, ?, date('now'));", [habitId, progress]);
+  await backupDatabase();
 };
 
 // export const getProgressByHabit = async (habitId: number) => {
@@ -188,6 +188,7 @@ export const getProgress = async (): Promise<{ habit_id: number; total_progress:
 export const addCategory = async (categoryName: string): Promise<void> => {
   const db = await dbPromise;
   await db.runAsync("INSERT INTO categories (name) VALUES (?);", [categoryName]);
+  await backupDatabase();
 };
 
 export const getCategories = async (): Promise<{ id: number; name: string; created_at: string }[]> => {
@@ -199,4 +200,5 @@ export const getCategories = async (): Promise<{ id: number; name: string; creat
 export const deleteCategory = async (categoryId: number): Promise<void> => {
   const db = await dbPromise;
   await db.runAsync("DELETE FROM categories WHERE id = ?;", [categoryId]);
+  await backupDatabase();
 };
