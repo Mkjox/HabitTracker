@@ -37,3 +37,6 @@ yarn-error.*
 
 # Idea
 .idea/
+
+# Visual Studio
+.vs/
