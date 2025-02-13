@@ -49,8 +49,8 @@ export const initializeDatabase = async () => {
     `CREATE TABLE IF NOT EXISTS recycle_bin (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           habit_id INTEGER NOT NULL,
-          deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
+          habit_name TEXT NOT NULL,
+          deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );`
   );
 };
@@ -75,9 +75,12 @@ export const getHabits = async (): Promise<{ id: number; name: string; category_
 
 export const deleteHabit = async (id: number) => {
   const db = await dbPromise;
-  await db.runAsync("INSERT INTO recycle_bin (habit_id) VALUES (?);", [id]);
-  await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
-  await backupDatabase();
+  const habit = await db.getFirstAsync("SELECT name FROM habits WHERE id = ?;", [id]);
+  if (habit) {
+    await db.runAsync("INSERT INTO recycle_bin (habit_id, habit_name) VALUES (?, ?);", [id, habit.name]);
+    await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
+    await backupDatabase();
+  }
 };
 
 export const deleteHabitPermanently = async (habitId: number) => {
@@ -106,15 +109,18 @@ export const getDeletedHabits = async () => {
   try {
     const db = await dbPromise;
     const rows = await db.getAllAsync(`
-      SELECT rb.habit_id AS id, h.name, rb.deleted_at
+      SELECT rb.habit_id AS id, rb.deleted_at, h.name
       FROM recycle_bin rb
-      JOIN habits h ON rb.habit_id = h.id
+      LEFT JOIN habits h ON rb.habit_id = h.id
       ORDER BY rb.deleted_at DESC;
-      `);
+    `);
 
-    return rows || [];
-  }
-  catch (error) {
+    // If the habit is not in the habits table, use a placeholder name
+    return rows.map(item => ({
+      ...item,
+      name: item.name || 'Deleted Habit'
+    }));
+  } catch (error) {
     console.error("Error fetching deleted habits:", error);
     return [];
   }
@@ -122,6 +128,24 @@ export const getDeletedHabits = async () => {
 
 export const restoreHabit = async (id: number) => {
   const db = await dbPromise;
+
+  const habitToRestore = await db.getFirstAsync(
+    "SELECT habit_name FROM recycle_bin WHERE habit_id = ?;",
+    [id]
+  );
+
+  if (!habitToRestore) {
+    console.warn(`No habit found in the recycle bin with id: ${id}`);
+    return;
+  }
+
+  // Insert back into habits table
+  await db.runAsync(
+    "INSERT INTO habits (id, name, added_at, updated_at) VALUES (?, ?, datetime('now'), datetime('now'));",
+    [id, habitToRestore.habit_name]
+  );
+
+  // Remove from recycle_bin table
   await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
   await backupDatabase();
 };
@@ -129,7 +153,8 @@ export const restoreHabit = async (id: number) => {
 export const cleanRecycleBin = async () => {
   const db = await dbPromise;
   await db.runAsync(
-    "DELETE FROM recycle_bin WHERE deleted_at <= datetime('now', '-30 days');"
+    `DELETE FROM recycle_bin 
+    WHERE datetime(deleted_at) <= datetime('now', '-30 days');`
   );
   await backupDatabase();
 };
