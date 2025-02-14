@@ -27,6 +27,20 @@ const ProgressScreen = () => {
     fetchProgress();
   }, []);
 
+  const formatProgressForCalendar = (progressData: any[]): AgendaSchedule => {
+    return progressData.reduce((acc, item) => {
+      if (!item.date || item.total_progress == null) return acc;
+      const formattedDate = item.date; 
+  
+      acc[formattedDate] = acc[formattedDate] || [];
+      acc[formattedDate].push({
+        habit_name: `Habit #${item.habit_id}`, 
+        total_progress: item.total_progress
+      });
+      return acc;
+    }, {} as AgendaSchedule);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Habit Progress</Text>
@@ -42,47 +56,56 @@ const ProgressScreen = () => {
               <Text>{`Progress: ${item.total_progress}%`}</Text>
             </View>
           )}
+          renderEmptyData={() => (
+            <View style={styles.emptyItem}>
+              <Text>No progress for this day</Text>
+            </View>
+          )}
+          theme={{
+            agendaDayTextColor: "purple",
+            agendaDayNumColor: "purple",
+            agendaTodayColor: "#00adf5",
+            agendaKnobColor: "#00adf5",
+          }}
         />
       )}
     </View>
   );
 };
 
-const formatProgressForCalendar = (progressData: any[]): AgendaSchedule => {
-  return progressData.reduce((acc, item) => {
-    if (!item.date || item.total_progress == null) return acc;
-    acc[item.date] = acc[item.date] || [];
-    acc[item.date].push({
-      habit_name: item.habit_name, // Include habit name 
-      total_progress: item.total_progress
-    });
-    return acc;
-  }, {} as AgendaSchedule);
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-  },
-  top: {
-    marginTop: StatusBar.currentHeight
+    // backgroundColor: "#1e1e1e",
+    paddingTop: StatusBar.currentHeight || 0,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
+    // color: "#fff",
     textAlign: "center",
-    marginVertical: 20
+    marginVertical: 10,
   },
   agendaItem: {
-    backgroundColor: "#e3f2fd",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10
+    // backgroundColor: "#2a2a2a",
+    padding: 15,
+    borderRadius: 10,
+    marginRight: 10,
+    marginTop: 17,
   },
   habitName: {
-    fontWeight: "bold"
-  }
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  emptyItem: {
+    backgroundColor: "#333",
+    padding: 15,
+    borderRadius: 10,
+    marginRight: 10,
+    marginTop: 17,
+    alignItems: "center",
+  },
 });
 
 export default ProgressScreen;

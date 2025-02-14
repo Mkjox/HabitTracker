@@ -76,7 +76,7 @@ const getIconName = (routeName: string) => {
             return 'bar-chart-sharp';
         case 'Categories':
             return 'grid-sharp';
-        case 'RecycleBin':
+        case 'Recycle Bin':
             return 'trash-outline';
         default:
             return 'home';

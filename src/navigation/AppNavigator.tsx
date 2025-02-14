@@ -40,7 +40,7 @@ function TabNavigator() {
             />
 
             <Tab.Screen
-                name='RecycleBin'
+                name='Recycle Bin'
                 component={RecycleBinScreen}
                 options={{
                     headerShown: false

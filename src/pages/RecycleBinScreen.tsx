@@ -109,9 +109,8 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   emptyText: {
     fontSize: 16,
