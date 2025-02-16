@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { checkAndRestoreDatabase, backupDatabase } from './backup';
+import { Habit, Progress, RecycleBinEntry } from './types';
 
 const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
@@ -39,10 +40,13 @@ export const initializeDatabase = async () => {
     `CREATE TABLE IF NOT EXISTS habit_progress (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           habit_id INTEGER NOT NULL,
-          date TEXT,
+          date TEXT NOT NULL,
           completed INTEGER DEFAULT 0,
+          UNIQUE(habit_id, date), 
+          FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
         );`
   );
+  await db.execAsync("CREATE INDEX IF NOT EXISTS idx_habit_id_date ON habit_progress(habit_id, date);");
 
   await db.execAsync(
     `CREATE TABLE IF NOT EXISTS recycle_bin (
@@ -74,11 +78,18 @@ export const getHabits = async (): Promise<{ id: number; name: string; category_
 
 export const deleteHabit = async (id: number) => {
   const db = await dbPromise;
-  const habit = await db.getFirstAsync("SELECT name FROM habits WHERE id = ?;", [id]);
-  if (habit) {
-    await db.runAsync("INSERT INTO recycle_bin (habit_id, habit_name) VALUES (?, ?);", [id, habit.name]);
-    await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
-    await backupDatabase();
+  await db.execAsync("BEGIN TRANSACTION;");
+  try {
+    const habit = await db.getFirstAsync("SELECT name FROM habits WHERE id = ?;", [id]);
+    if (habit) {
+      await db.runAsync("INSERT INTO recycle_bin (habit_id, habit_name) VALUES (?, ?);", [id, habit.name]);
+      await db.runAsync("DELETE FROM habits WHERE id = ?;", [id]);
+      await backupDatabase();
+    }
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    await db.execAsync("ROLLBACK;");
+    console.error("Error deleting habit:", error);
   }
 };
 
@@ -114,7 +125,6 @@ export const getDeletedHabits = async () => {
       ORDER BY rb.deleted_at DESC;
     `);
 
-    // If the habit is not in the habits table, use a placeholder name
     return rows.map(item => ({
       ...item,
       name: item.name || 'Deleted Habit'
@@ -158,25 +168,30 @@ export const cleanRecycleBin = async () => {
   await backupDatabase();
 };
 
-export const addProgress = async (habitId: number, progress: number, formattedDate?: string) => {
+export const addProgress = async (habitId: number, p0: number, formattedDate?: string) => {
   const db = await dbPromise;
-  await db.runAsync("INSERT INTO habit_progress (habit_id, progress, date) VALUES (?, ?, date('now', 'localtime'));", [habitId, progress]);
-  await backupDatabase();
+  await db.runAsync(
+    `INSERT OR REPLACE INTO habit_progress (habit_id, date, completed) 
+     VALUES (?, date('now', 'localtime'), 1);`, 
+    [habitId]
+  );
 };
 
-export const getProgressByHabitId = async (habit_id: number): Promise<{ total_progress: number; date: string }[]> => {
+export const getProgressByHabitId = async (habitId: number) => {
   const db = await dbPromise;
-  const rows = await db.getAllAsync(`
-    SELECT 
-      CAST(COALESCE(SUM(progress), 0) AS INTEGER) AS total_progress, 
-      strftime('%Y-%m-%d', date) AS date 
-    FROM habit_progress 
-    WHERE habit_id = ?
-    GROUP BY date 
-    ORDER BY date DESC;
-  `, [habit_id]);
-
-  return rows as { total_progress: number; date: string }[];
+  try {
+    const results = await db.execAsync(
+      `SELECT id, date, completed AS total_progress 
+       FROM habit_progress 
+       WHERE habit_id = ? 
+       ORDER BY date DESC;`,
+      [habitId]
+    );
+    return results.rows._array;
+  } catch (error) {
+    console.error("Error fetching progress:", error);
+    return [];
+  }
 };
 
 export const getProgress = async (): Promise<{ habit_id: number; total_progress: number; date: string }[]> => {
@@ -193,13 +208,13 @@ export const getProgress = async (): Promise<{ habit_id: number; total_progress:
   return rows as { habit_id: number; total_progress: number; date: string }[];
 };
 
-export const removeProgress = async (habit_id: number, date: string): Promise<void> => {
+export const removeProgress = async (habitId: number, formattedDate: string) => {
   const db = await dbPromise;
-  await db.execAsync(`
-    DELETE FROM habit_progress 
-    WHERE habit_id = ? AND date = ?;
-  `, [habit_id, date]);
-  console.log(`Progress removed for habit ${habit_id} on ${date}`);
+  await db.runAsync(
+    `DELETE FROM habit_progress 
+     WHERE habit_id = ? AND date = ?;`, 
+    [habitId, formattedDate]
+  );
 };
 
 export const addCategory = async (categoryName: string): Promise<void> => {
