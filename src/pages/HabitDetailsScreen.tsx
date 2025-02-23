@@ -9,10 +9,17 @@ import {
 } from "react-native";
 import DateTimePicker from "expo-datepicker";
 import { RouteProp } from "@react-navigation/native";
-import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
+import {
+  addProgress,
+  removeProgress,
+  getProgressByHabitId,
+} from "../assets/data/database";
 
 type HabitDetailsScreenProps = {
-  route: RouteProp<{ params: { habitId: number; habitName: string } }, "params">;
+  route: RouteProp<
+    { params: { habitId: number; habitName: string } },
+    "params"
+  >;
 };
 
 const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
@@ -28,21 +35,23 @@ const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
       try {
         const data = await getProgressByHabitId(habitId);
         console.log("Fetched Progress History:", data);
-        setProgressHistory(data ?? []);
+        setProgressHistory(Array.isArray(data) ? data : []); // Ensure it's an array
       } catch (error) {
         console.error("Error fetching progress:", error);
+        setProgressHistory([]); // Avoid undefined state
       }
     };
-
+  
     fetchProgress();
   }, [habitId]);
 
-  const handleToggleProgress = async () => {
-    const formattedDate = selectedDate.toISOString().split("T")[0];
-    const alreadyCompleted = progressHistory.some(
-      (item) => item.date === formattedDate
-    );
+const handleToggleProgress = async () => {
+  const formattedDate = selectedDate.toISOString().split("T")[0];
+  const alreadyCompleted = progressHistory.some(
+    (item) => item.date === formattedDate
+  );
 
+  try {
     if (alreadyCompleted) {
       await removeProgress(habitId, formattedDate);
     } else {
@@ -50,8 +59,12 @@ const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
     }
 
     const updatedData = await getProgressByHabitId(habitId);
-    setProgressHistory(updatedData);
-  };
+    console.log("Updated Progress Data:", updatedData); // Log the updated data
+    setProgressHistory(updatedData ?? []); // Ensure we set an empty array if updatedData is null
+  } catch (error) {
+    console.error("Error toggling progress:", error); // Log any errors
+  }
+};
 
   const isDateCompleted = (date: string) => {
     return progressHistory.some((item) => item.date === date);
@@ -79,26 +92,47 @@ const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
         />
       )}
 
-      <TouchableOpacity onPress={handleToggleProgress} style={styles.toggleButton}>
+      <TouchableOpacity
+        onPress={handleToggleProgress}
+        style={styles.toggleButton}
+      >
         <Text style={styles.toggleButtonText}>
-          {isDateCompleted(selectedDate.toISOString().split("T")[0]) ? "✔️ Completed" : "➕ Mark as Done"}
+          {isDateCompleted(selectedDate.toISOString().split("T")[0])
+            ? "✔️ Completed"
+            : "➕ Mark as Done"}
         </Text>
       </TouchableOpacity>
 
       <Text style={styles.historyTitle}>Progress History:</Text>
 
-      <FlatList
+      {/* <FlatList
         data={progressHistory}
-        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.historyItem}>
-            <Text style={styles.historyDate}>{item.date}</Text>
-            <Text style={styles.historyProgress}>
-              {isDateCompleted(item.date) ? "✔️" : "❌"}
+          <View>
+            <Text>
+              {item.date}: {item.total_progress}
             </Text>
           </View>
         )}
-      />
+        keyExtractor={(item) => item.id.toString()}
+      /> */}
+
+      {!progressHistory || progressHistory.length === 0 ? (
+        <Text>No progress recorded for this habit.</Text>
+      ) : (
+        <FlatList
+          data={progressHistory}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.historyItem}>
+              <Text style={styles.historyDate}>{item.date}</Text>
+              <Text style={styles.historyProgress}>
+                {isDateCompleted(item.date) ? "✔️" : "❌"}
+              </Text>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };
