@@ -99,7 +99,7 @@ const CategoriesScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        margin: 10
+        padding: 20
     },
     top: {
         marginTop: StatusBar.currentHeight

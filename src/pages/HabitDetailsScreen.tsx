@@ -46,7 +46,7 @@ const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
     if (alreadyCompleted) {
       await removeProgress(habitId, formattedDate);
     } else {
-      await addProgress(habitId, 1, formattedDate); // Using 1 to mark completion
+      await addProgress(habitId, 1, formattedDate);
     }
 
     const updatedData = await getProgressByHabitId(habitId);
@@ -72,7 +72,7 @@ const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
           value={selectedDate}
           mode="date"
           display="default"
-          onChange={(_, date) => {
+          onChange={(_: any, date: React.SetStateAction<Date>) => {
             setShowDatePicker(false);
             if (date) setSelectedDate(date);
           }}

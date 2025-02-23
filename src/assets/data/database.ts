@@ -172,7 +172,7 @@ export const addProgress = async (habitId: number, p0: number, formattedDate?: s
   const db = await dbPromise;
   await db.runAsync(
     `INSERT OR REPLACE INTO habit_progress (habit_id, date, completed) 
-     VALUES (?, date('now', 'localtime'), 1);`, 
+     VALUES (?, date('now', 'localtime'), 1);`,
     [habitId]
   );
 };
@@ -187,7 +187,7 @@ export const getProgressByHabitId = async (habitId: number) => {
        ORDER BY date DESC;`,
       [habitId]
     );
-    return results.rows._array;
+    return results[0].rows;
   } catch (error) {
     console.error("Error fetching progress:", error);
     return [];
@@ -212,7 +212,7 @@ export const removeProgress = async (habitId: number, formattedDate: string) => 
   const db = await dbPromise;
   await db.runAsync(
     `DELETE FROM habit_progress 
-     WHERE habit_id = ? AND date = ?;`, 
+     WHERE habit_id = ? AND date = ?;`,
     [habitId, formattedDate]
   );
 };
