@@ -90,8 +90,8 @@ const RecycleBinScreen = () => {
         )}
 
         {deletedHabits.length > 0 && (
-          <TouchableOpacity style={styles.cleanButton} onPress={handleCleanRecycleBin}>
-            <Text style={styles.cleanButtonText}>Empty Recycle Bin</Text>
+          <TouchableOpacity style={[styles.cleanButton, themeStyles.button]} onPress={handleCleanRecycleBin}>
+            <Text style={[styles.cleanButtonText,themeStyles.buttonText]}>Empty Recycle Bin</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -131,14 +131,12 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   cleanButton: {
-    backgroundColor: "red",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 20,
   },
   cleanButtonText: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },

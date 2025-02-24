@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
 import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from "../assets/colors/colors";
 import { Entypo } from '@expo/vector-icons';
-import { IconButton } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
@@ -74,7 +74,9 @@ const CategoriesScreen = () => {
                     style={styles.textInput}
                 />
 
-                <Button title='Add Category' onPress={handleAddCategory} />
+                <Button mode='contained' onPress={handleAddCategory} style={themeStyles.button}>
+                    Add Category
+                </Button>
 
                 <FlatList
                     data={categories}
@@ -86,7 +88,7 @@ const CategoriesScreen = () => {
                                 <Text style={styles.itemDate}>Created at: {item.created_at}</Text>
                             </View>
                             <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteCategory(item.id)}>
-                                <Entypo name='cross' size={16} style={styles.icon} />
+                                <Entypo name='cross' size={16} />
                             </TouchableOpacity>
                         </View>
                     )}
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     iconButton: {
         justifyContent: 'center',
         marginRight: 15
-    }
+    },
 })
 
 export default CategoriesScreen;

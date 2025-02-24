@@ -2,10 +2,15 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, StatusBar } from "react-native";
 import { Agenda, AgendaSchedule } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
+import { useTheme } from "../context/ThemeContext";
+import { darkTheme, lightTheme } from "../assets/colors/colors";
 
 const ProgressScreen = () => {
   const [progressData, setProgressData] = useState<AgendaSchedule>({});
   const [loading, setLoading] = useState(true);
+    const { isDark } = useTheme();
+  
+    const themeStyles = isDark ? darkTheme : lightTheme;
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -50,15 +55,15 @@ const ProgressScreen = () => {
       ) : (
         <Agenda
           items={progressData}
-          renderItem={(item) => (
+          renderItem={(item: { habit_name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; total_progress: any; }) => (
             <View style={styles.agendaItem}>
               <Text style={styles.habitName}>{item.habit_name}</Text>
               <Text>{`Progress: ${item.total_progress}%`}</Text>
             </View>
           )}
           renderEmptyData={() => (
-            <View style={styles.emptyItem}>
-              <Text>No progress for this day</Text>
+            <View style={[styles.emptyItem, themeStyles.button]}>
+              <Text style={themeStyles.buttonText}>No progress for this day</Text>
             </View>
           )}
           theme={{
@@ -77,13 +82,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // backgroundColor: "#1e1e1e",
-    paddingTop: StatusBar.currentHeight || 0,
+    padding: 20
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     // color: "#fff",
-    textAlign: "center",
     marginVertical: 10,
   },
   agendaItem: {
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
     marginTop: 17,
   },
   habitName: {
-    color: "#fff",
+    // color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -102,7 +106,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#333",
     padding: 15,
     borderRadius: 10,
-    marginRight: 10,
     marginTop: 17,
     alignItems: "center",
   },

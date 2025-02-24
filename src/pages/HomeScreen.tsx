@@ -132,7 +132,7 @@ const HomeScreen = () => {
           <Divider />
         </Menu>
 
-        <Button mode="contained" onPress={handleAddHabit} style={{ marginTop: 10 }}>
+        <Button mode="contained" onPress={handleAddHabit} style={[{ marginTop: 10 }, themeStyles.button]}>
           Add Habit
         </Button>
 
