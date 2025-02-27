@@ -118,7 +118,7 @@ const handleToggleProgress = async () => {
       /> */}
 
       {!progressHistory || progressHistory.length === 0 ? (
-        <Text>No progress recorded for this habit.</Text>
+        <Text style={styles.noProgress}>No progress recorded for this habit.</Text>
       ) : (
         <FlatList
           data={progressHistory}
@@ -143,6 +143,10 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#f9f9f9",
     paddingTop: StatusBar.currentHeight || 0,
+  },
+  noProgress: {
+    fontSize: 16,
+    fontWeight: '500'
   },
   habitName: {
     fontSize: 24,

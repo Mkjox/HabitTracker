@@ -242,10 +242,11 @@ export const getProgressByHabitId = async (habitId: number) => {
   const db = await dbPromise;
   try {
     const results = await db.getAllAsync(
-      `SELECT id, date, completed AS total_progress 
-       FROM habit_progress 
-       WHERE habit_id = ? 
-       ORDER BY date DESC;`,
+      `SELECT hp.id, hp.date, hp.completed AS total_progress, h.name AS habit_name
+       FROM habit_progress hp
+       JOIN habits h ON hp.habit_id = h.id
+       WHERE hp.habit_id = ? 
+       ORDER BY hp.date DESC;`,
       [habitId]
     );
 
@@ -262,23 +263,20 @@ export const getProgressByHabitId = async (habitId: number) => {
   }
 };
 
-export const getProgress = async (): Promise<{ habit_id: number; total_progress: number; date: string }[]> => {
+export const getProgress = async (): Promise<{ habit_id: number; habit_name: string; total_progress: number; date: string }[]> => {
   const db = await dbPromise;
-  try {
-    const rows = await db.getAllAsync(`
-      SELECT 
-        habit_id, 
-        CAST(COALESCE(SUM(completed), 0) AS INTEGER) AS total_progress, 
-        strftime('%Y-%m-%d', date) AS date 
-      FROM habit_progress 
-      GROUP BY habit_id, date 
-      ORDER BY habit_id ASC, date DESC;
-    `);
-    return rows as { habit_id: number; total_progress: number; date: string }[];
-  } catch (error) {
-    console.error("Error fetching total progress:", error);
-    return [];
-  }
+  const rows = await db.getAllAsync(`
+    SELECT 
+      hp.habit_id, 
+      h.name AS habit_name,
+      CAST(COALESCE(SUM(hp.completed), 0) AS INTEGER) AS total_progress, 
+      strftime('%Y-%m-%d', hp.date) AS date 
+    FROM habit_progress hp
+    JOIN habits h ON hp.habit_id = h.id
+    GROUP BY hp.habit_id, date 
+    ORDER BY hp.habit_id ASC, date DESC;
+  `);
+  return rows as { habit_id: number; habit_name: string; total_progress: number; date: string }[];
 };
 
 export const removeProgress = async (habitId: number, formattedDate: string) => {
