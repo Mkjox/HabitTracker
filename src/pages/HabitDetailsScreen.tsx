@@ -35,10 +35,10 @@ const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
       try {
         const data = await getProgressByHabitId(habitId);
         console.log("Fetched Progress History:", data);
-        setProgressHistory(Array.isArray(data) ? data : []); // Ensure it's an array
+        setProgressHistory(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching progress:", error);
-        setProgressHistory([]); // Avoid undefined state
+        setProgressHistory([]);
       }
     };
   
@@ -59,10 +59,10 @@ const handleToggleProgress = async () => {
     }
 
     const updatedData = await getProgressByHabitId(habitId);
-    console.log("Updated Progress Data:", updatedData); // Log the updated data
-    setProgressHistory(updatedData ?? []); // Ensure we set an empty array if updatedData is null
+    console.log("Updated Progress Data:", updatedData);
+    setProgressHistory(updatedData ?? []);
   } catch (error) {
-    console.error("Error toggling progress:", error); // Log any errors
+    console.error("Error toggling progress:", error);
   }
 };
 

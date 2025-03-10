@@ -119,7 +119,6 @@ const styles = StyleSheet.create({
     },
     list: {
         padding: 10,
-        // borderBottomWidth: 1
     },
     itemName: {
         fontSize: 16

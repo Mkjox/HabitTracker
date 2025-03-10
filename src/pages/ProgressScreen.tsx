@@ -13,26 +13,6 @@ const ProgressScreen = () => {
 
   const themeStyles = isDark ? darkTheme : lightTheme;
 
-  // useEffect(() => {
-  //   const fetchProgress = async () => {
-  //     try {
-  //       const data = await getProgress();
-  //       console.log("Raw progress data from DB:", data);
-
-  //       const formattedData = formatProgressForCalendar(data);
-  //       console.log("Formatted calendar data:", formattedData);
-
-  //       setProgressData(formattedData);
-  //     } catch (error) {
-  //       console.error("Error fetching progress:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProgress();
-  // }, []);
-
   useEffect(() => {
     fetchProgress();
   }, []);
@@ -114,7 +94,6 @@ const ProgressScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: "#1e1e1e",
     padding: 20
   },
   topWrapper: {
@@ -124,7 +103,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    // color: "#fff",
     marginVertical: 10,
   },
   refreshButton: {
@@ -138,19 +116,16 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   agendaItem: {
-    // backgroundColor: "#2a2a2a",
     padding: 15,
     borderRadius: 10,
     marginRight: 10,
     marginTop: 17,
   },
   habitName: {
-    // color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
   },
   emptyItem: {
-    backgroundColor: "#333",
     padding: 15,
     borderRadius: 10,
     marginTop: 17,

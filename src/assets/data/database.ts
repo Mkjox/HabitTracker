@@ -175,7 +175,7 @@ export const getDeletedHabits = async () => {
     return rows.map(item => ({
       id: item.id,
       deleted_at: item.deleted_at,
-      name: item.habit_name // ✅ Fetching name from recycle_bin
+      name: item.habit_name // Fetching name from recycle_bin
     }));
   } catch (error) {
     console.error("Error fetching deleted habits:", error);

@@ -39,20 +39,19 @@ const RecycleBinScreen = () => {
     ]);
   };
 
-  const handleCleanRecycleBin = async () => {
-    Alert.alert("Empty Recycle Bin", "This will delete all habits permanently. Proceed?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Empty Bin",
-        onPress: async () => {
-          await cleanRecycleBin();
-          fetchDeletedHabits();
-        },
-      },
-    ]);
-  };
+  // const handleCleanRecycleBin = async () => {
+  //   Alert.alert("Empty Recycle Bin", "This will delete all habits permanently. Proceed?", [
+  //     { text: "Cancel", style: "cancel" },
+  //     {
+  //       text: "Empty Bin",
+  //       onPress: async () => {
+  //         await cleanRecycleBin();
+  //         fetchDeletedHabits();
+  //       },
+  //     },
+  //   ]);
+  // };
 
-  // Added Refresh Button Functionality
   const handleRefresh = () => {
     fetchDeletedHabits();
   };
@@ -89,11 +88,11 @@ const RecycleBinScreen = () => {
           />
         )}
 
-        {deletedHabits.length > 0 && (
+        {/* {deletedHabits.length > 0 && (
           <TouchableOpacity style={[styles.cleanButton, themeStyles.button]} onPress={handleCleanRecycleBin}>
             <Text style={[styles.cleanButtonText,themeStyles.buttonText]}>Empty Recycle Bin</Text>
           </TouchableOpacity>
-        )}
+        )} */}
       </View>
     </View>
   );
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
   },
   cleanButton: {
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 25,
     alignItems: "center",
     marginTop: 20,
   },
