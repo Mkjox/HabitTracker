@@ -1,58 +1,94 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, StatusBar } from "react-native";
-import { restoreHabit, getDeletedHabits, deleteHabitPermanently, cleanRecycleBin } from "../assets/data/database";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  StatusBar,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { darkTheme, lightTheme } from "../assets/colors/colors";
+import {
+  restoreHabit,
+  getDeletedHabits,
+  deleteHabitPermanently,
+  cleanRecycleBin,
+} from "../assets/data/database";
 
-const RecycleBinScreen = () => {
-  const [deletedHabits, setDeletedHabits] = useState([]);
+// Type definition for a deleted habit
+type Habit = {
+  id: number;
+  name: string;
+};
+
+const RecycleBinScreen: React.FC = () => {
+  const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
   const { isDark } = useTheme();
-
   const themeStyles = isDark ? darkTheme : lightTheme;
 
   useEffect(() => {
     fetchDeletedHabits();
   }, []);
 
-  const fetchDeletedHabits = async () => {
-    const data = await getDeletedHabits();
-    console.log("Deleted habits:", data);
-    setDeletedHabits(data);
+  const fetchDeletedHabits = async (): Promise<void> => {
+    try {
+      const data: Habit[] = await getDeletedHabits();
+      console.log("Deleted habits:", data);
+      setDeletedHabits(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching deleted habits:", error);
+      setDeletedHabits([]);
+    }
   };
 
-  const handleRestore = async (habitId: number) => {
-    await restoreHabit(habitId);
-    fetchDeletedHabits();
+  const handleRestore = async (habitId: number): Promise<void> => {
+    try {
+      await restoreHabit(habitId);
+      fetchDeletedHabits();
+    } catch (error) {
+      console.error("Error restoring habit:", error);
+    }
   };
 
-  const handleDeletePermanently = async (habitId: number) => {
+  const handleDeletePermanently = (habitId: number): void => {
     Alert.alert("Confirm Delete", "Are you sure you want to permanently delete this habit?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         onPress: async () => {
-          await deleteHabitPermanently(habitId);
-          fetchDeletedHabits();
+          try {
+            await deleteHabitPermanently(habitId);
+            fetchDeletedHabits();
+          } catch (error) {
+            console.error("Error deleting habit permanently:", error);
+          }
         },
       },
     ]);
   };
 
-  // const handleCleanRecycleBin = async () => {
+  // Uncomment if you want to add "Empty Recycle Bin" functionality
+  // const handleCleanRecycleBin = async (): Promise<void> => {
   //   Alert.alert("Empty Recycle Bin", "This will delete all habits permanently. Proceed?", [
   //     { text: "Cancel", style: "cancel" },
   //     {
   //       text: "Empty Bin",
   //       onPress: async () => {
-  //         await cleanRecycleBin();
-  //         fetchDeletedHabits();
+  //         try {
+  //           await cleanRecycleBin();
+  //           fetchDeletedHabits();
+  //         } catch (error) {
+  //           console.error("Error cleaning recycle bin:", error);
+  //         }
   //       },
   //     },
   //   ]);
   // };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     fetchDeletedHabits();
   };
 
@@ -88,6 +124,7 @@ const RecycleBinScreen = () => {
           />
         )}
 
+        {/* Uncomment if "Empty Recycle Bin" button is needed */}
         {/* {deletedHabits.length > 0 && (
           <TouchableOpacity style={[styles.cleanButton, themeStyles.button]} onPress={handleCleanRecycleBin}>
             <Text style={[styles.cleanButtonText,themeStyles.buttonText]}>Empty Recycle Bin</Text>
@@ -108,7 +145,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   emptyText: {
     fontSize: 16,

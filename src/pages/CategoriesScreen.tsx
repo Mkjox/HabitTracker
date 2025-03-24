@@ -4,7 +4,7 @@ import { addCategory, deleteCategory, getCategories } from '../assets/data/datab
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from "../assets/colors/colors";
 import { Entypo } from '@expo/vector-icons';
-import { Button, IconButton } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");

@@ -1,101 +1,84 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  StatusBar,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import DateTimePicker from "expo-datepicker";
 import { RouteProp } from "@react-navigation/native";
-import {
-  addProgress,
-  removeProgress,
-  getProgressByHabitId,
-} from "../assets/data/database";
+import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
+import { RootStackParamList } from "../assets/types/navigationTypes";
 
-type HabitDetailsScreenProps = {
-  route: RouteProp<
-    { params: { habitId: number; habitName: string } },
-    "params"
-  >;
+type HabitDetailsScreenRouteProp = RouteProp<RootStackParamList, "HabitDetails">;
+
+type ProgressItem = {
+  id: number;
+  date: string;
+  total_progress: number;
 };
 
-const HabitDetailsScreen: React.FC<HabitDetailsScreenProps> = ({ route }) => {
+const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
   const { habitId, habitName } = route.params;
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [progressHistory, setProgressHistory] = useState<
-    Array<{ id: number; date: string; total_progress: number }>
-  >([]);
+
+  // States with appropriate types
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([]);
 
   useEffect(() => {
-    const fetchProgress = async () => {
+    const fetchProgress = async (): Promise<void> => {
       try {
         const data = await getProgressByHabitId(habitId);
-        console.log("Fetched Progress History:", data);
         setProgressHistory(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching progress:", error);
         setProgressHistory([]);
       }
     };
-  
+
     fetchProgress();
   }, [habitId]);
 
-const handleToggleProgress = async () => {
-  const formattedDate = selectedDate.toISOString().split("T")[0];
-  const alreadyCompleted = progressHistory.some(
-    (item) => item.date === formattedDate
-  );
+  const handleToggleProgress = async (): Promise<void> => {
+    const formattedDate = selectedDate.toISOString().split("T")[0];
+    const alreadyCompleted = progressHistory.some((item) => item.date === formattedDate);
 
-  try {
-    if (alreadyCompleted) {
-      await removeProgress(habitId, formattedDate);
-    } else {
-      await addProgress(habitId, 1, formattedDate);
+    try {
+      if (alreadyCompleted) {
+        await removeProgress(habitId, formattedDate);
+      } else {
+        await addProgress(habitId, 1, formattedDate);
+      }
+
+      const updatedData = await getProgressByHabitId(habitId);
+      setProgressHistory(updatedData ?? []);
+    } catch (error) {
+      console.error("Error toggling progress:", error);
     }
-
-    const updatedData = await getProgressByHabitId(habitId);
-    console.log("Updated Progress Data:", updatedData);
-    setProgressHistory(updatedData ?? []);
-  } catch (error) {
-    console.error("Error toggling progress:", error);
-  }
-};
-
-  const isDateCompleted = (date: string) => {
-    return progressHistory.some((item) => item.date === date);
   };
+
+  const isDateCompleted = (date: string): boolean => progressHistory.some((item) => item.date === date);
 
   return (
     <View style={styles.container}>
       <Text style={styles.habitName}>{habitName}</Text>
 
-      <TouchableOpacity
-        onPress={() => setShowDatePicker(true)}
-        style={styles.dateButton}
-      >
+      {/* Date picker button */}
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
         <Text style={styles.dateText}>📅 {selectedDate.toDateString()}</Text>
       </TouchableOpacity>
+
+      {/* Date picker */}
       {showDatePicker && (
         <DateTimePicker
           value={selectedDate}
           mode="date"
           display="default"
-          onChange={(_: any, date: React.SetStateAction<Date>) => {
+          onChange={(_: any, date: Date | undefined) => {
             setShowDatePicker(false);
             if (date) setSelectedDate(date);
           }}
         />
       )}
 
-      <TouchableOpacity
-        onPress={handleToggleProgress}
-        style={styles.toggleButton}
-      >
+      {/* Toggle progress button */}
+      <TouchableOpacity onPress={handleToggleProgress} style={styles.toggleButton}>
         <Text style={styles.toggleButtonText}>
           {isDateCompleted(selectedDate.toISOString().split("T")[0])
             ? "✔️ Completed"
@@ -105,19 +88,8 @@ const handleToggleProgress = async () => {
 
       <Text style={styles.historyTitle}>Progress History:</Text>
 
-      {/* <FlatList
-        data={progressHistory}
-        renderItem={({ item }) => (
-          <View>
-            <Text>
-              {item.date}: {item.total_progress}
-            </Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      /> */}
-
-      {!progressHistory || progressHistory.length === 0 ? (
+      {/* FlatList to render progress history */}
+      {progressHistory.length === 0 ? (
         <Text style={styles.noProgress}>No progress recorded for this habit.</Text>
       ) : (
         <FlatList
@@ -142,11 +114,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#f9f9f9",
-    paddingTop: StatusBar.currentHeight || 0,
-  },
-  noProgress: {
-    fontSize: 16,
-    fontWeight: '500'
   },
   habitName: {
     fontSize: 24,
@@ -202,6 +169,10 @@ const styles = StyleSheet.create({
   historyProgress: {
     fontSize: 16,
     color: "#28a745",
+  },
+  noProgress: {
+    fontSize: 16,
+    fontWeight: "500",
   },
 });
 

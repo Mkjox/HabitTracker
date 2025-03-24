@@ -6,6 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../context/ThemeContext";
 import { lightTheme, darkTheme } from '../assets/colors/colors';
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../assets/types/navigationTypes";
 
 const { height, width } = Dimensions.get("window");
 

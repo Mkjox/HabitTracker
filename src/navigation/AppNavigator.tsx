@@ -3,13 +3,21 @@ import HomeScreen from '../pages/HomeScreen';
 import ProgressScreen from '../pages/ProgressScreen';
 import CategoriesScreen from '../pages/CategoriesScreen';
 import HabitDetailsScreen from '../pages/HabitDetailsScreen';
-import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack';
 import CustomTabBar from '../component/CustomTabBar';
 import RecycleBinScreen from '../pages/RecycleBinScreen';
+// import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer, RouteProp } from '@react-navigation/native'
+import { RootStackParamList } from '../assets/types/navigationTypes';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+// const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// export type RootStackParamList = {
+//     TabNavigator: undefined;
+//     HabitDetails: { habitId: number };
+//   };
 
 function TabNavigator() {
     return (
@@ -54,13 +62,13 @@ function TabNavigator() {
 function StackNavigator() {
     return (
         <Stack.Navigator>
-            <Stack.Screen
+            {/* <Stack.Screen
                 name='TabNavigator'
                 component={TabNavigator}
                 options={{
                     headerShown: false
                 }}
-            />
+            /> */}
 
             <Stack.Screen
                 name='HabitDetails'

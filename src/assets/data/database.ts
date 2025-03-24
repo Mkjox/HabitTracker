@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { checkAndRestoreDatabase, backupDatabase } from './backup';
-import { Habit, Progress, RecycleBinEntry } from './types';
+import { Category, DeletedHabit, Habit, HabitFromRecycleBin, HabitProgress, RecycleBinEntry } from '../types/types';
 
 const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
@@ -101,14 +101,14 @@ export const getHabits = async (): Promise<{ id: number; name: string; category_
   }
 };
 
-export const deleteHabit = async (habitId: number) => {
+export const deleteHabit = async (habitId: number): Promise<void> => {
   const db = await dbPromise;
-  
+
   try {
     await db.execAsync("BEGIN TRANSACTION;");
 
-    // Fetch habit and log it
-    const habit = await db.getFirstAsync("SELECT id, name FROM habits WHERE id = ?;", [habitId]);
+    const habit = (await db.getFirstAsync("SELECT id, name FROM habits WHERE id = ?;", [habitId])) as Habit | null;
+    
     console.log("Fetched habit before deleting:", habit);
 
     if (!habit) {
@@ -123,13 +123,11 @@ export const deleteHabit = async (habitId: number) => {
       return;
     }
 
-    // Insert into recycle_bin
     await db.runAsync(
       "INSERT INTO recycle_bin (habit_id, habit_name, deleted_at) VALUES (?, ?, datetime('now'));",
       [habitId, habit.name]
     );
 
-    // Delete from habits table
     await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);
 
     await db.execAsync("COMMIT;");
@@ -163,19 +161,19 @@ export const deleteHabitPermanently = async (habitId: number) => {
   }
 };
 
-export const getDeletedHabits = async () => {
+export const getDeletedHabits = async (): Promise<DeletedHabit[]> => {
   try {
     const db = await dbPromise;
-    const rows = await db.getAllAsync(`
+    const rows: { id: number; deleted_at: string; habit_name: string }[] = await db.getAllAsync(`
       SELECT habit_id AS id, deleted_at, habit_name 
       FROM recycle_bin
       ORDER BY deleted_at DESC;
     `);
 
-    return rows.map(item => ({
+    return rows.map((item) => ({
       id: item.id,
       deleted_at: item.deleted_at,
-      name: item.habit_name // Fetching name from recycle_bin
+      name: item.habit_name,
     }));
   } catch (error) {
     console.error("Error fetching deleted habits:", error);
@@ -191,20 +189,18 @@ export const restoreHabit = async (id: number) => {
     const habitToRestore = await db.getFirstAsync(
       "SELECT habit_name FROM recycle_bin WHERE habit_id = ?;",
       [id]
-    );
+    ) as HabitFromRecycleBin | null;
 
     if (!habitToRestore) {
       console.warn(`No habit found in the recycle bin with id: ${id}`);
       return;
     }
 
-    // Insert back into habits table
     await db.runAsync(
       "INSERT INTO habits (name, added_at, updated_at) VALUES (?, datetime('now'), datetime('now'));",
       [habitToRestore.habit_name]
     );
 
-    // Remove from recycle_bin table
     await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
     await backupDatabase();
   } catch (error) {
@@ -250,16 +246,15 @@ export const getProgressByHabitId = async (habitId: number) => {
       [habitId]
     );
 
-    // Check if results are empty
     if (!results || results.length === 0) {
       console.warn(`No progress found for habitId: ${habitId}`);
-      return []; // Return an empty array if no progress is found
+      return [];
     }
 
     return results;
   } catch (error) {
     console.error("Error fetching progress:", error);
-    return []; // Return an empty array on error
+    return [];
   }
 };
 
