@@ -154,7 +154,7 @@ const HomeScreen = () => {
             const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
             return (
               <TouchableOpacity onPress={
-                () => navigation.navigate("HabitDetails", { habitId: item.id, habitName: item.name })
+                () => navigation.navigate('HabitDetails', { habitId: item.id, habitName: item.name })
                 }>
                 <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, themeStyles.hairLine]}>
                   <View style={styles.habitWrapper}>

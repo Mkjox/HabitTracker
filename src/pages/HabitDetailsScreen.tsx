@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import DateTimePicker from "expo-datepicker";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { RouteProp } from "@react-navigation/native";
 import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
 import { RootStackParamList } from "../assets/types/navigationTypes";
@@ -25,7 +25,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
     const fetchProgress = async (): Promise<void> => {
       try {
         const data = await getProgressByHabitId(habitId);
-        setProgressHistory(Array.isArray(data) ? data : []);
+        setProgressHistory(Array.isArray(data) ? (data as ProgressItem[]) : []);
       } catch (error) {
         console.error("Error fetching progress:", error);
         setProgressHistory([]);
@@ -47,7 +47,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
       }
 
       const updatedData = await getProgressByHabitId(habitId);
-      setProgressHistory(updatedData ?? []);
+      setProgressHistory(updatedData as ProgressItem[] ?? []);
     } catch (error) {
       console.error("Error toggling progress:", error);
     }
@@ -66,15 +66,29 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
 
       {/* Date picker */}
       {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={(_: any, date: Date | undefined) => {
-            setShowDatePicker(false);
-            if (date) setSelectedDate(date);
-          }}
-        />
+        Platform.OS === "ios" ? (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            onChange={(_, date) => {
+              setShowDatePicker(false);
+              if (date) setSelectedDate(date);
+            }}
+          />
+        ) : (
+          <>
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={(_, date) => {
+                setShowDatePicker(false);
+                if (date) setSelectedDate(date);
+              }}
+            />
+          </>
+        )
       )}
 
       {/* Toggle progress button */}
