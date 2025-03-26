@@ -3,6 +3,11 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { PaperProvider } from 'react-native-paper';
 import { useEffect } from 'react';
 import { initializeDatabase } from './src/assets/data/database';
+import { View, Text } from 'react-native';
+import { enableScreens } from 'react-native-screens';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+enableScreens();
 
 export default function App() {
   useEffect(() => {
@@ -18,12 +23,24 @@ export default function App() {
     setupDB();
   }, []);
 
-  return (
-    <PaperProvider>
-      <ThemeProvider>
-        <AppNavigator />
-      </ThemeProvider>
-    </PaperProvider>
-  );
+
+  try {
+    return (
+      <SafeAreaProvider>
+        <PaperProvider>
+          <ThemeProvider>
+            <AppNavigator />
+          </ThemeProvider>
+        </PaperProvider>
+      </SafeAreaProvider>
+    );
+  } catch (error) {
+    console.error("Navigation Error", error);
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: 'red' }}>Navigation Error</Text>
+      </View>
+    );
+  }
 }
 
