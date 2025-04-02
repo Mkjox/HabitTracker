@@ -44,6 +44,7 @@ export const initializeDatabase = async () => {
             habit_id INTEGER NOT NULL,
             date TEXT NOT NULL,
             completed INTEGER DEFAULT 0,
+            custom_value TEXT,
             UNIQUE(habit_id, date), 
             FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
           );`
@@ -108,7 +109,7 @@ export const deleteHabit = async (habitId: number): Promise<void> => {
     await db.execAsync("BEGIN TRANSACTION;");
 
     const habit = (await db.getFirstAsync("SELECT id, name FROM habits WHERE id = ?;", [habitId])) as Habit | null;
-    
+
     console.log("Fetched habit before deleting:", habit);
 
     if (!habit) {
@@ -221,13 +222,13 @@ export const cleanRecycleBin = async () => {
   }
 };
 
-export const addProgress = async (habitId: number, p0: number, formattedDate?: string) => {
+export const addProgress = async (habitId: number, p0: number, formattedDate?: string, customValue?: string) => {
   const db = await dbPromise;
   try {
     await db.runAsync(
-      `INSERT OR REPLACE INTO habit_progress (habit_id, date, completed) 
-       VALUES (?, ?, 1);`,
-      [habitId, formattedDate || "date('now', 'localtime')"]
+      `INSERT OR REPLACE INTO habit_progress (habit_id, date, completed, custom_value) 
+       VALUES (?, ?, 1, ?);`,
+      [habitId, formattedDate, customValue || "date('now', 'localtime')"]
     );
   } catch (error) {
     console.error("Error adding progress:", error);
@@ -238,7 +239,7 @@ export const getProgressByHabitId = async (habitId: number) => {
   const db = await dbPromise;
   try {
     const results = await db.getAllAsync(
-      `SELECT hp.id, hp.date, hp.completed AS total_progress, h.name AS habit_name
+      `SELECT hp.id, hp.date, hp.completed AS total_progress, hp.custom_value, h.name AS habit_name
        FROM habit_progress hp
        JOIN habits h ON hp.habit_id = h.id
        WHERE hp.habit_id = ? 
@@ -260,7 +261,9 @@ export const getProgressByHabitId = async (habitId: number) => {
 
 export const getProgress = async (): Promise<{ habit_id: number; habit_name: string; total_progress: number; date: string }[]> => {
   const db = await dbPromise;
-  const rows = await db.getAllAsync(`
+
+  try {
+    const rows = await db.getAllAsync(`
     SELECT 
       hp.habit_id, 
       h.name AS habit_name,
@@ -271,7 +274,12 @@ export const getProgress = async (): Promise<{ habit_id: number; habit_name: str
     GROUP BY hp.habit_id, date 
     ORDER BY hp.habit_id ASC, date DESC;
   `);
-  return rows as { habit_id: number; habit_name: string; total_progress: number; date: string }[];
+    return rows as { habit_id: number; habit_name: string; total_progress: number; date: string }[];
+  }
+  catch (error) {
+    console.error("Error fetching overall progress:", error);
+    return [];
+  }
 };
 
 export const removeProgress = async (habitId: number, formattedDate: string) => {

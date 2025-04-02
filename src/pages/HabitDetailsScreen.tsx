@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Switch, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RouteProp } from "@react-navigation/native";
 import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
@@ -11,6 +11,7 @@ type ProgressItem = {
   id: number;
   date: string;
   total_progress: number;
+  custom_value?: string | null;
 };
 
 const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
@@ -20,6 +21,8 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([]);
+  const [useCustom, setUseCustom] = useState<boolean>(false);
+  const [customValue, setCustomValue] = useState<string>("");
 
   useEffect(() => {
     const fetchProgress = async (): Promise<void> => {
@@ -43,7 +46,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
       if (alreadyCompleted) {
         await removeProgress(habitId, formattedDate);
       } else {
-        await addProgress(habitId, 1, formattedDate);
+        await addProgress(habitId, 1, formattedDate, useCustom && customValue.trim() ? customValue.trim() : undefined);
       }
 
       const updatedData = await getProgressByHabitId(habitId);
@@ -77,25 +80,39 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
             }}
           />
         ) : (
-          <>
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="default"
-              onChange={(_, date) => {
-                setShowDatePicker(false);
-                if (date) setSelectedDate(date);
-              }}
-            />
-          </>
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            onChange={(_, date) => {
+              setShowDatePicker(false);
+              if (date) setSelectedDate(date);
+            }}
+          />
         )
+      )}
+
+      {/* Custom Progress Toggle */}
+      <View style={styles.customContainer}>
+        <Text style={styles.customLabel}>Custom Progress:</Text>
+        <Switch value={useCustom} onValueChange={setUseCustom} />
+      </View>
+      {useCustom && (
+        <TextInput
+          style={styles.customInput}
+          placeholder="Enter custom progress (e.g., 2 km, 10 reps)"
+          value={customValue}
+          onChangeText={setCustomValue}
+        />
       )}
 
       {/* Toggle progress button */}
       <TouchableOpacity onPress={handleToggleProgress} style={styles.toggleButton}>
         <Text style={styles.toggleButtonText}>
           {isDateCompleted(selectedDate.toISOString().split("T")[0])
-            ? "✔️ Completed"
+            ? `✔️ ${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value 
+                ? `Done (${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value})`
+                : "Done"}`
             : "➕ Mark as Done"}
         </Text>
       </TouchableOpacity>
@@ -113,7 +130,9 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
             <View style={styles.historyItem}>
               <Text style={styles.historyDate}>{item.date}</Text>
               <Text style={styles.historyProgress}>
-                {isDateCompleted(item.date) ? "✔️" : "❌"}
+                {item.custom_value && item.custom_value.trim() !== ""
+                  ? `✔️ Done (${item.custom_value})`
+                  : "✔️ Done"}
               </Text>
             </View>
           )}
@@ -146,6 +165,22 @@ const styles = StyleSheet.create({
   dateText: {
     color: "white",
     fontSize: 16,
+  },
+  customContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  customLabel: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  customInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
   },
   toggleButton: {
     backgroundColor: "#28a745",

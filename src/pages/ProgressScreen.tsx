@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, StatusBar, TouchableOpacity } from "react-native";
 import { Agenda, AgendaSchedule } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
 import { darkTheme, lightTheme } from "../assets/colors/colors";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { useFocusEffect } from "@react-navigation/native";
 
 const ProgressScreen = () => {
   const [progressData, setProgressData] = useState<AgendaSchedule>({});
@@ -13,9 +14,11 @@ const ProgressScreen = () => {
 
   const themeStyles = isDark ? darkTheme : lightTheme;
 
-  useEffect(() => {
-    fetchProgress();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProgress();
+    }, [])
+  );
 
   const fetchProgress = async () => {
     try {
@@ -47,19 +50,10 @@ const ProgressScreen = () => {
     }, {} as AgendaSchedule);
   };
 
-  const handleRefresh = () => {
-    fetchProgress();
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.topWrapper}>
         <Text style={styles.title}>Habit Progress</Text>
-
-        <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
-          <Ionicons name="refresh" size={24} color="blue" />
-          <Text style={styles.refreshButtonText}>Refresh</Text>
-        </TouchableOpacity>
       </View>
 
       {loading ? (

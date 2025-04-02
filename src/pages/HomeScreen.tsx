@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity, Dimensions } from "react-native";
 import { Button, Divider, Menu } from "react-native-paper";
 import { addHabit, getCategories, getHabits, deleteHabit } from "../assets/data/database";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { useTheme } from "../context/ThemeContext";
 import { lightTheme, darkTheme } from '../assets/colors/colors';
@@ -23,10 +23,17 @@ const HomeScreen = () => {
 
   const navigation = useNavigation();
 
-  useEffect(() => {
-    fetchCategories();
-    fetchHabits();
-  }, []);
+  // useEffect(() => {
+  //   fetchCategories();
+  //   fetchHabits();
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCategories();
+      fetchHabits();
+    }, [])
+  );
 
   const fetchCategories = async () => {
     try {
@@ -93,10 +100,10 @@ const HomeScreen = () => {
     );
   };
 
-  const handleRefresh = () => {
-    fetchHabits();
-    fetchCategories();
-  }
+  // const handleRefresh = () => {
+  //   fetchHabits();
+  //   fetchCategories();
+  // }
 
   return (
     <View style={styles.container}>
@@ -142,10 +149,10 @@ const HomeScreen = () => {
           Added Habits:
         </Text>
 
-        <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
+        {/* <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
           <Ionicons name="refresh" size={24} color="blue" />
           <Text style={styles.refreshButtonText}>Refresh</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <FlatList
           data={habits}

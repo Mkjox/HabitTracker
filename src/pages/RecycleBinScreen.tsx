@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import {
   deleteHabitPermanently,
   cleanRecycleBin,
 } from "../assets/data/database";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Type definition for a deleted habit
 type Habit = {
@@ -29,9 +30,11 @@ const RecycleBinScreen: React.FC = () => {
   const { isDark } = useTheme();
   const themeStyles = isDark ? darkTheme : lightTheme;
 
-  useEffect(() => {
-    fetchDeletedHabits();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDeletedHabits();
+    }, [])
+  );
 
   const fetchDeletedHabits = async (): Promise<void> => {
     try {
@@ -88,19 +91,10 @@ const RecycleBinScreen: React.FC = () => {
   //   ]);
   // };
 
-  const handleRefresh = (): void => {
-    fetchDeletedHabits();
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.top}>
         <Text style={styles.title}>Recycle Bin</Text>
-
-        <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
-          <Ionicons name="refresh" size={24} color="blue" />
-          <Text style={styles.refreshButtonText}>Refresh</Text>
-        </TouchableOpacity>
 
         {deletedHabits.length === 0 ? (
           <Text style={styles.emptyText}>No deleted habits.</Text>

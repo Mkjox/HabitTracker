@@ -4,11 +4,15 @@
     "slug": "HabitTracker",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/img/icon.png",
+    "icon": "./src/assets/images/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "splash": {
-      "image": "./src/assets/img/splash-icon.png",
+      "image": "./src/assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,13 +20,17 @@
       "supportsTablet": true
     },
     "android": {
+      "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/img/adaptive-icon.png",
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.mkjox.habittracker",
+      "versionCode": 1
     },
-    "web": {
-      "favicon": "./src/assets/img/favicon.png"
-    }
+    "owner": "mkjox",
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }

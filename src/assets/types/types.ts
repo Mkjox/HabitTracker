@@ -17,6 +17,7 @@ export interface HabitProgress {
   habit_id: number;
   date: string;
   completed: number;
+  custom_value?: string | null;
 }
 
 export interface RecycleBinEntry {
