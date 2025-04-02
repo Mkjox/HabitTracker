@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity, Keyboard, Platform, ToastAndroid } from 'react-native';
 import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from "../assets/colors/colors";
@@ -16,6 +16,18 @@ const CategoriesScreen = () => {
     useEffect(() => {
         fetchCategories();
     }, []);
+
+    const showToastAdd = () => {
+        if (Platform.OS === 'android') {
+            ToastAndroid.show("Category saved successfully!", ToastAndroid.SHORT);
+        }
+    };
+
+    const showToastDelete = () => {
+        if (Platform.OS === 'android') {
+            ToastAndroid.show("Category deleted successfully!", ToastAndroid.SHORT);
+        }
+    };
 
     const fetchCategories = async () => {
         try {
@@ -34,6 +46,8 @@ const CategoriesScreen = () => {
         }
         try {
             await addCategory(categoryName);
+            Keyboard.dismiss();
+            showToastAdd();
             setCategoryName("");
             fetchCategories();
         }
@@ -52,6 +66,7 @@ const CategoriesScreen = () => {
                     text: "Delete",
                     onPress: async () => {
                         await deleteCategory(id);
+                        showToastDelete();
                         fetchCategories();
                     },
                     style: "destructive"

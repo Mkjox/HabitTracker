@@ -24,7 +24,7 @@ function TabNavigator() {
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Progress" component={ProgressScreen} />
             <Tab.Screen name="Categories" component={CategoriesScreen} />
-            <Tab.Screen name="RecycleBin" component={RecycleBinScreen} />
+            <Tab.Screen name="Recycle Bin" component={RecycleBinScreen} />
         </Tab.Navigator>
     );
 }

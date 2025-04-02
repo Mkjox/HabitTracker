@@ -7,6 +7,8 @@ import {
   Alert,
   StyleSheet,
   StatusBar,
+  Platform,
+  ToastAndroid,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -36,6 +38,12 @@ const RecycleBinScreen: React.FC = () => {
     }, [])
   );
 
+      const showToastDelete = () => {
+          if (Platform.OS === 'android') {
+              ToastAndroid.show("Habit deleted from Recycle Bin successfully!", ToastAndroid.SHORT);
+          }
+      };
+
   const fetchDeletedHabits = async (): Promise<void> => {
     try {
       const data: Habit[] = await getDeletedHabits();
@@ -64,6 +72,7 @@ const RecycleBinScreen: React.FC = () => {
         onPress: async () => {
           try {
             await deleteHabitPermanently(habitId);
+            showToastDelete();
             fetchDeletedHabits();
           } catch (error) {
             console.error("Error deleting habit permanently:", error);

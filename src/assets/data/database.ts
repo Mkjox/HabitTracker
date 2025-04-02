@@ -228,7 +228,7 @@ export const addProgress = async (habitId: number, p0: number, formattedDate?: s
     await db.runAsync(
       `INSERT OR REPLACE INTO habit_progress (habit_id, date, completed, custom_value) 
        VALUES (?, ?, 1, ?);`,
-      [habitId, formattedDate, customValue || "date('now', 'localtime')"]
+      [habitId, formattedDate, customValue || null]
     );
   } catch (error) {
     console.error("Error adding progress:", error);

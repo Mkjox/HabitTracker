@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Switch, Platform } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Switch, Platform, StatusBar } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RouteProp } from "@react-navigation/native";
 import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     color: "#333",
+    marginTop: StatusBar.currentHeight
   },
   dateButton: {
     padding: 10,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity, Dimensions, ToastAndroid, Platform, Keyboard } from "react-native";
 import { Button, Divider, Menu } from "react-native-paper";
 import { addHabit, getCategories, getHabits, deleteHabit } from "../assets/data/database";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -23,11 +23,6 @@ const HomeScreen = () => {
 
   const navigation = useNavigation();
 
-  // useEffect(() => {
-  //   fetchCategories();
-  //   fetchHabits();
-  // }, []);
-
   useFocusEffect(
     useCallback(() => {
       fetchCategories();
@@ -43,7 +38,19 @@ const HomeScreen = () => {
     }
     catch (error) {
       console.error("Failed to fetch categories:", error);
-      Alert.alert("Error", "Could not load categories.");
+      console.log("Could not load categories.");
+    }
+  };
+
+  const showToastAdd = () => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show("Habit saved successfully!", ToastAndroid.SHORT);
+    }
+  };
+
+  const showToastDelete = () => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show("Habit deleted successfully!", ToastAndroid.SHORT);
     }
   };
 
@@ -54,7 +61,7 @@ const HomeScreen = () => {
     }
     catch (error) {
       console.error("Failed to fetch habits:", error);
-      Alert.alert("Error", "Could not load habits.");
+      console.log("Could not load habits.");
     }
   };
 
@@ -71,7 +78,9 @@ const HomeScreen = () => {
 
     try {
       await addHabit(habitName, selectedCategory);
-      Alert.alert("Success", "Habit added successfully!");
+      Keyboard.dismiss();
+      // Alert.alert("Success", "Habit added successfully!");
+      showToastAdd();
       setHabitName("");
       fetchHabits();
     }
@@ -92,6 +101,7 @@ const HomeScreen = () => {
           text: "Delete",
           onPress: async () => {
             await deleteHabit(id);
+            showToastDelete();
             fetchHabits();
           },
           style: "destructive"
@@ -99,11 +109,6 @@ const HomeScreen = () => {
       ]
     );
   };
-
-  // const handleRefresh = () => {
-  //   fetchHabits();
-  //   fetchCategories();
-  // }
 
   return (
     <View style={styles.container}>
@@ -148,11 +153,6 @@ const HomeScreen = () => {
         <Text style={styles.habitTitle}>
           Added Habits:
         </Text>
-
-        {/* <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
-          <Ionicons name="refresh" size={24} color="blue" />
-          <Text style={styles.refreshButtonText}>Refresh</Text>
-        </TouchableOpacity> */}
 
         <FlatList
           data={habits}

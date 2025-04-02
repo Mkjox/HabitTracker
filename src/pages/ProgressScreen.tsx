@@ -65,7 +65,14 @@ const ProgressScreen = () => {
             <View style={styles.agendaItem}>
               <Text style={styles.habitName}>{item.habit_name}</Text>
               {/* <Text>{`Progress: ${item.total_progress}%`}</Text> */}
-              <Text>{`Progress: Done`}</Text>
+              {/* <Text>{`Progress: Done`}</Text> */}
+              <Text>
+                {
+                  progressData.custom_value
+                    ? `Done (${progressItem.custom_value})`
+                    : "Done"
+                }
+              </Text>
             </View>
           )}
           renderEmptyData={() => (
