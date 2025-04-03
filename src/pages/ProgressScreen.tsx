@@ -25,7 +25,7 @@ const ProgressScreen = () => {
       const data = await getProgress();
       const formattedData = formatProgressForCalendar(data);
       console.log(formattedData);
-      console.log(data);
+      // console.log(data);
       setProgressData(formattedData);
     }
     catch (error) {
@@ -44,7 +44,8 @@ const ProgressScreen = () => {
       acc[formattedDate] = acc[formattedDate] || [];
       acc[formattedDate].push({
         habit_name: item.habit_name,
-        total_progress: item.total_progress
+        total_progress: item.total_progress,
+        custom_value: item.custom_value
       });
       return acc;
     }, {} as AgendaSchedule);
@@ -61,18 +62,19 @@ const ProgressScreen = () => {
       ) : (
         <Agenda
           items={progressData}
-          renderItem={(item: { habit_name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; total_progress: any; }) => (
+          renderItem={(item: { habit_name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; total_progress: any; custom_value: any; }) => (
             <View style={styles.agendaItem}>
               <Text style={styles.habitName}>{item.habit_name}</Text>
               {/* <Text>{`Progress: ${item.total_progress}%`}</Text> */}
               {/* <Text>{`Progress: Done`}</Text> */}
               <Text>
-                {
-                  progressData.custom_value
-                    ? `Done (${progressItem.custom_value})`
-                    : "Done"
-                }
+                {progressData.custom_value
+                  ? "Done"
+                  : item.custom_value
+                    ? `Done (${item.custom_value})`
+                    : "Done"}
               </Text>
+
             </View>
           )}
           renderEmptyData={() => (

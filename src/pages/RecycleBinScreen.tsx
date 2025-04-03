@@ -25,6 +25,7 @@ import { useFocusEffect } from "@react-navigation/native";
 type Habit = {
   id: number;
   name: string;
+  category_id: number;
 };
 
 const RecycleBinScreen: React.FC = () => {

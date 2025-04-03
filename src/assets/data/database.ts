@@ -56,6 +56,7 @@ export const initializeDatabase = async () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             habit_id INTEGER NOT NULL,
             habit_name TEXT NOT NULL,
+            category_id INTEGER,
             deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP
           );`
     );
@@ -108,7 +109,7 @@ export const deleteHabit = async (habitId: number): Promise<void> => {
   try {
     await db.execAsync("BEGIN TRANSACTION;");
 
-    const habit = (await db.getFirstAsync("SELECT id, name FROM habits WHERE id = ?;", [habitId])) as Habit | null;
+    const habit = (await db.getFirstAsync("SELECT id, name, category_id FROM habits WHERE id = ?;", [habitId])) as Habit | null;
 
     console.log("Fetched habit before deleting:", habit);
 
@@ -125,8 +126,8 @@ export const deleteHabit = async (habitId: number): Promise<void> => {
     }
 
     await db.runAsync(
-      "INSERT INTO recycle_bin (habit_id, habit_name, deleted_at) VALUES (?, ?, datetime('now'));",
-      [habitId, habit.name]
+      "INSERT INTO recycle_bin (habit_id, habit_name, category_id, deleted_at) VALUES (?, ?, ?, datetime('now'));",
+      [habitId, habit.name, habit.category_id]
     );
 
     await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);
@@ -165,8 +166,8 @@ export const deleteHabitPermanently = async (habitId: number) => {
 export const getDeletedHabits = async (): Promise<DeletedHabit[]> => {
   try {
     const db = await dbPromise;
-    const rows: { id: number; deleted_at: string; habit_name: string }[] = await db.getAllAsync(`
-      SELECT habit_id AS id, deleted_at, habit_name 
+    const rows: { id: number; deleted_at: string; habit_name: string, category_id: number }[] = await db.getAllAsync(`
+      SELECT habit_id AS id, deleted_at, habit_name, category_id
       FROM recycle_bin
       ORDER BY deleted_at DESC;
     `);
@@ -175,6 +176,7 @@ export const getDeletedHabits = async (): Promise<DeletedHabit[]> => {
       id: item.id,
       deleted_at: item.deleted_at,
       name: item.habit_name,
+      category_id: item.category_id
     }));
   } catch (error) {
     console.error("Error fetching deleted habits:", error);
@@ -188,7 +190,7 @@ export const restoreHabit = async (id: number) => {
 
   try {
     const habitToRestore = await db.getFirstAsync(
-      "SELECT habit_name FROM recycle_bin WHERE habit_id = ?;",
+      "SELECT habit_name, category_id FROM recycle_bin WHERE habit_id = ?;",
       [id]
     ) as HabitFromRecycleBin | null;
 
@@ -198,8 +200,8 @@ export const restoreHabit = async (id: number) => {
     }
 
     await db.runAsync(
-      "INSERT INTO habits (name, added_at, updated_at) VALUES (?, datetime('now'), datetime('now'));",
-      [habitToRestore.habit_name]
+      "INSERT INTO habits (name, category_id, added_at, updated_at) VALUES (?, ?, datetime('now'), datetime('now'));",
+      [habitToRestore.habit_name, habitToRestore.category_id]
     );
 
     await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
@@ -222,7 +224,7 @@ export const cleanRecycleBin = async () => {
   }
 };
 
-export const addProgress = async (habitId: number, p0: number, formattedDate?: string, customValue?: string) => {
+export const addProgress = async (habitId: number, p0: number, formattedDate: string, customValue?: string) => {
   const db = await dbPromise;
   try {
     await db.runAsync(
@@ -265,7 +267,8 @@ export const getProgress = async (): Promise<{ habit_id: number; habit_name: str
   try {
     const rows = await db.getAllAsync(`
     SELECT 
-      hp.habit_id, 
+      hp.habit_id,
+      hp.custom_value,
       h.name AS habit_name,
       CAST(COALESCE(SUM(hp.completed), 0) AS INTEGER) AS total_progress, 
       strftime('%Y-%m-%d', hp.date) AS date 

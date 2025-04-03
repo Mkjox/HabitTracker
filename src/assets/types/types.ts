@@ -31,10 +31,12 @@ export type DeletedHabit = {
   id: number;
   deleted_at: string;
   name: string;
+  category_id: number;
 };
 
 export type HabitFromRecycleBin = {
   habit_name: string;
+  category_id: number;
 };
 
 // export type Database = SQLite.WebSQLDatabase;
