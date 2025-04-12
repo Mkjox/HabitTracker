@@ -22,6 +22,7 @@ export const initializeDatabase = async () => {
       `CREATE TABLE IF NOT EXISTS habits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
+            description TEXT,
             category_id INTEGER,
             added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -56,6 +57,7 @@ export const initializeDatabase = async () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             habit_id INTEGER NOT NULL,
             habit_name TEXT NOT NULL,
+            habit_description TEXT,
             category_id INTEGER,
             deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP
           );`
@@ -65,7 +67,7 @@ export const initializeDatabase = async () => {
   }
 };
 
-export const addHabit = async (name: string, categoryId: number) => {
+export const addHabit = async (name: string, description: string, categoryId: number) => {
   if (!name.trim()) {
     console.error("Error: Habit name cannot be empty.");
     return;
@@ -73,7 +75,7 @@ export const addHabit = async (name: string, categoryId: number) => {
 
   const db = await dbPromise;
   try {
-    await db.runAsync("INSERT INTO habits (name, category_id) VALUES (?, ?);", [name, categoryId]);
+    await db.runAsync("INSERT INTO habits (name, description, category_id) VALUES (?, ?, ?);", [name, description, categoryId]);
     await backupDatabase();
   } catch (error) {
     console.error('Error adding habit:', error);
@@ -82,21 +84,21 @@ export const addHabit = async (name: string, categoryId: number) => {
 
 
 
-export const updateHabit = async (id: number, name: string, categoryId: number) => {
+export const updateHabit = async (id: number, name: string, description: string, categoryId: number) => {
   const db = await dbPromise;
   try {
-    await db.runAsync("UPDATE habits SET name = ?, category_id = ? WHERE id = ?;", [name, categoryId, id]);
+    await db.runAsync("UPDATE habits SET name = ?, description = ?, category_id = ? WHERE id = ?;", [name, description, categoryId, id]);
     await backupDatabase();
   } catch (error) {
     console.error('Error updating habit:', error);
   }
 };
 
-export const getHabits = async (): Promise<{ id: number; name: string; category_id: number }[]> => {
+export const getHabits = async (): Promise<{ id: number; name: string; description: string; category_id: number }[]> => {
   const db = await dbPromise;
   try {
     const rows = await db.getAllAsync("SELECT * FROM habits;");
-    return rows as { id: number; name: string; category_id: number }[];
+    return rows as { id: number; name: string; description: string; category_id: number }[];
   } catch (error) {
     console.error('Error fetching habits:', error);
     return [];
@@ -109,7 +111,7 @@ export const deleteHabit = async (habitId: number): Promise<void> => {
   try {
     await db.execAsync("BEGIN TRANSACTION;");
 
-    const habit = (await db.getFirstAsync("SELECT id, name, category_id FROM habits WHERE id = ?;", [habitId])) as Habit | null;
+    const habit = (await db.getFirstAsync("SELECT id, name, description, category_id FROM habits WHERE id = ?;", [habitId])) as Habit | null;
 
     console.log("Fetched habit before deleting:", habit);
 
@@ -126,8 +128,8 @@ export const deleteHabit = async (habitId: number): Promise<void> => {
     }
 
     await db.runAsync(
-      "INSERT INTO recycle_bin (habit_id, habit_name, category_id, deleted_at) VALUES (?, ?, ?, datetime('now'));",
-      [habitId, habit.name, habit.category_id]
+      "INSERT INTO recycle_bin (habit_id, habit_name, habit_description, category_id, deleted_at) VALUES (?, ?, ?, ?, datetime('now'));",
+      [habitId, habit.name, habit.description, habit.category_id]
     );
 
     await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);
@@ -190,7 +192,7 @@ export const restoreHabit = async (id: number) => {
 
   try {
     const habitToRestore = await db.getFirstAsync(
-      "SELECT habit_name, category_id FROM recycle_bin WHERE habit_id = ?;",
+      "SELECT habit_name, habit_description, category_id FROM recycle_bin WHERE habit_id = ?;",
       [id]
     ) as HabitFromRecycleBin | null;
 
@@ -200,8 +202,8 @@ export const restoreHabit = async (id: number) => {
     }
 
     await db.runAsync(
-      "INSERT INTO habits (name, category_id, added_at, updated_at) VALUES (?, ?, datetime('now'), datetime('now'));",
-      [habitToRestore.habit_name, habitToRestore.category_id]
+      "INSERT INTO habits (name, description, category_id, added_at, updated_at) VALUES (?, ?, ?, datetime('now'), datetime('now'));",
+      [habitToRestore.habit_name, habitToRestore.habit_description, habitToRestore.category_id]
     );
 
     await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [id]);
@@ -241,7 +243,7 @@ export const getProgressByHabitId = async (habitId: number) => {
   const db = await dbPromise;
   try {
     const results = await db.getAllAsync(
-      `SELECT hp.id, hp.date, hp.completed AS total_progress, hp.custom_value, h.name AS habit_name
+      `SELECT hp.id, hp.date, hp.completed AS total_progress, hp.custom_value, h.name AS habit_name, h.description AS habit_description
        FROM habit_progress hp
        JOIN habits h ON hp.habit_id = h.id
        WHERE hp.habit_id = ? 

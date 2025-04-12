@@ -13,8 +13,9 @@ const { height, width } = Dimensions.get("window");
 
 const HomeScreen = () => {
   const [habitName, setHabitName] = useState("");
+  const [habitDescription, setHabitDescription] = useState("");
   const [categories, setCategories] = useState<{ id: number; name: string; }[]>([]);
-  const [habits, setHabits] = useState<{ id: number; name: string; category_id: number }[]>([]);
+  const [habits, setHabits] = useState<{ id: number; name: string; description: string; category_id: number }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [visible, setVisible] = useState(false);
   const { isDark } = useTheme();
@@ -77,11 +78,12 @@ const HomeScreen = () => {
     }
 
     try {
-      await addHabit(habitName, selectedCategory);
+      await addHabit(habitName, habitDescription, selectedCategory);
       Keyboard.dismiss();
       // Alert.alert("Success", "Habit added successfully!");
       showToastAdd();
       setHabitName("");
+      setHabitDescription("");
       fetchHabits();
     }
 
@@ -124,6 +126,15 @@ const HomeScreen = () => {
           style={styles.habitAddInput}
         />
 
+        <TextInput
+          placeholder="Enter habit description..."
+          value={habitDescription}
+          onChangeText={setHabitDescription}
+          style={styles.habitAddInput}
+          maxLength={250}
+          multiline // CHECK IF IT'S RIGHT
+        />
+
         <Menu
           visible={visible}
           onDismiss={() => setVisible(false)}
@@ -162,7 +173,7 @@ const HomeScreen = () => {
             return (
               <TouchableOpacity onPress={
                 () => navigation.navigate('HabitDetails', { habitId: item.id, habitName: item.name })
-                }>
+              }>
                 <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, themeStyles.hairLine]}>
                   <View style={styles.habitWrapper}>
                     <Text style={styles.habitName}>{item.name}</Text>

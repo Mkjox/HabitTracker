@@ -7,6 +7,7 @@ export interface Category {
 export interface Habit {
   id: number;
   name: string;
+  description: string;
   category_id: number | null;
   added_at: string;
   updated_at: string;
@@ -36,6 +37,7 @@ export type DeletedHabit = {
 
 export type HabitFromRecycleBin = {
   habit_name: string;
+  habit_description: string;
   category_id: number;
 };
 

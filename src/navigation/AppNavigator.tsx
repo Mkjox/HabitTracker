@@ -8,7 +8,7 @@ import CategoriesScreen from "../pages/CategoriesScreen";
 import HabitDetailsScreen from "../pages/HabitDetailsScreen";
 import RecycleBinScreen from "../pages/RecycleBinScreen";
 
-import CustomTabBar from "../component/CustomTabBar";
+import CustomTabBar from "../components/CustomTabBar";
 import { RootStackParamList } from "../assets/types/navigationTypes";
 
 const Tab = createBottomTabNavigator();

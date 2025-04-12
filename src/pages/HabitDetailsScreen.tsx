@@ -15,7 +15,7 @@ type ProgressItem = {
 };
 
 const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
-  const { habitId, habitName } = route.params;
+  const { habitId, habitName, habitDescription } = route.params;
 
   // States with appropriate types
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -28,6 +28,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
     const fetchProgress = async (): Promise<void> => {
       try {
         const data = await getProgressByHabitId(habitId);
+        console.log(habitDescription)
         setProgressHistory(Array.isArray(data) ? (data as ProgressItem[]) : []);
       } catch (error) {
         console.error("Error fetching progress:", error);
@@ -61,6 +62,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   return (
     <View style={styles.container}>
       <Text style={styles.habitName}>{habitName}</Text>
+      <Text style={styles.habitName}>{habitDescription}</Text>
 
       {/* Date picker button */}
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
