@@ -16,6 +16,9 @@ export const lightTheme = StyleSheet.create({
     text: {
         color: '#002055'
     },
+    textGray: {
+        color: '#656565'
+    },
     card: {
         backgroundColor: '#fff'
     },
@@ -51,6 +54,9 @@ export const darkTheme = StyleSheet.create({
     text: {
         color: '#FFFFFF'
     },
+    textGray: {
+        color: '#656565'
+    },
     card: {
         backgroundColor: '#1F1B24'
     },
@@ -60,7 +66,7 @@ export const darkTheme = StyleSheet.create({
     textInput: {
         backgroundColor: '#FFFFFF'
     },
-    textInputPlaceholder:{
+    textInputPlaceholder: {
         color: '#505050'
     },
     hairLine: {

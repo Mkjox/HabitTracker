@@ -4,6 +4,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { RouteProp } from "@react-navigation/native";
 import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
 import { RootStackParamList } from "../assets/types/navigationTypes";
+import { useTheme } from "../context/ThemeContext";
+import { darkTheme, lightTheme } from "../assets/colors/colors";
 
 type HabitDetailsScreenRouteProp = RouteProp<RootStackParamList, "HabitDetails">;
 
@@ -16,8 +18,10 @@ type ProgressItem = {
 
 const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
   const { habitId, habitName, habitDescription } = route.params;
+  const { isDark } = useTheme();
 
-  // States with appropriate types
+  const themeStyles = isDark ? darkTheme : lightTheme;
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([]);
@@ -60,9 +64,9 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   const isDateCompleted = (date: string): boolean => progressHistory.some((item) => item.date === date);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.habitName}>{habitName}</Text>
-      <Text style={styles.habitName}>{habitDescription}</Text>
+    <View style={[styles.container, themeStyles.container]}>
+      <Text style={[styles.habitName, themeStyles.text]}>{habitName}</Text>
+      <Text style={[styles.habitDescription, themeStyles.textGray]}>{habitDescription}</Text>
 
       {/* Date picker button */}
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
@@ -96,7 +100,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
 
       {/* Custom Progress Toggle */}
       <View style={styles.customContainer}>
-        <Text style={styles.customLabel}>Custom Progress:</Text>
+        <Text style={[styles.customLabel, themeStyles.text]}>Custom Progress:</Text>
         <Switch value={useCustom} onValueChange={setUseCustom} />
       </View>
       {useCustom && (
@@ -109,29 +113,29 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
       )}
 
       {/* Toggle progress button */}
-      <TouchableOpacity onPress={handleToggleProgress} style={styles.toggleButton}>
+      <TouchableOpacity onPress={handleToggleProgress} style={[styles.toggleButton, themeStyles.button]}>
         <Text style={styles.toggleButtonText}>
           {isDateCompleted(selectedDate.toISOString().split("T")[0])
-            ? `✔️ ${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value 
-                ? `Done (${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value})`
-                : "Done"}`
+            ? `✔️ ${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value
+              ? `Done (${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value})`
+              : "Done"}`
             : "➕ Mark as Done"}
         </Text>
       </TouchableOpacity>
 
-      <Text style={styles.historyTitle}>Progress History:</Text>
+      <Text style={[styles.historyTitle, themeStyles.text]}>Progress History:</Text>
 
       {/* FlatList to render progress history */}
       {progressHistory.length === 0 ? (
-        <Text style={styles.noProgress}>No progress recorded for this habit.</Text>
+        <Text style={[styles.noProgress, themeStyles.text]}>No progress recorded for this habit.</Text>
       ) : (
         <FlatList
           data={progressHistory}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.historyItem}>
-              <Text style={styles.historyDate}>{item.date}</Text>
-              <Text style={styles.historyProgress}>
+              <Text style={[styles.historyDate, themeStyles.text]}>{item.date}</Text>
+              <Text style={[styles.historyProgress, themeStyles.text]}>
                 {item.custom_value && item.custom_value.trim() !== ""
                   ? `✔️ Done (${item.custom_value})`
                   : "✔️ Done"}
@@ -154,9 +158,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
+    marginBottom: 10,
     marginTop: StatusBar.currentHeight
+  },
+  habitDescription: {
+    fontSize: 16,
+    fontWeight: 'semibold',
+    textAlign: 'center',
+    marginBottom: 15,
   },
   dateButton: {
     padding: 10,

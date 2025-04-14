@@ -113,9 +113,9 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, themeStyles.container]}>
       <View style={styles.top}>
-        <Text style={styles.habitAddTitle}>
+        <Text style={[styles.habitAddTitle, themeStyles.text]}>
           Add a New Habit
         </Text>
 
@@ -123,16 +123,16 @@ const HomeScreen = () => {
           placeholder="Enter habit name..."
           value={habitName}
           onChangeText={setHabitName}
-          style={styles.habitAddInput}
+          style={[styles.habitAddInput, { marginTop: 15 }]}
         />
 
         <TextInput
           placeholder="Enter habit description..."
           value={habitDescription}
           onChangeText={setHabitDescription}
-          style={styles.habitAddInput}
+          style={[styles.habitAddInput, { marginBottom: 15 }]}
           maxLength={250}
-          multiline // CHECK IF IT'S RIGHT
+          multiline
         />
 
         <Menu
@@ -161,7 +161,7 @@ const HomeScreen = () => {
           Add Habit
         </Button>
 
-        <Text style={styles.habitTitle}>
+        <Text style={[styles.habitTitle, themeStyles.text]}>
           Added Habits:
         </Text>
 
@@ -172,12 +172,12 @@ const HomeScreen = () => {
             const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
             return (
               <TouchableOpacity onPress={
-                () => navigation.navigate('HabitDetails', { habitId: item.id, habitName: item.name })
+                () => navigation.navigate('HabitDetails', { habitId: item.id, habitName: item.name, habitDescription: item.description })
               }>
                 <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, themeStyles.hairLine]}>
                   <View style={styles.habitWrapper}>
-                    <Text style={styles.habitName}>{item.name}</Text>
-                    <Text style={styles.habitCategory}>Category: {categoryName}</Text>
+                    <Text style={[styles.habitName, themeStyles.text]}>{item.name}</Text>
+                    <Text style={[styles.habitCategory, themeStyles.textGray]}>Category: {categoryName}</Text>
                   </View>
                   <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteHabit(item.id)}>
                     <Entypo name="cross" size={16} style={styles.icon} />
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   habitAddInput: {
     borderWidth: 1,
     padding: 10,
-    marginVertical: 10,
+    marginVertical: 5,
     borderRadius: 8
   },
   habitTitle: {
@@ -232,10 +232,10 @@ const styles = StyleSheet.create({
   },
   habitName: {
     fontSize: 16,
+    fontWeight: '600'
   },
   habitCategory: {
     fontSize: 14,
-    color: 'gray'
   },
   icon: {
 

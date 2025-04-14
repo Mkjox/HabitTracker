@@ -1,138 +1,132 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, StatusBar, TouchableOpacity } from "react-native";
-import { Agenda, AgendaSchedule } from "react-native-calendars";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { Calendar } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
 import { darkTheme, lightTheme } from "../assets/colors/colors";
-import Ionicons from "@expo/vector-icons/build/Ionicons";
-import { useFocusEffect } from "@react-navigation/native";
+
+type HabitItem = {
+  habit_name: string;
+  total_progress: number;
+  custom_value?: string;
+};
+
+type HabitData = {
+  [date: string]: HabitItem[];
+};
 
 const ProgressScreen = () => {
-  const [progressData, setProgressData] = useState<AgendaSchedule>({});
-  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<string>(getToday());
+  const [habitData, setHabitData] = useState<HabitData>({});
   const { isDark } = useTheme();
-
   const themeStyles = isDark ? darkTheme : lightTheme;
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchProgress();
-    }, [])
-  );
+  useEffect(() => {
+    fetchProgress();
+  }, []);
 
   const fetchProgress = async () => {
     try {
       const data = await getProgress();
-      const formattedData = formatProgressForCalendar(data);
-      console.log(formattedData);
-      // console.log(data);
-      setProgressData(formattedData);
+      const formatted = formatProgress(data);
+      setHabitData(formatted);
+    } catch (err) {
+      console.error("Error fetching progress:", err);
     }
-    catch (error) {
-      console.error("Error fetching progress:", error);
-    }
-    finally {
-      setLoading(false);
-    }
-  }
-
-  const formatProgressForCalendar = (progressData: any[]): AgendaSchedule => {
-    return progressData.reduce((acc, item) => {
-      if (!item.date || item.total_progress == null) return acc;
-      const formattedDate = item.date;
-
-      acc[formattedDate] = acc[formattedDate] || [];
-      acc[formattedDate].push({
-        habit_name: item.habit_name,
-        total_progress: item.total_progress,
-        custom_value: item.custom_value
-      });
-      return acc;
-    }, {} as AgendaSchedule);
   };
 
+  const formatProgress = (data: any[]): HabitData => {
+    return data.reduce((acc, item) => {
+      if (!item.date || item.total_progress == null) return acc;
+      const date = item.date;
+      acc[date] = acc[date] || [];
+      acc[date].push({
+        habit_name: item.habit_name,
+        total_progress: item.total_progress,
+        custom_value: item.custom_value,
+      });
+      return acc;
+    }, {} as HabitData);
+  };
+
+  const habitsForSelectedDate = habitData[selectedDate] || [];
+
   return (
-    <View style={styles.container}>
-      <View style={styles.topWrapper}>
-        <Text style={styles.title}>Habit Progress</Text>
-      </View>
+    <View style={[styles.container, themeStyles.container]}>
+      <Text style={[styles.title, themeStyles.text]}>Habit Progress</Text>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#00adf5" />
-      ) : (
-        <Agenda
-          items={progressData}
-          renderItem={(item: { habit_name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; total_progress: any; custom_value: any; }) => (
-            <View style={styles.agendaItem}>
-              <Text style={styles.habitName}>{item.habit_name}</Text>
-              {/* <Text>{`Progress: ${item.total_progress}%`}</Text> */}
-              {/* <Text>{`Progress: Done`}</Text> */}
-              <Text>
-                {progressData.custom_value
-                  ? "Done"
-                  : item.custom_value
-                    ? `Done (${item.custom_value})`
-                    : "Done"}
-              </Text>
+      <Calendar
+        onDayPress={(day) => setSelectedDate(day.dateString)}
+        markedDates={{
+          [selectedDate]: {
+            selected: true,
+            selectedColor: "#00adf5",
+          },
+        }}
+        theme={{
+          calendarBackground: isDark ? "#1c1c1c" : "#ffffff",
+          dayTextColor: isDark ? "#ffffff" : "#2d4150",
+          textSectionTitleColor: isDark ? "#a3a3a3" : "#b6c1cd",
+          selectedDayTextColor: "#ffffff",
+        }}
+      />
 
-            </View>
-          )}
-          renderEmptyData={() => (
-            <View style={[styles.emptyItem, themeStyles.button]}>
-              <Text style={themeStyles.buttonText}>No progress for this day</Text>
-            </View>
-          )}
-          theme={{
-            agendaDayTextColor: "purple",
-            agendaDayNumColor: "purple",
-            agendaTodayColor: "#00adf5",
-            agendaKnobColor: "#00adf5",
-          }}
-        />
-      )}
+      <FlatList
+        style={styles.list}
+        data={habitsForSelectedDate}
+        keyExtractor={(_, index) => index.toString()}
+        ListEmptyComponent={
+          <Text style={[styles.noDataText, themeStyles.text]}>
+            No habits for this day.
+          </Text>
+        }
+        renderItem={({ item }) => (
+          <View style={[styles.habitCard, themeStyles.card]}>
+            <Text style={[styles.habitName, themeStyles.text]}>{item.habit_name}</Text>
+            <Text style={themeStyles.text}>
+              {item.custom_value
+                ? `Done (${item.custom_value})`
+                : `Done (${item.total_progress})`}
+            </Text>
+          </View>
+        )}
+      />
     </View>
   );
+};
+
+const getToday = (): string => {
+  const today = new Date();
+  return today.toISOString().split("T")[0]; // yyyy-mm-dd
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20
-  },
-  topWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
+    padding: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
-    marginVertical: 10,
-  },
-  refreshButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-end",
     marginBottom: 10,
   },
-  refreshButtonText: {
-    color: "blue",
-    marginLeft: 5,
+  list: {
+    marginTop: 15,
   },
-  agendaItem: {
+  habitCard: {
     padding: 15,
     borderRadius: 10,
-    marginRight: 10,
-    marginTop: 17,
+    marginVertical: 8,
+    elevation: 2,
   },
   habitName: {
-    fontWeight: "bold",
+    fontWeight: "600",
     fontSize: 16,
   },
-  emptyItem: {
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 17,
-    alignItems: "center",
+  noDataText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
   },
 });
 

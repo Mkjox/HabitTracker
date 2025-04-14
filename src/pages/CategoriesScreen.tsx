@@ -76,9 +76,9 @@ const CategoriesScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, themeStyles.container]}>
             <View style={styles.top}>
-                <Text style={styles.title}>
+                <Text style={[styles.title, themeStyles.text]}>
                     Categories
                 </Text>
 
@@ -99,8 +99,8 @@ const CategoriesScreen = () => {
                     renderItem={({ item }) => (
                         <View style={{ flexDirection: 'row', borderBottomWidth: 1, justifyContent: 'space-between' }}>
                             <View style={styles.list}>
-                                <Text style={styles.itemName}>{item.name}</Text>
-                                <Text style={styles.itemDate}>Created at: {item.created_at}</Text>
+                                <Text style={[styles.itemName, themeStyles.text]}>{item.name}</Text>
+                                <Text style={[styles.itemDate, themeStyles.textGray]}>Created at: {item.created_at}</Text>
                             </View>
                             <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteCategory(item.id)}>
                                 <Entypo name='cross' size={16} />
@@ -129,14 +129,15 @@ const styles = StyleSheet.create({
     textInput: {
         borderWidth: 1,
         padding: 10,
-        marginBottom: 10,
+        marginBottom: 15,
         borderRadius: 5
     },
     list: {
         padding: 10,
     },
     itemName: {
-        fontSize: 16
+        fontSize: 16,
+        fontWeight: '600'
     },
     itemDate: {
         fontSize: 12,
