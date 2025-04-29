@@ -78,6 +78,8 @@ const getIconName = (routeName: string) => {
             return 'grid-sharp';
         case 'Recycle Bin':
             return 'trash-outline';
+        case 'ProgressChart':
+            return 'bar-chart-outline'
         default:
             return 'home';
     }
