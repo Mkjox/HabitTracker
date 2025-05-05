@@ -25,8 +25,8 @@ function TabNavigator() {
         >
             <Tab.Screen name="Dashboard" component={DashboardScreen} />
             <Tab.Screen name="Add Habit" component={AddHabitScreen} />
-            <Tab.Screen name="Progress" component={ProgressScreen} />
             <Tab.Screen name="Categories" component={CategoriesScreen} />
+            <Tab.Screen name="Progress" component={ProgressScreen} />
             {/* <Tab.Screen name="ProgressChart" component={ProgressChartScreen} /> */}
             <Tab.Screen name="Recycle Bin" component={RecycleBinScreen} />
         </Tab.Navigator>

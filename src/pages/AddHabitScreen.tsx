@@ -123,14 +123,14 @@ const AddHabitScreen = () => {
           placeholder="Enter habit name..."
           value={habitName}
           onChangeText={setHabitName}
-          style={[styles.habitAddInput, { marginTop: 15 }]}
+          style={[styles.habitAddInput, { marginTop: 15 }, themeStyles.textInput]}
         />
 
         <TextInput
           placeholder="Enter habit description..."
           value={habitDescription}
           onChangeText={setHabitDescription}
-          style={[styles.habitAddInput, { marginBottom: 15 }]}
+          style={[styles.habitAddInput, { marginBottom: 15 }, themeStyles.textInput]}
           maxLength={250}
           multiline
         />
@@ -172,7 +172,12 @@ const AddHabitScreen = () => {
             const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
             return (
               <TouchableOpacity onPress={
-                () => navigation.navigate('HabitDetails', { habitId: item.id, habitName: item.name, habitDescription: item.description })
+                () => navigation.navigate('HabitDetails',
+                  {
+                    habitId: item.id,
+                    habitName: item.name,
+                    habitDescription: item.description
+                  })
               }>
                 <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, themeStyles.hairLine]}>
                   <View style={styles.habitWrapper}>
@@ -207,6 +212,7 @@ const styles = StyleSheet.create({
   },
   habitAddInput: {
     borderWidth: 1,
+    borderColor: '#ccc',
     padding: 10,
     marginVertical: 5,
     borderRadius: 8

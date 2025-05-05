@@ -86,10 +86,10 @@ const CategoriesScreen = () => {
                     placeholder='Enter category name'
                     value={categoryName}
                     onChangeText={setCategoryName}
-                    style={styles.textInput}
+                    style={[styles.textInput, themeStyles.textInput]}
                 />
 
-                <Button mode='contained' onPress={handleAddCategory} style={themeStyles.button}>
+                <Button mode='contained' onPress={handleAddCategory} style={[themeStyles.button, { marginBottom: 10 }]}>
                     Add Category
                 </Button>
 
@@ -97,7 +97,7 @@ const CategoriesScreen = () => {
                     data={categories}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <View style={{ flexDirection: 'row', borderBottomWidth: 1, justifyContent: 'space-between' }}>
+                        <View style={styles.listWrapper}>
                             <View style={styles.list}>
                                 <Text style={[styles.itemName, themeStyles.text]}>{item.name}</Text>
                                 <Text style={[styles.itemDate, themeStyles.textGray]}>Created at: {item.created_at}</Text>
@@ -128,9 +128,15 @@ const styles = StyleSheet.create({
     },
     textInput: {
         borderWidth: 1,
+        borderColor: '#ccc',
         padding: 10,
         marginBottom: 15,
         borderRadius: 5
+    },
+    listWrapper: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        justifyContent: 'space-between'
     },
     list: {
         padding: 10,

@@ -6,12 +6,14 @@ import {
     FlatList,
     ActivityIndicator,
     RefreshControl,
-    StatusBar
+    StatusBar,
+    TouchableOpacity
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getProgress } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from '../assets/colors/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 type ProgressRecord = {
     habit_id: number;
@@ -51,7 +53,7 @@ const computeStreak = (dates: string[]): number => {
 };
 
 export default function DashboardScreen() {
-    const { isDark } = useTheme();
+    const { isDark, toggleTheme } = useTheme();
     const [habits, setHabits] = useState<HabitStreak[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -102,7 +104,20 @@ export default function DashboardScreen() {
     return (
         <View style={[styles.container, themeStyles.container]}>
             <View style={styles.top}>
-                <Text style={[styles.title, themeStyles.text]}>Habit Streaks</Text>
+
+                <View style={styles.topSection}>
+                    <Text style={[styles.title, themeStyles.text]}>Habit Streaks</Text>
+                    <TouchableOpacity
+                        onPress={toggleTheme}
+                        style={[styles.button]}
+                    >
+                        <Ionicons
+                            name={isDark ? 'sunny-outline' : 'moon-outline'}
+                            size={28}
+                            color={themeStyles.icon.color}
+                        />
+                    </TouchableOpacity>
+                </View>
 
                 <FlatList
                     data={habits}
@@ -141,10 +156,21 @@ const styles = StyleSheet.create({
     top: {
         marginTop: StatusBar.currentHeight
     },
+    topSection: {
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10
+    },
     title: {
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 12
+    },
+    button: {
+        padding: 10,
+        borderRadius: 50,
+        alignSelf: 'flex-end',
     },
     loader: {
         flex: 1,
