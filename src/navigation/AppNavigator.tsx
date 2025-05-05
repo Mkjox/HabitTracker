@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 
-import HomeScreen from "../pages/HomeScreen";
+import AddHabitScreen from "../pages/AddHabitScreen";
 import ProgressScreen from "../pages/ProgressScreen";
 import CategoriesScreen from "../pages/CategoriesScreen";
 import HabitDetailsScreen from "../pages/HabitDetailsScreen";
@@ -19,15 +19,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function TabNavigator() {
     return (
         <Tab.Navigator
-            initialRouteName="Home"
+            initialRouteName="Dashboard"
             screenOptions={{ headerShown: false }}
             tabBar={(props) => <CustomTabBar {...props} />}
         >
             <Tab.Screen name="Dashboard" component={DashboardScreen} />
-            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Add Habit" component={AddHabitScreen} />
             <Tab.Screen name="Progress" component={ProgressScreen} />
             <Tab.Screen name="Categories" component={CategoriesScreen} />
-            <Tab.Screen name="ProgressChart" component={ProgressChartScreen} />
+            {/* <Tab.Screen name="ProgressChart" component={ProgressChartScreen} /> */}
             <Tab.Screen name="Recycle Bin" component={RecycleBinScreen} />
         </Tab.Navigator>
     );

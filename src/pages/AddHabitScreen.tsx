@@ -11,7 +11,7 @@ import { RootStackParamList } from "../assets/types/navigationTypes";
 
 const { height, width } = Dimensions.get("window");
 
-const HomeScreen = () => {
+const AddHabitScreen = () => {
   const [habitName, setHabitName] = useState("");
   const [habitDescription, setHabitDescription] = useState("");
   const [categories, setCategories] = useState<{ id: number; name: string; }[]>([]);
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight
   },
   habitAddTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold'
   },
   habitAddInput: {
@@ -246,4 +246,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default HomeScreen;
+export default AddHabitScreen;

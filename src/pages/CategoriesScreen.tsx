@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         marginTop: StatusBar.currentHeight
     },
     title: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 10
     },

@@ -31,6 +31,7 @@ type Habit = {
 const RecycleBinScreen: React.FC = () => {
   const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
   const { isDark } = useTheme();
+
   const themeStyles = isDark ? darkTheme : lightTheme;
 
   useFocusEffect(
@@ -39,11 +40,11 @@ const RecycleBinScreen: React.FC = () => {
     }, [])
   );
 
-      const showToastDelete = () => {
-          if (Platform.OS === 'android') {
-              ToastAndroid.show("Habit deleted from Recycle Bin successfully!", ToastAndroid.SHORT);
-          }
-      };
+  const showToastDelete = () => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show("Habit deleted from Recycle Bin successfully!", ToastAndroid.SHORT);
+    }
+  };
 
   const fetchDeletedHabits = async (): Promise<void> => {
     try {
@@ -102,19 +103,19 @@ const RecycleBinScreen: React.FC = () => {
   // };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, themeStyles.container]}>
       <View style={styles.top}>
-        <Text style={styles.title}>Recycle Bin</Text>
+        <Text style={[styles.title, themeStyles.text]}>Recycle Bin</Text>
 
         {deletedHabits.length === 0 ? (
-          <Text style={styles.emptyText}>No deleted habits.</Text>
+          <Text style={[styles.emptyText, themeStyles.textGray]}>No deleted habits.</Text>
         ) : (
           <FlatList
             data={deletedHabits}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={[styles.habitItem, themeStyles.hairLine]}>
-                <Text style={styles.habitName}>{item.name}</Text>
+                <Text style={[styles.habitName, themeStyles.text]}>{item.name}</Text>
                 <View style={styles.actions}>
                   <TouchableOpacity onPress={() => handleRestore(item.id)}>
                     <Ionicons name="refresh-circle" size={24} color="green" />
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
   },
   emptyText: {

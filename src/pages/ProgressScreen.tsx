@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, StatusBar } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
@@ -53,44 +53,46 @@ const ProgressScreen = () => {
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      <Text style={[styles.title, themeStyles.text]}>Habit Progress</Text>
+      <View style={styles.top}>
+        <Text style={[styles.title, themeStyles.text]}>Habit Progress</Text>
 
-      <Calendar
-        onDayPress={(day) => setSelectedDate(day.dateString)}
-        markedDates={{
-          [selectedDate]: {
-            selected: true,
-            selectedColor: "#00adf5",
-          },
-        }}
-        theme={{
-          calendarBackground: isDark ? "#1c1c1c" : "#ffffff",
-          dayTextColor: isDark ? "#ffffff" : "#2d4150",
-          textSectionTitleColor: isDark ? "#a3a3a3" : "#b6c1cd",
-          selectedDayTextColor: "#ffffff",
-        }}
-      />
+        <Calendar
+          onDayPress={(day) => setSelectedDate(day.dateString)}
+          markedDates={{
+            [selectedDate]: {
+              selected: true,
+              selectedColor: "#00adf5",
+            },
+          }}
+          theme={{
+            calendarBackground: isDark ? "#1c1c1c" : "#ffffff",
+            dayTextColor: isDark ? "#ffffff" : "#2d4150",
+            textSectionTitleColor: isDark ? "#a3a3a3" : "#b6c1cd",
+            selectedDayTextColor: "#ffffff",
+          }}
+        />
 
-      <FlatList
-        style={styles.list}
-        data={habitsForSelectedDate}
-        keyExtractor={(_, index) => index.toString()}
-        ListEmptyComponent={
-          <Text style={[styles.noDataText, themeStyles.text]}>
-            No habits for this day.
-          </Text>
-        }
-        renderItem={({ item }) => (
-          <View style={[styles.habitCard, themeStyles.card]}>
-            <Text style={[styles.habitName, themeStyles.text]}>{item.habit_name}</Text>
-            <Text style={themeStyles.text}>
-              {item.custom_value
-                ? `Done (${item.custom_value})`
-                : `Done (${item.total_progress})`}
+        <FlatList
+          style={styles.list}
+          data={habitsForSelectedDate}
+          keyExtractor={(_, index) => index.toString()}
+          ListEmptyComponent={
+            <Text style={[styles.noDataText, themeStyles.text]}>
+              No habits for this day.
             </Text>
-          </View>
-        )}
-      />
+          }
+          renderItem={({ item }) => (
+            <View style={[styles.habitCard, themeStyles.card]}>
+              <Text style={[styles.habitName, themeStyles.text]}>{item.habit_name}</Text>
+              <Text style={themeStyles.text}>
+                {item.custom_value
+                  ? `Done (${item.custom_value})`
+                  : `Done (${item.total_progress})`}
+              </Text>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 };
@@ -105,6 +107,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  top: {
+    marginTop: StatusBar.currentHeight
+  },
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -118,6 +123,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#ccc'
   },
   habitName: {
     fontWeight: "600",
