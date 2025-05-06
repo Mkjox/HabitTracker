@@ -32,7 +32,6 @@ export const lightTheme = StyleSheet.create({
         color: '#505050'
     },
     hairLine: {
-        borderBottomColor: '#002055',
         borderBottomWidth: StyleSheet.hairlineWidth,
         marginTop: 10
     }

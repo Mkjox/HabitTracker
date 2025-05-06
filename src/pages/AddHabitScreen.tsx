@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity, Dimensions, ToastAndroid, Platform, Keyboard } from "react-native";
+import { View, Text, TextInput, Alert, StyleSheet, StatusBar, FlatList, TouchableOpacity, Dimensions, ToastAndroid, Platform, Keyboard, ScrollView } from "react-native";
 import { Button, Divider, Menu } from "react-native-paper";
 import { addHabit, getCategories, getHabits, deleteHabit } from "../assets/data/database";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -114,86 +114,88 @@ const AddHabitScreen = () => {
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      <View style={styles.top}>
-        <Text style={[styles.habitAddTitle, themeStyles.text]}>
-          Add a New Habit
-        </Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.top}>
+          <Text style={[styles.habitAddTitle, themeStyles.text]}>
+            Add a New Habit
+          </Text>
 
-        <TextInput
-          placeholder="Enter habit name..."
-          value={habitName}
-          onChangeText={setHabitName}
-          style={[styles.habitAddInput, { marginTop: 15 }, themeStyles.textInput]}
-        />
+          <TextInput
+            placeholder="Enter habit name..."
+            value={habitName}
+            onChangeText={setHabitName}
+            style={[styles.habitAddInput, { marginTop: 15 }, themeStyles.textInput]}
+          />
 
-        <TextInput
-          placeholder="Enter habit description..."
-          value={habitDescription}
-          onChangeText={setHabitDescription}
-          style={[styles.habitAddInput, { marginBottom: 15 }, themeStyles.textInput]}
-          maxLength={250}
-          multiline
-        />
+          <TextInput
+            placeholder="Enter habit description..."
+            value={habitDescription}
+            onChangeText={setHabitDescription}
+            style={[styles.habitAddInput, { marginBottom: 15 }, themeStyles.textInput]}
+            maxLength={250}
+            multiline
+          />
 
-        <Menu
-          visible={visible}
-          onDismiss={() => setVisible(false)}
-          anchor={
-            <Button mode="outlined" onPress={() => setVisible(true)}>
-              {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "Select Category"}
-            </Button>
-          }
-        >
-          {categories.map((cat) => (
-            <Menu.Item
-              key={cat.id}
-              onPress={() => {
-                setSelectedCategory(cat.id);
-                setVisible(false);
-              }}
-              title={cat.name}
-            />
-          ))}
-          <Divider />
-        </Menu>
+          <Menu
+            visible={visible}
+            onDismiss={() => setVisible(false)}
+            anchor={
+              <Button mode="outlined" onPress={() => setVisible(true)}>
+                {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "Select Category"}
+              </Button>
+            }
+          >
+            {categories.map((cat) => (
+              <Menu.Item
+                key={cat.id}
+                onPress={() => {
+                  setSelectedCategory(cat.id);
+                  setVisible(false);
+                }}
+                title={cat.name}
+              />
+            ))}
+            <Divider />
+          </Menu>
 
-        <Button mode="contained" onPress={handleAddHabit} style={[{ marginTop: 10 }, themeStyles.button]}>
-          Add Habit
-        </Button>
+          <Button mode="contained" onPress={handleAddHabit} style={[{ marginTop: 10 }, themeStyles.button]}>
+            Add Habit
+          </Button>
 
-        <Text style={[styles.habitTitle, themeStyles.text]}>
-          Added Habits:
-        </Text>
+          <Text style={[styles.habitTitle, themeStyles.text]}>
+            Added Habits:
+          </Text>
 
-        <FlatList
-          data={habits}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => {
-            const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
-            return (
-              <TouchableOpacity onPress={
-                () => navigation.navigate('HabitDetails',
-                  {
-                    habitId: item.id,
-                    habitName: item.name,
-                    habitDescription: item.description
-                  })
-              }>
-                <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, themeStyles.hairLine]}>
-                  <View style={styles.habitWrapper}>
-                    <Text style={[styles.habitName, themeStyles.text]}>{item.name}</Text>
-                    <Text style={[styles.habitCategory, themeStyles.textGray]}>Category: {categoryName}</Text>
+          <FlatList
+            data={habits}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => {
+              const categoryName = categories.find(c => c.id === item.category_id)?.name || "Unknown Category";
+              return (
+                <TouchableOpacity onPress={
+                  () => navigation.navigate('HabitDetails',
+                    {
+                      habitId: item.id,
+                      habitName: item.name,
+                      habitDescription: item.description
+                    })
+                }>
+                  <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, themeStyles.hairLine]}>
+                    <View style={styles.habitWrapper}>
+                      <Text style={[styles.habitName, themeStyles.text]}>{item.name}</Text>
+                      <Text style={[styles.habitCategory, themeStyles.textGray]}>Category: {categoryName}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteHabit(item.id)}>
+                      <Entypo name="cross" size={16} style={styles.icon} />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteHabit(item.id)}>
-                    <Entypo name="cross" size={16} style={styles.icon} />
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            )
-          }}
-        />
+                </TouchableOpacity>
+              )
+            }}
+          />
 
-      </View>
+        </View>
+      </ScrollView>
     </View>
   )
 };
@@ -201,10 +203,11 @@ const AddHabitScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20
+    padding: 20,
+    overflow: 'hidden'
   },
   top: {
-    marginTop: StatusBar.currentHeight
+    marginTop: height * 0.01
   },
   habitAddTitle: {
     fontSize: 22,
@@ -222,19 +225,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20
   },
-  refreshButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-end",
-    marginBottom: 10,
-  },
-  refreshButtonText: {
-    color: "blue",
-    marginLeft: 5,
-  },
   habitWrapper: {
     padding: 10,
-    // borderBottomWidth: 1
   },
   habitName: {
     fontSize: 16,

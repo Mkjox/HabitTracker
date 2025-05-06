@@ -7,7 +7,8 @@ import {
     ActivityIndicator,
     RefreshControl,
     StatusBar,
-    TouchableOpacity
+    TouchableOpacity,
+    Dimensions
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getProgress } from '../assets/data/database';
@@ -51,6 +52,8 @@ const computeStreak = (dates: string[]): number => {
 
     return streak;
 };
+
+const {height} = Dimensions.get("window");
 
 export default function DashboardScreen() {
     const { isDark, toggleTheme } = useTheme();
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
         padding: 20
     },
     top: {
-        marginTop: StatusBar.currentHeight
+        marginTop: height * 0.01
     },
     topSection: {
         justifyContent: 'space-between',

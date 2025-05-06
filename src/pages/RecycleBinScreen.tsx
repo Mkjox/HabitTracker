@@ -9,6 +9,7 @@ import {
   StatusBar,
   Platform,
   ToastAndroid,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -27,6 +28,8 @@ type Habit = {
   name: string;
   category_id: number;
 };
+
+const { height } = Dimensions.get("window");
 
 const RecycleBinScreen: React.FC = () => {
   const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
@@ -146,7 +149,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   top: {
-    marginTop: StatusBar.currentHeight,
+    marginTop: height * 0.01
   },
   title: {
     fontSize: 22,
@@ -180,16 +183,6 @@ const styles = StyleSheet.create({
   cleanButtonText: {
     fontSize: 16,
     fontWeight: "bold",
-  },
-  refreshButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-end",
-    marginBottom: 10,
-  },
-  refreshButtonText: {
-    color: "blue",
-    marginLeft: 5,
   },
 });
 

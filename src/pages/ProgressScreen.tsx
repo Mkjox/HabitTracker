@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, StatusBar } from "react-native";
+import { View, Text, StyleSheet, FlatList, StatusBar, Dimensions } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
@@ -14,6 +14,8 @@ type HabitItem = {
 type HabitData = {
   [date: string]: HabitItem[];
 };
+
+const { height } = Dimensions.get("window");
 
 const ProgressScreen = () => {
   const [selectedDate, setSelectedDate] = useState<string>(getToday());
@@ -58,6 +60,13 @@ const ProgressScreen = () => {
 
         <Calendar
           onDayPress={(day) => setSelectedDate(day.dateString)}
+          style={{
+            borderRadius: 8,
+            padding: 8,
+            backgroundColor: themeStyles.container.backgroundColor,
+            elevation: 2,
+            marginBottom: 16,
+          }}
           markedDates={{
             [selectedDate]: {
               selected: true,
@@ -65,10 +74,15 @@ const ProgressScreen = () => {
             },
           }}
           theme={{
-            calendarBackground: isDark ? "#1c1c1c" : "#ffffff",
-            dayTextColor: isDark ? "#ffffff" : "#2d4150",
-            textSectionTitleColor: isDark ? "#a3a3a3" : "#b6c1cd",
-            selectedDayTextColor: "#ffffff",
+            calendarBackground: themeStyles.container.backgroundColor,
+            dayTextColor: isDark ? '#e0e0e0' : '#2d4150',
+            textSectionTitleColor: isDark ? '#888888' : '#b6c1cd',
+            textDisabledColor: isDark ? '#555555' : '#d9e1e8',
+            selectedDayBackgroundColor: '#00adf5',
+            selectedDayTextColor: '#ffffff',
+            todayTextColor: '#00adf5',
+            arrowColor: isDark ? '#ffffff' : '#000000',
+            monthTextColor: isDark ? '#ffffff' : '#333333',
           }}
         />
 
@@ -87,7 +101,7 @@ const ProgressScreen = () => {
               <Text style={themeStyles.text}>
                 {item.custom_value
                   ? `Done (${item.custom_value})`
-                  : `Done (${item.total_progress})`}
+                  : `Done`}
               </Text>
             </View>
           )}
@@ -108,12 +122,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   top: {
-    marginTop: StatusBar.currentHeight
+    marginTop: height * 0.01
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   list: {
     marginTop: 15,

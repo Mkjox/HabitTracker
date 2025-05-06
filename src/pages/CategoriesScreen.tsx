@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity, Keyboard, Platform, ToastAndroid } from 'react-native';
+import { View, Text, TextInput, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions } from 'react-native';
 import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from "../assets/colors/colors";
 import { Entypo } from '@expo/vector-icons';
 import { Button } from 'react-native-paper';
+
+const {height} = Dimensions.get("window");
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
         padding: 20
     },
     top: {
-        marginTop: StatusBar.currentHeight
+        marginTop: height * 0.01
     },
     title: {
         fontSize: 22,
@@ -136,6 +138,7 @@ const styles = StyleSheet.create({
     listWrapper: {
         flexDirection: 'row',
         borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
         justifyContent: 'space-between'
     },
     list: {

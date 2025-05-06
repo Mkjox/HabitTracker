@@ -105,7 +105,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
       </View>
       {useCustom && (
         <TextInput
-          style={styles.customInput}
+          style={[styles.customInput, themeStyles.textInput]}
           placeholder="Enter custom progress (e.g., 2 km, 10 reps)"
           value={customValue}
           onChangeText={setCustomValue}
@@ -133,7 +133,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           data={progressHistory}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.historyItem}>
+            <View style={[styles.historyItem, themeStyles.card]}>
               <Text style={[styles.historyDate, themeStyles.text]}>{item.date}</Text>
               <Text style={[styles.historyProgress, themeStyles.text]}>
                 {item.custom_value && item.custom_value.trim() !== ""
