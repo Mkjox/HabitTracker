@@ -1,13 +1,26 @@
-import { ThemeProvider } from './src/context/ThemeContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { PaperProvider } from 'react-native-paper';
 import { useEffect } from 'react';
 import { initializeDatabase } from './src/assets/data/database';
-import { View, Text } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 enableScreens();
+
+function AppContent() {
+  const { isLoadingTheme } = useTheme();
+
+  if (isLoadingTheme) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#00adf5" />
+      </View>
+    );
+  }
+  return <AppNavigator />;
+}
 
 export default function App() {
   useEffect(() => {
@@ -29,7 +42,7 @@ export default function App() {
       <SafeAreaProvider>
         <PaperProvider>
           <ThemeProvider>
-            <AppNavigator />
+            <AppContent />
           </ThemeProvider>
         </PaperProvider>
       </SafeAreaProvider>
