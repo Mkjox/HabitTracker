@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Switch, Platform, StatusBar } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Switch, Platform, StatusBar } from "react-native";
+import { TextInput } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RouteProp } from "@react-navigation/native";
 import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
@@ -105,10 +106,19 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
       </View>
       {useCustom && (
         <TextInput
-          style={[styles.customInput, themeStyles.textInput]}
-          placeholder="Enter custom progress (e.g., 2 km, 10 reps)"
-          value={customValue}
-          onChangeText={setCustomValue}
+        label="Enter custom progress (e.g., 2 km, 10 reps)"
+        value={customValue}
+        onChangeText={setCustomValue}
+        mode="outlined"
+        style={[styles.customInput, themeStyles.textInput]}
+          theme={{
+            colors: {
+              text: themeStyles.text.color,
+              placeholder: themeStyles.textGray.color,
+              primary: themeStyles.text.color
+            }
+          }}
+          textColor={themeStyles.buttonText.color}
         />
       )}
 
@@ -188,10 +198,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   customInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
     marginBottom: 10,
   },
   toggleButton: {

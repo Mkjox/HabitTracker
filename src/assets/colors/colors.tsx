@@ -57,13 +57,13 @@ export const darkTheme = StyleSheet.create({
         color: '#656565'
     },
     card: {
-        backgroundColor: '#1F1B24'
+        backgroundColor: '#14151A'
     },
     icon: {
         color: '#E0E0E0'
     },
     textInput: {
-        backgroundColor: '#FFFFFF'
+        backgroundColor: '#1F1B24'
     },
     textInputPlaceholder: {
         color: '#505050'

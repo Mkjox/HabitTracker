@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions } from 'react-native';
+import { View, Text, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions } from 'react-native';
 import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from "../assets/colors/colors";
 import { Entypo } from '@expo/vector-icons';
-import { Button } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
 
-const {height} = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
@@ -85,10 +85,19 @@ const CategoriesScreen = () => {
                 </Text>
 
                 <TextInput
-                    placeholder='Enter category name'
+                    label='Enter category name'
                     value={categoryName}
                     onChangeText={setCategoryName}
+                    mode='outlined'
                     style={[styles.textInput, themeStyles.textInput]}
+                    theme={{
+                        colors: {
+                            text: themeStyles.text.color,
+                            placeholder: themeStyles.textGray.color,
+                            primary: themeStyles.text.color
+                        }
+                    }}
+                    textColor={themeStyles.buttonText.color}
                 />
 
                 <Button mode='contained' onPress={handleAddCategory} style={[themeStyles.button, { marginBottom: 10 }]}>
@@ -105,7 +114,7 @@ const CategoriesScreen = () => {
                                 <Text style={[styles.itemDate, themeStyles.textGray]}>Created at: {item.created_at}</Text>
                             </View>
                             <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteCategory(item.id)}>
-                                <Entypo name='cross' size={16} />
+                                <Entypo name='cross' size={16} color={themeStyles.icon.color} />
                             </TouchableOpacity>
                         </View>
                     )}
@@ -129,11 +138,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     textInput: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
         marginBottom: 15,
-        borderRadius: 5
     },
     listWrapper: {
         flexDirection: 'row',
