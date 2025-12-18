@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert, StyleSheet, StatusBar, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions } from 'react-native';
+import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
 import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { darkTheme, lightTheme } from "../assets/colors/colors";
 import { Entypo } from '@expo/vector-icons';
-import { Button, TextInput } from 'react-native-paper';
+import {  Divider, TextInput } from 'react-native-paper';
+import CustomButton from '../components/CustomButton';
 
 const { height } = Dimensions.get("window");
 
@@ -78,7 +79,7 @@ const CategoriesScreen = () => {
     };
 
     return (
-        <View style={[styles.container, themeStyles.container]}>
+        <SafeAreaView style={[styles.container, themeStyles.container]}>
             <View style={styles.top}>
                 <Text style={[styles.title, themeStyles.text]}>
                     Categories
@@ -100,9 +101,13 @@ const CategoriesScreen = () => {
                     textColor={themeStyles.buttonText.color}
                 />
 
-                <Button mode='contained' onPress={handleAddCategory} style={[themeStyles.button, { marginBottom: 10 }]}>
-                    Add Category
-                </Button>
+                    <CustomButton
+                        title='Add Category'
+                        onPress={handleAddCategory}
+                        style={[themeStyles.button, { marginBottom: 10, height: height * 0.065 }]}
+                    />
+
+                    <Divider style={[styles.divider, themeStyles.hairLine]} />
 
                 <FlatList
                     data={categories}
@@ -120,7 +125,7 @@ const CategoriesScreen = () => {
                     )}
                 />
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -161,6 +166,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginRight: 15
     },
+  divider: {
+    marginVertical: 16
+  },
 })
 
 export default CategoriesScreen;

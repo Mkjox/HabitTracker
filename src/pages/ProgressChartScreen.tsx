@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from "react-native";
 import { BarGroup, CartesianChart, Line } from "victory-native";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
@@ -42,7 +42,7 @@ const ProgressChartScreen = () => {
   };
 
   return (
-    <View style={[styles.container, themeStyles.container]}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <Text style={[styles.title, themeStyles.text]}>Monthly Habit Progress</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#00adf5" />
@@ -61,7 +61,7 @@ const ProgressChartScreen = () => {
           )}
         </CartesianChart>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 

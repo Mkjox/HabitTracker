@@ -9,7 +9,6 @@ import {
   Alert,
   ToastAndroid,
   Platform,
-  ScrollView,
   StatusBar,
   SafeAreaView
 } from "react-native";
@@ -100,144 +99,140 @@ export default function AddHabitScreen() {
 
   return (
     <SafeAreaView style={[styles.outer, themeStyles.container]}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Add Habit Section */}
-          <Card.Content>
-            <TextInput
-              label="Habit Name"
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              style={[styles.input, themeStyles.textInput]}
-              theme={{
-                colors: {
-                  text: themeStyles.text.color,
-                  placeholder: themeStyles.textGray.color,
-                  primary: themeStyles.text.color
-                }
-              }}
-              textColor={themeStyles.buttonText.color}
-            />
-            <TextInput
-              label="Description (optional)"
-              value={description}
-              onChangeText={setDescription}
-              mode="outlined"
-              multiline
-              numberOfLines={3}
-              style={[styles.input, themeStyles.textInput, { marginBottom: height * 0.03 }]}
-              theme={{
-                colors: {
-                  text: themeStyles.text.color,
-                  placeholder: themeStyles.textGray.color,
-                  primary: themeStyles.text.color
-                }
-              }}
-              textColor={themeStyles.buttonText.color}
-            />
-            <Menu
-              visible={menuVisible}
-              onDismiss={() => setMenuVisible(false)}
-              contentStyle={[
-                themeStyles.card,
-                {
-                  borderColor: '#CCCCCC',
-                  borderWidth: 1,
-                  marginTop: height * 0.025,
-                  justifyContent: 'center'
-                }]
-              }
-              anchor={
-                <Button
-                  mode="contained"
-                  onPress={() => setMenuVisible(true)}
-                  style={[
-                    styles.input,
-                    themeStyles.button
-                  ]}
-                  labelStyle={themeStyles.buttonText}
-                >
-                  {categories.find((c) => c.id === selectedCat)?.name ||
-                    "Select Category"}
-                </Button>
-              }
-            >
-              {categories.map((cat) => (
-                <Menu.Item
-                  key={cat.id}
-                  title={cat.name}
-                  onPress={() => {
-                    setSelectedCat(cat.id);
-                    setMenuVisible(false);
-                  }}
-                  titleStyle={themeStyles.text}
-                />
-              ))}
-            </Menu>
-            <Button
-              mode="contained"
-              onPress={onAdd}
-              style={[styles.addButton, themeStyles.button]}
-              labelStyle={themeStyles.buttonText}
-            >
-              Add Habit
-            </Button>
-          </Card.Content>
-
-        <Divider style={[styles.divider, themeStyles.hairLine]} />
-
-        {/* Habits List */}
-        <FlatList
-          data={habits}
-          keyExtractor={(h) => h.id.toString()}
-          ItemSeparatorComponent={() => <Divider style={themeStyles.hairLine} />}
-          contentContainerStyle={{ paddingBottom: 50 }}
-          renderItem={({ item }) => {
-            const catName =
-              categories.find((c) => c.id === item.category_id)?.name ||
-              "Uncategorized";
-            return (
-              <Card style={[styles.habitCard, themeStyles.card]}>
-                <TouchableOpacity
-                  onPress={() =>
-                    nav.navigate("HabitDetails", {
-                      habitId: item.id,
-                      habitName: item.name,
-                      habitDescription: item.description
-                    })
+      <FlatList
+        data={habits}
+        keyExtractor={(h) => h.id.toString()}
+        ItemSeparatorComponent={() => <Divider style={themeStyles.hairLine} />}
+        contentContainerStyle={{ paddingBottom: 50, flexGrow: 1 }}
+        ListHeaderComponent={() => (
+          <>
+            <Card.Content>
+              <TextInput
+                label="Habit Name"
+                value={name}
+                onChangeText={setName}
+                mode="outlined"
+                style={[styles.input, themeStyles.textInput]}
+                theme={{
+                  colors: {
+                    text: themeStyles.text.color,
+                    placeholder: themeStyles.textGray.color,
+                    primary: themeStyles.text.color
                   }
-                >
-                  <Card.Title
-                    title={item.name}
+                }}
+                textColor={themeStyles.buttonText.color}
+              />
+              <TextInput
+                label="Description (optional)"
+                value={description}
+                onChangeText={setDescription}
+                mode="outlined"
+                multiline
+                numberOfLines={3}
+                style={[styles.input, themeStyles.textInput, { marginBottom: height * 0.03 }]}
+                theme={{
+                  colors: {
+                    text: themeStyles.text.color,
+                    placeholder: themeStyles.textGray.color,
+                    primary: themeStyles.text.color
+                  }
+                }}
+                textColor={themeStyles.buttonText.color}
+              />
+              <Menu
+                visible={menuVisible}
+                onDismiss={() => setMenuVisible(false)}
+                contentStyle={[
+                  themeStyles.card,
+                  {
+                    borderColor: '#CCCCCC',
+                    borderWidth: 1,
+                    marginTop: height * 0.025,
+                    justifyContent: 'center'
+                  }]
+                }
+                anchor={
+                  <Button
+                    mode="contained"
+                    onPress={() => setMenuVisible(true)}
+                    style={[
+                      styles.input,
+                      themeStyles.button
+                    ]}
+                    labelStyle={themeStyles.buttonText}
+                  >
+                    {categories.find((c) => c.id === selectedCat)?.name ||
+                      "Select Category"}
+                  </Button>
+                }
+              >
+                {categories.map((cat) => (
+                  <Menu.Item
+                    key={cat.id}
+                    title={cat.name}
+                    onPress={() => {
+                      setSelectedCat(cat.id);
+                      setMenuVisible(false);
+                    }}
                     titleStyle={themeStyles.text}
-                    subtitle={`Category: ${catName}`}
-                    subtitleStyle={themeStyles.textGray}
-                    right={() => (
-                      <Entypo
-                        name="trash"
-                        size={20}
-                        color={themeStyles.icon.color}
-                        style={{ marginRight: 12 }}
-                        onPress={() => onDelete(item.id)}
-                      />
-                    )}
                   />
-                </TouchableOpacity>
-              </Card>
-            );
-          }}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Text style={themeStyles.text}>
-                No habits yet. Add one above!
-              </Text>
-            </View>
-          }
-        />
-      </ScrollView>
+                ))}
+              </Menu>
+              <Button
+                mode="contained"
+                onPress={onAdd}
+                style={[styles.addButton, themeStyles.button]}
+                labelStyle={themeStyles.buttonText}
+              >
+                Add Habit
+              </Button>
+            </Card.Content>
+
+            <Divider style={[styles.divider, themeStyles.hairLine]} />
+          </>
+        )}
+        renderItem={({ item }) => {
+          const catName =
+            categories.find((c) => c.id === item.category_id)?.name ||
+            "Uncategorized";
+          return (
+            <Card style={[styles.habitCard, themeStyles.card]}>
+              <TouchableOpacity
+                onPress={() =>
+                  nav.navigate("HabitDetails", {
+                    habitId: item.id,
+                    habitName: item.name,
+                    habitDescription: item.description
+                  })
+                }
+              >
+                <Card.Title
+                  title={item.name}
+                  titleStyle={themeStyles.text}
+                  subtitle={`Category: ${catName}`}
+                  subtitleStyle={themeStyles.textGray}
+                  right={() => (
+                    <Entypo
+                      name="trash"
+                      size={20}
+                      color={themeStyles.icon.color}
+                      style={{ marginRight: 12 }}
+                      onPress={() => onDelete(item.id)}
+                    />
+                  )}
+                />
+              </TouchableOpacity>
+            </Card>
+          );
+        }}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={themeStyles.text}>
+              No habits yet. Add one above!
+            </Text>
+          </View>
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -268,6 +263,7 @@ const styles = StyleSheet.create({
   habitCard: {
     marginVertical: 8,
     borderRadius: 8,
+    marginHorizontal: 16
   },
   empty: {
     marginTop: 32,

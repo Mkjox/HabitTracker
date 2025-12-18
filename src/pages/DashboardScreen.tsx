@@ -6,9 +6,9 @@ import {
     FlatList,
     ActivityIndicator,
     RefreshControl,
-    StatusBar,
     TouchableOpacity,
-    Dimensions
+    Dimensions,
+    SafeAreaView
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getProgress } from '../assets/data/database';
@@ -105,7 +105,7 @@ export default function DashboardScreen() {
     }
 
     return (
-        <View style={[styles.container, themeStyles.container]}>
+        <SafeAreaView style={[styles.container, themeStyles.container]}>
             <View style={styles.top}>
 
                 <View style={styles.topSection}>
@@ -147,14 +147,14 @@ export default function DashboardScreen() {
                     )}
                 />
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20
+        padding: 24
     },
     top: {
         marginTop: height * 0.01

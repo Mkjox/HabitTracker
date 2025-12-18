@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Switch, Platform, StatusBar } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Switch, Platform, StatusBar, SafeAreaView } from "react-native";
 import { TextInput } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RouteProp } from "@react-navigation/native";
@@ -65,7 +65,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   const isDateCompleted = (date: string): boolean => progressHistory.some((item) => item.date === date);
 
   return (
-    <View style={[styles.container, themeStyles.container]}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <Text style={[styles.habitName, themeStyles.text]}>{habitName}</Text>
       <Text style={[styles.habitDescription, themeStyles.textGray]}>{habitDescription}</Text>
 
@@ -154,7 +154,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           )}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 

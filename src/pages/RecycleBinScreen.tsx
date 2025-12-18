@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  StatusBar,
   Platform,
   ToastAndroid,
   Dimensions,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -106,7 +106,7 @@ const RecycleBinScreen: React.FC = () => {
   // };
 
   return (
-    <View style={[styles.container, themeStyles.container]}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <View style={styles.top}>
         <Text style={[styles.title, themeStyles.text]}>Recycle Bin</Text>
 
@@ -139,7 +139,7 @@ const RecycleBinScreen: React.FC = () => {
           </TouchableOpacity>
         )} */}
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

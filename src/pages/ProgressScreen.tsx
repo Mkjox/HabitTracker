@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, StatusBar, Dimensions } from "react-native";
+import { View, Text, StyleSheet, FlatList, Dimensions, SafeAreaView } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
@@ -54,16 +54,16 @@ const ProgressScreen = () => {
   const habitsForSelectedDate = habitData[selectedDate] || [];
 
   return (
-    <View style={[styles.container, themeStyles.container]}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <View style={styles.top}>
         <Text style={[styles.title, themeStyles.text]}>Habit Progress</Text>
 
         <Calendar
-          onDayPress={(day) => setSelectedDate(day.dateString)}
+          onDayPress={(day: any) => setSelectedDate(day.dateString)}
           style={{
             borderRadius: 8,
             padding: 8,
-            backgroundColor: themeStyles.container.backgroundColor,
+            backgroundColor: isDark ? '#0A0C16' : '#FFFFFF',
             elevation: 2,
             marginBottom: 16,
           }}
@@ -73,8 +73,9 @@ const ProgressScreen = () => {
               selectedColor: "#00adf5",
             },
           }}
+          key={isDark ? 'dark' : 'light'}
           theme={{
-            calendarBackground: themeStyles.container.backgroundColor,
+            calendarBackground: isDark ? '#0A0C16' : '#FFFFFF',
             dayTextColor: isDark ? '#e0e0e0' : '#2d4150',
             textSectionTitleColor: isDark ? '#888888' : '#b6c1cd',
             textDisabledColor: isDark ? '#555555' : '#d9e1e8',
@@ -107,7 +108,7 @@ const ProgressScreen = () => {
           )}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

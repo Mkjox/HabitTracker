@@ -6,6 +6,7 @@ import { initializeDatabase } from './src/assets/data/database';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import CustomStatusBar from './src/components/CustomStatusBar';
 
 enableScreens();
 
@@ -42,6 +43,7 @@ export default function App() {
       <SafeAreaProvider>
         <PaperProvider>
           <ThemeProvider>
+            <CustomStatusBar />
             <AppContent />
           </ThemeProvider>
         </PaperProvider>
