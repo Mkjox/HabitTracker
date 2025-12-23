@@ -8,6 +8,7 @@ import CategoriesScreen from "../pages/CategoriesScreen";
 import HabitDetailsScreen from "../pages/HabitDetailsScreen";
 import RecycleBinScreen from "../pages/RecycleBinScreen";
 import ProgressChartScreen from "../pages/ProgressChartScreen";
+import SettingsScreen from "../pages/SettingsScreen";
 
 import CustomTabBar from "../components/CustomTabBar";
 import { RootStackParamList } from "../assets/types/navigationTypes";
@@ -28,6 +29,7 @@ function TabNavigator() {
             <Tab.Screen name="Categories" component={CategoriesScreen} />
             <Tab.Screen name="Progress" component={ProgressScreen} />
             {/* <Tab.Screen name="ProgressChart" component={ProgressChartScreen} /> */}
+            <Tab.Screen name="Settings" component={SettingsScreen} />
             <Tab.Screen name="Recycle Bin" component={RecycleBinScreen} />
         </Tab.Navigator>
     );

@@ -3,6 +3,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { PaperProvider } from 'react-native-paper';
 import { useEffect } from 'react';
 import { initializeDatabase } from './src/assets/data/database';
+import { startAutoBackup, stopAutoBackup, DEFAULT_BACKUP_INTERVAL_MS } from './src/assets/data/backup';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -35,6 +36,14 @@ export default function App() {
       }
     }
     setupDB();
+  }, []);
+
+  useEffect(() => {
+    // Start auto-backup using default interval (24h).
+    startAutoBackup(DEFAULT_BACKUP_INTERVAL_MS);
+    return () => {
+      stopAutoBackup();
+    };
   }, []);
 
 

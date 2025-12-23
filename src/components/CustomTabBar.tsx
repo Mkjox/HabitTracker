@@ -72,15 +72,17 @@ const getIconName = (routeName: string) => {
     switch (routeName) {
         case 'Add Habit':
             return 'create';
-            // return 'add-circle-outline';
-            // return 'add-outline';
+        // return 'add-circle-outline';
+        // return 'add-outline';
         case 'Dashboard':
             return 'flame-outline';
-            // return 'speedometer';
+        // return 'speedometer';
         case 'Progress':
             return 'bar-chart-sharp';
         case 'Categories':
             return 'grid-sharp';
+        case 'Settings':
+            return 'settings';
         case 'Recycle Bin':
             return 'trash-outline';
         // case 'ProgressChart':
