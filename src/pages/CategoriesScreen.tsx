@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
 import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
-import { darkTheme, lightTheme } from "../assets/colors/colors";
-import { Entypo } from '@expo/vector-icons';
-import {  Divider, TextInput } from 'react-native-paper';
+import { Entypo, Ionicons } from '@expo/vector-icons';
+import { Divider, TextInput } from 'react-native-paper';
 import CustomButton from '../components/CustomButton';
 
 const { height } = Dimensions.get("window");
@@ -12,9 +11,7 @@ const { height } = Dimensions.get("window");
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
     const [categories, setCategories] = useState<{ id: number; name: string; created_at: string }[]>([]);
-    const { isDark } = useTheme();
-
-    const themeStyles = isDark ? darkTheme : lightTheme;
+    const { theme } = useTheme();
 
     useEffect(() => {
         fetchCategories();
@@ -61,8 +58,8 @@ const CategoriesScreen = () => {
 
     const handleDeleteCategory = async (id: number) => {
         Alert.alert(
-            "Detele Habit",
-            "Are you sure you want to delete this habit?",
+            "Delete Category",
+            "Are you sure you want to delete this category?",
             [
                 { text: "Cancel", style: "cancel" },
                 {
@@ -79,50 +76,68 @@ const CategoriesScreen = () => {
     };
 
     return (
-        <SafeAreaView style={[styles.container, themeStyles.container]}>
-            <View style={styles.top}>
-                <Text style={[styles.title, themeStyles.text]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <View style={styles.content}>
+                <Text style={[styles.title, { color: theme.colors.text }]}>
                     Categories
                 </Text>
 
-                <TextInput
-                    label='Enter category name'
-                    value={categoryName}
-                    onChangeText={setCategoryName}
-                    mode='outlined'
-                    style={[styles.textInput, themeStyles.textInput]}
-                    theme={{
-                        colors: {
-                            text: themeStyles.text.color,
-                            placeholder: themeStyles.textGray.color,
-                            primary: themeStyles.text.color
-                        }
-                    }}
-                    textColor={themeStyles.buttonText.color}
-                />
+                <View style={[styles.inputCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                    <TextInput
+                        label='Category Name'
+                        value={categoryName}
+                        onChangeText={setCategoryName}
+                        mode='outlined'
+                        style={[styles.textInput, { backgroundColor: theme.colors.surface }]}
+                        outlineColor={theme.colors.border}
+                        activeOutlineColor={theme.colors.primary}
+                        textColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.placeholder}
+                    />
 
                     <CustomButton
                         title='Add Category'
                         onPress={handleAddCategory}
-                        style={[themeStyles.button, { marginBottom: 10, height: height * 0.065 }]}
+                        size="medium"
                     />
+                </View>
 
-                    <Divider style={[styles.divider, themeStyles.hairLine]} />
+                <View style={styles.listHeader}>
+                    <Text style={[styles.listTitle, { color: theme.colors.text }]}>All Categories</Text>
+                    <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
+                        <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{categories.length}</Text>
+                    </View>
+                </View>
 
                 <FlatList
                     data={categories}
                     keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.listContainer}
                     renderItem={({ item }) => (
-                        <View style={styles.listWrapper}>
-                            <View style={styles.list}>
-                                <Text style={[styles.itemName, themeStyles.text]}>{item.name}</Text>
-                                <Text style={[styles.itemDate, themeStyles.textGray]}>Created at: {item.created_at}</Text>
+                        <View style={[styles.categoryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                            <View style={styles.categoryInfo}>
+                                <Text style={[styles.categoryName, { color: theme.colors.text }]}>{item.name}</Text>
+                                <Text style={[styles.categoryDate, { color: theme.colors.textSecondary }]}>
+                                    Added on {new Date(item.created_at).toLocaleDateString()}
+                                </Text>
                             </View>
-                            <TouchableOpacity style={styles.iconButton} onPress={() => handleDeleteCategory(item.id)}>
-                                <Entypo name='cross' size={16} color={themeStyles.icon.color} />
+                            <TouchableOpacity
+                                style={[styles.deleteButton, { backgroundColor: theme.colors.error + '10' }]}
+                                onPress={() => handleDeleteCategory(item.id)}
+                            >
+                                <Entypo name='trash' size={18} color={theme.colors.error} />
                             </TouchableOpacity>
                         </View>
                     )}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="folder-open-outline" size={64} color={theme.colors.icon} />
+                            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                                No categories yet. Create one above to organize your habits.
+                            </Text>
+                        </View>
+                    }
                 />
             </View>
         </SafeAreaView>
@@ -132,43 +147,87 @@ const CategoriesScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20
     },
-    top: {
-        marginTop: height * 0.01
+    content: {
+        flex: 1,
+        paddingHorizontal: 20,
     },
     title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 10
+        fontSize: 28,
+        fontWeight: '700',
+        marginTop: 20,
+        marginBottom: 24,
+    },
+    inputCard: {
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        marginBottom: 32,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
     },
     textInput: {
-        marginBottom: 15,
+        marginBottom: 16,
     },
-    listWrapper: {
+    listHeader: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        justifyContent: 'space-between'
+        alignItems: 'center',
+        marginBottom: 16,
     },
-    list: {
-        padding: 10,
+    listTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        marginRight: 8,
     },
-    itemName: {
+    badge: {
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 10,
+    },
+    listContainer: {
+        paddingBottom: 20,
+    },
+    categoryCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        marginBottom: 10,
+        justifyContent: 'space-between',
+    },
+    categoryInfo: {
+        flex: 1,
+    },
+    categoryName: {
         fontSize: 16,
-        fontWeight: '600'
+        fontWeight: '600',
     },
-    itemDate: {
+    categoryDate: {
         fontSize: 12,
-        color: 'gray'
+        marginTop: 4,
     },
-    iconButton: {
+    deleteButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
-        marginRight: 15
+        alignItems: 'center',
     },
-  divider: {
-    marginVertical: 16
-  },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 60,
+    },
+    emptyText: {
+        marginTop: 16,
+        fontSize: 15,
+        textAlign: 'center',
+        lineHeight: 22,
+    },
 })
 
 export default CategoriesScreen;

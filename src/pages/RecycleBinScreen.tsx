@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,10 @@ import {
   StyleSheet,
   Platform,
   ToastAndroid,
-  Dimensions,
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
-import { darkTheme, lightTheme } from "../assets/colors/colors";
 import {
   restoreHabit,
   getDeletedHabits,
@@ -21,21 +19,17 @@ import {
   cleanRecycleBin,
 } from "../assets/data/database";
 import { useFocusEffect } from "@react-navigation/native";
+import CustomButton from "../components/CustomButton";
 
-// Type definition for a deleted habit
 type Habit = {
   id: number;
   name: string;
   category_id: number;
 };
 
-const { height } = Dimensions.get("window");
-
 const RecycleBinScreen: React.FC = () => {
   const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
-  const { isDark } = useTheme();
-
-  const themeStyles = isDark ? darkTheme : lightTheme;
+  const { theme } = useTheme();
 
   useFocusEffect(
     useCallback(() => {
@@ -45,14 +39,13 @@ const RecycleBinScreen: React.FC = () => {
 
   const showToastDelete = () => {
     if (Platform.OS === 'android') {
-      ToastAndroid.show("Habit deleted from Recycle Bin successfully!", ToastAndroid.SHORT);
+      ToastAndroid.show("Habit deleted permanently", ToastAndroid.SHORT);
     }
   };
 
   const fetchDeletedHabits = async (): Promise<void> => {
     try {
       const data: Habit[] = await getDeletedHabits();
-      console.log("Deleted habits:", data);
       setDeletedHabits(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching deleted habits:", error);
@@ -74,6 +67,7 @@ const RecycleBinScreen: React.FC = () => {
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
+        style: "destructive",
         onPress: async () => {
           try {
             await deleteHabitPermanently(habitId);
@@ -87,57 +81,69 @@ const RecycleBinScreen: React.FC = () => {
     ]);
   };
 
-  // Uncomment if you want to add "Empty Recycle Bin" functionality
-  // const handleCleanRecycleBin = async (): Promise<void> => {
-  //   Alert.alert("Empty Recycle Bin", "This will delete all habits permanently. Proceed?", [
-  //     { text: "Cancel", style: "cancel" },
-  //     {
-  //       text: "Empty Bin",
-  //       onPress: async () => {
-  //         try {
-  //           await cleanRecycleBin();
-  //           fetchDeletedHabits();
-  //         } catch (error) {
-  //           console.error("Error cleaning recycle bin:", error);
-  //         }
-  //       },
-  //     },
-  //   ]);
-  // };
+  const handleCleanBin = (): void => {
+    if (deletedHabits.length === 0) return;
+    Alert.alert("Empty Bin", "This will permanently delete all items. Proceed?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete All",
+        style: "destructive",
+        onPress: async () => {
+          await cleanRecycleBin();
+          fetchDeletedHabits();
+        }
+      }
+    ]);
+  };
 
   return (
-    <SafeAreaView style={[styles.container, themeStyles.container]}>
-      <View style={styles.top}>
-        <Text style={[styles.title, themeStyles.text]}>Recycle Bin</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: theme.colors.text }]}>Recycle Bin</Text>
+          {deletedHabits.length > 0 && (
+            <TouchableOpacity onPress={handleCleanBin}>
+              <Text style={{ color: theme.colors.error, fontWeight: '600' }}>Empty Bin</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
-        {deletedHabits.length === 0 ? (
-          <Text style={[styles.emptyText, themeStyles.textGray]}>No deleted habits.</Text>
-        ) : (
-          <FlatList
-            data={deletedHabits}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={[styles.habitItem, themeStyles.hairLine]}>
-                <Text style={[styles.habitName, themeStyles.text]}>{item.name}</Text>
-                <View style={styles.actions}>
-                  <TouchableOpacity onPress={() => handleRestore(item.id)}>
-                    <Ionicons name="refresh-circle" size={24} color="green" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDeletePermanently(item.id)}>
-                    <Ionicons name="trash" size={24} color="red" />
-                  </TouchableOpacity>
-                </View>
+        <FlatList
+          data={deletedHabits}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="trash-outline" size={64} color={theme.colors.icon} />
+              <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                Recycle bin is empty. Deleted habits will appear here.
+              </Text>
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View style={[styles.habitCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <View style={styles.habitInfo}>
+                <Text style={[styles.habitName, { color: theme.colors.text }]}>{item.name}</Text>
+                <Text style={[styles.habitSub, { color: theme.colors.textSecondary }]}>Ready to restore</Text>
               </View>
-            )}
-          />
-        )}
-
-        {/* Uncomment if "Empty Recycle Bin" button is needed */}
-        {/* {deletedHabits.length > 0 && (
-          <TouchableOpacity style={[styles.cleanButton, themeStyles.button]} onPress={handleCleanRecycleBin}>
-            <Text style={[styles.cleanButtonText,themeStyles.buttonText]}>Empty Recycle Bin</Text>
-          </TouchableOpacity>
-        )} */}
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  onPress={() => handleRestore(item.id)}
+                  style={[styles.actionButton, { backgroundColor: theme.colors.success + '15' }]}
+                >
+                  <Ionicons name="refresh-outline" size={20} color={theme.colors.success} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleDeletePermanently(item.id)}
+                  style={[styles.actionButton, { backgroundColor: theme.colors.error + '15' }]}
+                >
+                  <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        />
       </View>
     </SafeAreaView>
   );
@@ -146,43 +152,72 @@ const RecycleBinScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
-  top: {
-    marginTop: height * 0.01
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "700",
   },
-  emptyText: {
-    fontSize: 16,
-    color: "gray",
-    textAlign: "center",
-    marginTop: 20,
+  listContainer: {
+    paddingBottom: 20,
   },
-  habitItem: {
+  habitCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  habitInfo: {
+    flex: 1,
   },
   habitName: {
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  habitSub: {
+    fontSize: 12,
+    marginTop: 2,
   },
   actions: {
     flexDirection: "row",
-    gap: 15,
+    gap: 12,
   },
-  cleanButton: {
-    padding: 15,
-    borderRadius: 25,
+  actionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
     alignItems: "center",
-    marginTop: 20,
+    justifyContent: "center",
+    marginTop: 100,
   },
-  cleanButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
+  emptyText: {
+    fontSize: 15,
+    textAlign: "center",
+    marginTop: 16,
+    lineHeight: 22,
+    paddingHorizontal: 40,
   },
 });
 

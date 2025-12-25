@@ -6,7 +6,8 @@ import { RouteProp } from "@react-navigation/native";
 import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
 import { RootStackParamList } from "../assets/types/navigationTypes";
 import { useTheme } from "../context/ThemeContext";
-import { darkTheme, lightTheme } from "../assets/colors/colors";
+import { Ionicons, Entypo } from "@expo/vector-icons";
+import CustomButton from "../components/CustomButton";
 
 type HabitDetailsScreenRouteProp = RouteProp<RootStackParamList, "HabitDetails">;
 
@@ -19,9 +20,7 @@ type ProgressItem = {
 
 const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
   const { habitId, habitName, habitDescription } = route.params;
-  const { isDark } = useTheme();
-
-  const themeStyles = isDark ? darkTheme : lightTheme;
+  const { isDark, theme } = useTheme();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
@@ -33,7 +32,6 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
     const fetchProgress = async (): Promise<void> => {
       try {
         const data = await getProgressByHabitId(habitId);
-        console.log(habitDescription)
         setProgressHistory(Array.isArray(data) ? (data as ProgressItem[]) : []);
       } catch (error) {
         console.error("Error fetching progress:", error);
@@ -65,95 +63,106 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   const isDateCompleted = (date: string): boolean => progressHistory.some((item) => item.date === date);
 
   return (
-    <SafeAreaView style={[styles.container, themeStyles.container]}>
-      <Text style={[styles.habitName, themeStyles.text]}>{habitName}</Text>
-      <Text style={[styles.habitDescription, themeStyles.textGray]}>{habitDescription}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={[styles.habitName, { color: theme.colors.text }]}>{habitName}</Text>
+          <Text style={[styles.habitDescription, { color: theme.colors.textSecondary }]}>{habitDescription}</Text>
+        </View>
 
-      {/* Date picker button */}
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-        <Text style={styles.dateText}>📅 {selectedDate.toDateString()}</Text>
-      </TouchableOpacity>
+        <View style={[styles.actionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Log Progress</Text>
 
-      {/* Date picker */}
-      {showDatePicker && (
-        Platform.OS === "ios" ? (
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="default"
-            onChange={(_, date) => {
-              setShowDatePicker(false);
-              if (date) setSelectedDate(date);
-            }}
-          />
-        ) : (
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="default"
-            onChange={(_, date) => {
-              setShowDatePicker(false);
-              if (date) setSelectedDate(date);
-            }}
-          />
-        )
-      )}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setShowDatePicker(true)}
+            style={[styles.datePickerButton, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}
+          >
+            <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+            <Text style={[styles.dateText, { color: theme.colors.text }]}>{selectedDate.toDateString()}</Text>
+            <Entypo name="chevron-small-down" size={20} color={theme.colors.icon} />
+          </TouchableOpacity>
 
-      {/* Custom Progress Toggle */}
-      <View style={styles.customContainer}>
-        <Text style={[styles.customLabel, themeStyles.text]}>Custom Progress:</Text>
-        <Switch value={useCustom} onValueChange={setUseCustom} />
-      </View>
-      {useCustom && (
-        <TextInput
-        label="Enter custom progress (e.g., 2 km, 10 reps)"
-        value={customValue}
-        onChangeText={setCustomValue}
-        mode="outlined"
-        style={[styles.customInput, themeStyles.textInput]}
-          theme={{
-            colors: {
-              text: themeStyles.text.color,
-              placeholder: themeStyles.textGray.color,
-              primary: themeStyles.text.color
-            }
-          }}
-          textColor={themeStyles.buttonText.color}
-        />
-      )}
-
-      {/* Toggle progress button */}
-      <TouchableOpacity onPress={handleToggleProgress} style={[styles.toggleButton, themeStyles.button]}>
-        <Text style={styles.toggleButtonText}>
-          {isDateCompleted(selectedDate.toISOString().split("T")[0])
-            ? `✔️ ${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value
-              ? `Done (${progressHistory.find(item => item.date === selectedDate.toISOString().split("T")[0])?.custom_value})`
-              : "Done"}`
-            : "➕ Mark as Done"}
-        </Text>
-      </TouchableOpacity>
-
-      <Text style={[styles.historyTitle, themeStyles.text]}>Progress History:</Text>
-
-      {/* FlatList to render progress history */}
-      {progressHistory.length === 0 ? (
-        <Text style={[styles.noProgress, themeStyles.text]}>No progress recorded for this habit.</Text>
-      ) : (
-        <FlatList
-          data={progressHistory}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={[styles.historyItem, themeStyles.card]}>
-              <Text style={[styles.historyDate, themeStyles.text]}>{item.date}</Text>
-              <Text style={[styles.historyProgress, themeStyles.text]}>
-                {item.custom_value && item.custom_value.trim() !== ""
-                  ? `✔️ Done (${item.custom_value})`
-                  : "✔️ Done"}
-              </Text>
-            </View>
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={(_, date) => {
+                setShowDatePicker(false);
+                if (date) setSelectedDate(date);
+              }}
+            />
           )}
-        />
-      )}
+
+          <View style={styles.switchRow}>
+            <View>
+              <Text style={[styles.switchLabel, { color: theme.colors.text }]}>Use custom value</Text>
+              <Text style={[styles.switchSublabel, { color: theme.colors.textSecondary }]}>Add units or measurements</Text>
+            </View>
+            <Switch
+              value={useCustom}
+              onValueChange={setUseCustom}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary + '80' }}
+              thumbColor={useCustom ? theme.colors.primary : '#f4f3f4'}
+            />
+          </View>
+
+          {useCustom && (
+            <TextInput
+              label="Progress Value (e.g., 2km, 50 pushups)"
+              value={customValue}
+              onChangeText={setCustomValue}
+              mode="outlined"
+              style={[styles.customInput, { backgroundColor: theme.colors.surface }]}
+              outlineColor={theme.colors.border}
+              activeOutlineColor={theme.colors.primary}
+              textColor={theme.colors.text}
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          )}
+
+          <CustomButton
+            onPress={handleToggleProgress}
+            title={isDateCompleted(selectedDate.toISOString().split("T")[0]) ? "Remove Selection" : "Mark as Done"}
+            variant={isDateCompleted(selectedDate.toISOString().split("T")[0]) ? "outline" : "primary"}
+            style={{ marginTop: 10 }}
+          />
+        </View>
+
+        <View style={styles.historyHeader}>
+          <Text style={[styles.historyTitle, { color: theme.colors.text }]}>Progress History</Text>
+          <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
+            <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{progressHistory.length}</Text>
+          </View>
+        </View>
+
+        {progressHistory.length === 0 ? (
+          <View style={styles.emptyHistory}>
+            <Ionicons name="bar-chart-outline" size={48} color={theme.colors.icon} />
+            <Text style={[styles.noProgress, { color: theme.colors.textSecondary }]}>No progress recorded yet.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={progressHistory}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <View style={[styles.historyItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <View style={styles.historyInfo}>
+                  <Text style={[styles.historyDate, { color: theme.colors.text }]}>{item.date}</Text>
+                  <Text style={[styles.historyValue, { color: theme.colors.textSecondary }]}>
+                    {item.custom_value && item.custom_value.trim() !== "" ? item.custom_value : "Standard completion"}
+                  </Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: theme.colors.success + '20' }]}>
+                  <Ionicons name="checkmark-done" size={16} color={theme.colors.success} />
+                </View>
+              </View>
+            )}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 };
@@ -161,85 +170,123 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f9f9f9",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginTop: 20,
+    marginBottom: 24,
+    alignItems: 'center',
   },
   habitName: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "700",
     textAlign: "center",
-    marginBottom: 10,
-    marginTop: StatusBar.currentHeight
+    marginBottom: 8,
   },
   habitDescription: {
     fontSize: 16,
-    fontWeight: 'semibold',
     textAlign: 'center',
-    marginBottom: 15,
+    lineHeight: 22,
   },
-  dateButton: {
-    padding: 10,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
-    alignItems: "center",
-    marginBottom: 10,
+  actionCard: {
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    marginBottom: 32,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 20,
   },
   dateText: {
-    color: "white",
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
+    marginHorizontal: 10,
+    fontWeight: '500',
   },
-  customContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  customLabel: {
+  switchLabel: {
     fontSize: 16,
-    marginRight: 10,
+    fontWeight: '600',
+  },
+  switchSublabel: {
+    fontSize: 12,
+    marginTop: 2,
   },
   customInput: {
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  toggleButton: {
-    backgroundColor: "#28a745",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  toggleButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  historyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   historyTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginBottom: 10,
+    fontSize: 20,
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
   historyItem: {
-    backgroundColor: "#fff",
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    marginBottom: 10,
+  },
+  historyInfo: {
+    flex: 1,
   },
   historyDate: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#555",
+    fontSize: 15,
+    fontWeight: "600",
   },
-  historyProgress: {
-    fontSize: 16,
-    color: "#28a745",
+  historyValue: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  statusBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyHistory: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
   },
   noProgress: {
-    fontSize: 16,
-    fontWeight: "500",
+    marginTop: 12,
+    fontSize: 15,
   },
 });
 

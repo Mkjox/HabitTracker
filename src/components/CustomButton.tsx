@@ -1,116 +1,142 @@
-import React from "react";
+import React from 'react';
 import {
-  Text,
-  ActivityIndicator,
+  TouchableOpacity,
+  Text as RNText,
   StyleSheet,
   ViewStyle,
   TextStyle,
-  GestureResponderEvent,
-  Platform,
-  Pressable,
-  PressableStateCallbackType,
+  ActivityIndicator,
   View,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useTheme } from "../context/ThemeContext";
-import { darkTheme, lightTheme } from "../assets/colors/colors";
+  GestureResponderEvent,
+} from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
-interface CustomButtonProps {
-  title: string;
-  onPress: (event: GestureResponderEvent) => void;
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost';
+type Size = 'small' | 'medium' | 'large';
+
+type Props = {
+  onPress?: (e?: GestureResponderEvent) => void;
+  title?: string;
+  children?: React.ReactNode;
+  variant?: Variant;
+  size?: Size;
+  fullWidth?: boolean;
   loading?: boolean;
   disabled?: boolean;
   style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle | TextStyle[];
-}
+  testID?: string;
+};
 
-const CustomButton: React.FC<CustomButtonProps> = ({
-  title,
+export default function CustomButton({
   onPress,
+  title,
+  children,
+  variant = 'primary',
+  size = 'medium',
+  fullWidth = true,
   loading = false,
   disabled = false,
   style,
   textStyle,
-}) => {
-  const { isDark } = useTheme();
-  const theme: any = isDark ? darkTheme : lightTheme;
-  const isDisabled = disabled || loading;
+  testID,
+}: Props) {
+  const { theme } = useTheme();
 
-  const gradientColors =
-    (isDisabled
-      ? theme.gradients?.buttonDisabled ?? theme.gradients?.button
-      : theme.gradients?.button) ?? ["#1c6d79", "#3ba7a3"];
+  const containerStyles: (ViewStyle | number)[] = [
+    styles.base,
+    { borderRadius: theme.borderRadius.m }
+  ];
 
-  const textColor = theme.colors?.buttonText ?? "#fff";
-  const rippleColor = theme.rippleColor ?? "rgba(255,255,255,0.15)";
+  // size
+  if (size === 'small') {
+    containerStyles.push({ paddingVertical: theme.spacing.xs, paddingHorizontal: theme.spacing.s, borderRadius: theme.borderRadius.s });
+  } else if (size === 'large') {
+    containerStyles.push({ paddingVertical: theme.spacing.m, paddingHorizontal: theme.spacing.l, borderRadius: theme.borderRadius.l });
+  } else {
+    containerStyles.push({ paddingVertical: theme.spacing.s, paddingHorizontal: theme.spacing.m });
+  }
+
+  if (fullWidth) containerStyles.push({ width: '100%' });
+  else containerStyles.push({ alignSelf: 'flex-start' });
+
+  // variant styles
+  let bgColor = theme.colors.primary;
+  let textColor = theme.colors.surface;
+  let borderColor = 'transparent';
+  let borderWidth = 0;
+
+  if (variant === 'primary') {
+    bgColor = theme.colors.primary;
+    textColor = theme.colors.surface;
+  } else if (variant === 'secondary') {
+    bgColor = theme.colors.surface;
+    textColor = theme.colors.primary;
+    borderColor = theme.colors.border;
+    borderWidth = 1;
+  } else if (variant === 'outline') {
+    bgColor = 'transparent';
+    textColor = theme.colors.primary;
+    borderColor = theme.colors.primary;
+    borderWidth = 1;
+  } else if (variant === 'ghost') {
+    bgColor = 'transparent';
+    textColor = theme.colors.primary;
+  }
+
+  containerStyles.push({
+    backgroundColor: bgColor,
+    borderColor: borderColor,
+    borderWidth: borderWidth,
+  });
+
+  if (disabled) {
+    containerStyles.push(styles.disabled);
+  }
+
+  if (style) containerStyles.push(style as any);
+
+  const textStyles: (TextStyle | number)[] = [
+    styles.textBase,
+    { color: textColor }
+  ];
+
+  if (textStyle) textStyles.push(textStyle as any);
 
   return (
-    <View style={[styles.wrapper, style]}>
-      {/* Gradient behind the Pressable — allows ripple to render above it */}
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[StyleSheet.absoluteFill, styles.gradient]}
-      />
-
-      <Pressable
-        onPress={onPress}
-        disabled={isDisabled}
-        android_ripple={{
-          color: rippleColor,
-          borderless: false,
-        }}
-        style={(state: PressableStateCallbackType) => [
-          styles.buttonBase,
-          isDisabled && styles.disabledButton,
-          state.pressed && Platform.OS === "ios" ? { opacity: 0.6 } : null,
-          StyleSheet.absoluteFill
-        ]}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: isDisabled }}
-      >
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      disabled={disabled || loading}
+      style={containerStyles}
+      testID={testID}
+    >
+      <View style={styles.content}>
         {loading ? (
           <ActivityIndicator color={textColor} />
         ) : (
-          <Text
-            style={[
-              styles.textBase,
-              theme.styles?.buttonText,
-              { color: textColor },
-              textStyle,
-            ]}
-          >
-            {title}
-          </Text>
+          <RNText style={textStyles}>{title ?? children}</RNText>
         )}
-      </Pressable>
-    </View>
+      </View>
+    </TouchableOpacity>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  wrapper: {
-    borderRadius: 10,
-    overflow: "hidden", // ensures ripple and gradient clip properly
+  base: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  gradient: {
-    borderRadius: 10,
+  disabled: {
+    opacity: 0.6,
   },
-  buttonBase: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   textBase: {
     fontSize: 16,
-    fontFamily: "Poppins_500Medium",
-  },
-  disabledButton: {
-    opacity: 0.6,
+    fontWeight: '600',
   },
 });
-
-export default CustomButton;

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Dimensions, SafeAreaView } from "reac
 import { Calendar } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
-import { darkTheme, lightTheme } from "../assets/colors/colors";
+import { Ionicons } from "@expo/vector-icons";
 
 type HabitItem = {
   habit_name: string;
@@ -20,8 +20,7 @@ const { height } = Dimensions.get("window");
 const ProgressScreen = () => {
   const [selectedDate, setSelectedDate] = useState<string>(getToday());
   const [habitData, setHabitData] = useState<HabitData>({});
-  const { isDark } = useTheme();
-  const themeStyles = isDark ? darkTheme : lightTheme;
+  const { isDark, theme } = useTheme();
 
   useEffect(() => {
     fetchProgress();
@@ -54,56 +53,70 @@ const ProgressScreen = () => {
   const habitsForSelectedDate = habitData[selectedDate] || [];
 
   return (
-    <SafeAreaView style={[styles.container, themeStyles.container]}>
-      <View style={styles.top}>
-        <Text style={[styles.title, themeStyles.text]}>Habit Progress</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Progress</Text>
 
-        <Calendar
-          onDayPress={(day: any) => setSelectedDate(day.dateString)}
-          style={{
-            borderRadius: 8,
-            padding: 8,
-            backgroundColor: isDark ? '#0A0C16' : '#FFFFFF',
-            elevation: 2,
-            marginBottom: 16,
-          }}
-          markedDates={{
-            [selectedDate]: {
-              selected: true,
-              selectedColor: "#00adf5",
-            },
-          }}
-          key={isDark ? 'dark' : 'light'}
-          theme={{
-            calendarBackground: isDark ? '#0A0C16' : '#FFFFFF',
-            dayTextColor: isDark ? '#e0e0e0' : '#2d4150',
-            textSectionTitleColor: isDark ? '#888888' : '#b6c1cd',
-            textDisabledColor: isDark ? '#555555' : '#d9e1e8',
-            selectedDayBackgroundColor: '#00adf5',
-            selectedDayTextColor: '#ffffff',
-            todayTextColor: '#00adf5',
-            arrowColor: isDark ? '#ffffff' : '#000000',
-            monthTextColor: isDark ? '#ffffff' : '#333333',
-          }}
-        />
+        <View style={[styles.calendarCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <Calendar
+            onDayPress={(day: any) => setSelectedDate(day.dateString)}
+            markedDates={{
+              [selectedDate]: {
+                selected: true,
+                selectedColor: theme.colors.primary,
+              },
+            }}
+            key={isDark ? 'dark' : 'light'}
+            theme={{
+              calendarBackground: 'transparent',
+              dayTextColor: theme.colors.text,
+              textSectionTitleColor: theme.colors.textSecondary,
+              textDisabledColor: theme.colors.placeholder,
+              selectedDayBackgroundColor: theme.colors.primary,
+              selectedDayTextColor: theme.colors.surface,
+              todayTextColor: theme.colors.primary,
+              arrowColor: theme.colors.primary,
+              monthTextColor: theme.colors.text,
+              textDayFontWeight: '400',
+              textMonthFontWeight: '700',
+              textDayHeaderFontWeight: '600',
+            }}
+          />
+        </View>
+
+        <View style={styles.listHeader}>
+          <Text style={[styles.listTitle, { color: theme.colors.text }]}>
+            {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </Text>
+          <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
+            <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{habitsForSelectedDate.length}</Text>
+          </View>
+        </View>
 
         <FlatList
           style={styles.list}
           data={habitsForSelectedDate}
+          showsVerticalScrollIndicator={false}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={
-            <Text style={[styles.noDataText, themeStyles.text]}>
-              No habits for this day.
-            </Text>
+            <View style={styles.emptyContainer}>
+              <Ionicons name="calendar-outline" size={48} color={theme.colors.icon} />
+              <Text style={[styles.noDataText, { color: theme.colors.textSecondary }]}>
+                No habits completed on this day.
+              </Text>
+            </View>
           }
           renderItem={({ item }) => (
-            <View style={[styles.habitCard, themeStyles.card]}>
-              <Text style={[styles.habitName, themeStyles.text]}>{item.habit_name}</Text>
-              <Text style={themeStyles.text}>
-                {item.custom_value
-                  ? `Done (${item.custom_value})`
-                  : `Done`}
-              </Text>
+            <View style={[styles.habitCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <View style={styles.habitInfo}>
+                <Text style={[styles.habitName, { color: theme.colors.text }]}>{item.habit_name}</Text>
+                <Text style={[styles.habitValue, { color: theme.colors.textSecondary }]}>
+                  {item.custom_value ? item.custom_value : 'Completed'}
+                </Text>
+              </View>
+              <View style={[styles.statusIcon, { backgroundColor: theme.colors.success + '20' }]}>
+                <Ionicons name="checkmark-sharp" size={18} color={theme.colors.success} />
+              </View>
             </View>
           )}
         />
@@ -120,35 +133,87 @@ const getToday = (): string => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
-  top: {
-    marginTop: height * 0.01
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 15,
+    fontSize: 28,
+    fontWeight: '700',
+    marginTop: 20,
+    marginBottom: 24,
+  },
+  calendarCard: {
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 32,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
   list: {
-    marginTop: 15,
+    flex: 1,
   },
   habitCard: {
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 8,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#ccc'
+    marginBottom: 12,
+    justifyContent: 'space-between',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  habitInfo: {
+    flex: 1,
   },
   habitName: {
-    fontWeight: "600",
     fontSize: 16,
+    fontWeight: '600',
+  },
+  habitValue: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  statusIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
   },
   noDataText: {
+    marginTop: 12,
+    fontSize: 15,
     textAlign: "center",
-    marginTop: 20,
-    fontSize: 16,
   },
 });
 

@@ -53,6 +53,7 @@ export const backupDatabase = async () => {
 
 export const restoreDatabase = async () => {
     try {
+        console.log('Attempting to restore database from', backupPath, 'to', dbPath);
         const backupExists = await FileSystem.getInfoAsync(backupPath);
 
         if (!backupExists.exists) {
@@ -73,6 +74,7 @@ export const restoreDatabase = async () => {
 
 export const checkAndRestoreDatabase = async () => {
     const dbExists = await FileSystem.getInfoAsync(dbPath);
+    console.log('Checking if DB exists at', dbPath, 'exists:', dbExists.exists);
 
     if (!dbExists.exists) {
         console.warn('Database is missing! Attempting to restore...');

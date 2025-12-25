@@ -13,7 +13,6 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { getProgress } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
-import { darkTheme, lightTheme } from '../assets/colors/colors';
 import { Ionicons } from '@expo/vector-icons';
 
 type ProgressRecord = {
@@ -53,15 +52,13 @@ const computeStreak = (dates: string[]): number => {
     return streak;
 };
 
-const {height} = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 export default function DashboardScreen() {
-    const { isDark, toggleTheme } = useTheme();
+    const { isDark, theme, toggleTheme } = useTheme();
     const [habits, setHabits] = useState<HabitStreak[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-
-    const themeStyles = isDark ? darkTheme : lightTheme;
 
     const loadData = async () => {
         setLoading(true);
@@ -101,23 +98,26 @@ export default function DashboardScreen() {
     };
 
     if (loading && !refreshing) {
-        return <ActivityIndicator style={styles.loader} size="large" color="#00adf5" />;
+        return (
+            <View style={[styles.loaderContainer, { backgroundColor: theme.colors.background }]}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
+        );
     }
 
     return (
-        <SafeAreaView style={[styles.container, themeStyles.container]}>
-            <View style={styles.top}>
-
-                <View style={styles.topSection}>
-                    <Text style={[styles.title, themeStyles.text]}>Habit Streaks</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <View style={styles.content}>
+                <View style={styles.header}>
+                    <Text style={[styles.title, { color: theme.colors.text }]}>Dashboard</Text>
                     <TouchableOpacity
                         onPress={toggleTheme}
-                        style={[styles.button]}
+                        style={[styles.themeToggle, { backgroundColor: theme.colors.surface }]}
                     >
                         <Ionicons
-                            name={isDark ? 'sunny-outline' : 'moon-outline'}
-                            size={28}
-                            color={themeStyles.icon.color}
+                            name={isDark ? 'sunny' : 'moon'}
+                            size={20}
+                            color={theme.colors.primary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -125,23 +125,42 @@ export default function DashboardScreen() {
                 <FlatList
                     data={habits}
                     keyExtractor={item => item.habit_id.toString()}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#00adf5']} />
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor={theme.colors.primary}
+                            colors={[theme.colors.primary]}
+                        />
                     }
                     ListEmptyComponent={
-                        <Text style={[styles.emptyText, themeStyles.text]}>
-                            No habits tracked yet.
-                        </Text>
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="leaf-outline" size={64} color={theme.colors.textSecondary} />
+                            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
+                                No habits tracked yet.
+                            </Text>
+                        </View>
                     }
                     renderItem={({ item }) => (
-                        <View style={[styles.card, themeStyles.card]}>
+                        <View style={[
+                            styles.card,
+                            {
+                                backgroundColor: theme.colors.surface,
+                                borderColor: theme.colors.border,
+                                borderRadius: theme.borderRadius.l
+                            }
+                        ]}>
                             <View style={styles.cardHeader}>
-                                <Text style={[styles.habitName, themeStyles.text]}>
+                                <Text style={[styles.habitName, { color: theme.colors.text }]}>
                                     {item.habit_name}
                                 </Text>
-                                <Text style={[styles.streak, themeStyles.text]}>
-                                    🔥 {item.streak} day{item.streak !== 1 ? 's' : ''}
-                                </Text>
+                                <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
+                                    <Text style={[styles.streakText, { color: theme.colors.primary }]}>
+                                        🔥 {item.streak} day{item.streak !== 1 ? 's' : ''}
+                                    </Text>
+                                </View>
                             </View>
                         </View>
                     )}
@@ -154,61 +173,78 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 24
     },
-    top: {
-        marginTop: height * 0.01
+    content: {
+        flex: 1,
+        paddingHorizontal: 20,
     },
-    topSection: {
-        justifyContent: 'space-between',
+    header: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10
+        marginTop: 20,
+        marginBottom: 24,
     },
     title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 12
+        fontSize: 28,
+        fontWeight: '700',
     },
-    button: {
-        padding: 10,
-        borderRadius: 50,
-        alignSelf: 'flex-end',
-    },
-    loader: {
-        flex: 1,
-        justifyContent: 'center'
-    },
-    emptyText: {
-        textAlign: 'center',
-        marginTop: 40,
-        fontSize: 16
-    },
-    card: {
-        padding: 12,
-        borderRadius: 8,
-        marginVertical: 6,
-        backgroundColor: '#fff',
+    themeToggle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 2,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1
-        },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
-        elevation: 2,
+    },
+    listContent: {
+        paddingBottom: 20,
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 100,
+    },
+    emptyText: {
+        marginTop: 16,
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    card: {
+        padding: 16,
+        marginBottom: 12,
         borderWidth: 1,
-        borderColor: '#ccc'
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
     },
     cardHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     habitName: {
-        fontSize: 16,
-        fontWeight: '600'
+        fontSize: 18,
+        fontWeight: '600',
     },
-    streak: {
-        fontSize: 14
-    }
+    streakBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    streakText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
 });

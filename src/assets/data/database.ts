@@ -65,6 +65,14 @@ export const initializeDatabase = async () => {
   } catch (error) {
     console.error("Error initializing database:", error);
   }
+  // Diagnostic: log current counts to help detect unexpected deletions
+  try {
+    const catCountRow = await db.getFirstAsync("SELECT COUNT(*) as cnt FROM categories;");
+    const habitCountRow = await db.getFirstAsync("SELECT COUNT(*) as cnt FROM habits;");
+    console.log(`DB counts after init - categories: ${catCountRow?.cnt ?? 0}, habits: ${habitCountRow?.cnt ?? 0}`);
+  } catch (err) {
+    console.warn("Could not read counts after DB init:", err);
+  }
 };
 
 export const addHabit = async (name: string, description: string, categoryId: number) => {

@@ -1,17 +1,21 @@
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "../context/ThemeContext";
-import { darkTheme, lightTheme } from "../assets/colors/colors";
 
 const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
-    const { isDark } = useTheme();
-
-    const themeStyles = isDark ? darkTheme : lightTheme;
+    const { theme } = useTheme();
 
     return (
-        <View style={[styles.tabContainer, themeStyles.container]}>
+        <View style={[
+            styles.tabContainer,
+            {
+                backgroundColor: theme.colors.tabBar,
+                borderTopColor: theme.colors.border,
+                paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+            }
+        ]}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
 
@@ -49,17 +53,18 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                         <Ionicons
                             name={iconName}
                             size={24}
-                            color={isFocused ? '#6E7FEC' : '#a0a0a0'}
+                            color={isFocused ? theme.colors.primary : theme.colors.textSecondary}
                         />
-                        {typeof label === "string" ? (
-                            <Text style={[styles.tabLabel, isFocused && styles.focusedLabel]}>
+                        {typeof label === "string" && (
+                            <Text style={[
+                                styles.tabLabel,
+                                {
+                                    color: isFocused ? theme.colors.primary : theme.colors.textSecondary,
+                                    fontWeight: isFocused ? '600' : '400'
+                                }
+                            ]}>
                                 {label}
                             </Text>
-                        ) : (
-                            label({
-                                focused: isFocused, color: isFocused ? '#6E7FEC' : '#a0a0a0', position: 'below-icon',
-                                children: ""
-                            })
                         )}
                     </TouchableOpacity>
                 );
@@ -71,22 +76,17 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
 const getIconName = (routeName: string) => {
     switch (routeName) {
         case 'Add Habit':
-            return 'create';
-        // return 'add-circle-outline';
-        // return 'add-outline';
+            return 'add-circle-outline';
         case 'Dashboard':
-            return 'flame-outline';
-        // return 'speedometer';
+            return 'home-outline';
         case 'Progress':
-            return 'bar-chart-sharp';
+            return 'bar-chart-outline';
         case 'Categories':
-            return 'grid-sharp';
+            return 'grid-outline';
         case 'Settings':
-            return 'settings';
+            return 'settings-outline';
         case 'Recycle Bin':
             return 'trash-outline';
-        // case 'ProgressChart':
-        //     return 'bar-chart-outline'
         default:
             return 'home';
     }
@@ -95,36 +95,25 @@ const getIconName = (routeName: string) => {
 const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
-        height: 70,
-        backgroundColor: '#FFFFFF',
+        height: Platform.OS === 'ios' ? 85 : 70,
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
         justifyContent: 'space-around',
         alignItems: 'center',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     tabButton: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    centerButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#6E7FEC',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 10,
-        elevation: 5
+        paddingTop: 10,
     },
     tabLabel: {
-        fontSize: 12,
-        color: '#a0a0a0',
-        fontFamily: 'Poppins_400Regular'
-    },
-    focusedLabel: {
-        color: '#6E7FEC',
-        fontFamily: 'Poppins_600SemiBold'
+        fontSize: 10,
+        marginTop: 4,
     }
 });
 
