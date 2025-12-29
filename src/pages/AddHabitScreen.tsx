@@ -253,9 +253,6 @@ export default function AddHabitScreen() {
 const styles = StyleSheet.create({
   outer: {
     flex: 1,
-    // Combined from second block:
-    // padding: 16, // This was removed as the FlatList contentContainerStyle handles padding
-    // paddingTop: StatusBar.currentHeight || 20 // SafeAreaView handles this
   },
   headerContainer: {
     padding: 20,
@@ -279,8 +276,6 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 8,
-    // Combined from second block:
-    // marginBottom: height * 0.02 // This was not used in the component, keeping the first block's definition
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -308,10 +303,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    // Combined from second block:
-    // marginVertical: 8, // First block had 6, keeping 6 as it's more specific to this component
-    // borderRadius: 8, // First block had 12, keeping 12
-    // marginHorizontal: 16 // First block had 20, keeping 20
   },
   habitCardContent: {
     flexDirection: 'row',
@@ -357,7 +348,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   empty: {
-    marginTop: 60, // First block had 60, second had 32. Keeping 60 as it's used in the component.
+    marginTop: 60,
     alignItems: "center",
   },
   // Styles from the second block that were not duplicates or were new:
@@ -368,7 +359,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 8
   },
-  divider: { // This style is not used in the component, a direct Divider component is used
+  divider: {
     marginVertical: 16
   },
 });

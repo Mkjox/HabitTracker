@@ -1,17 +1,4 @@
 import * as FileSystem from 'expo-file-system';
-// import * as MediaLibrary from 'expo-media-library';
-// import { useEffect } from 'react';
-
-// async function requestPermissions() {
-//     const { status } = await MediaLibrary.requestPermissionsAsync(); // Corrected
-//     if (status !== 'granted') {
-//         alert('Permission denied');
-//     }
-// }
-
-// useEffect(() => {
-//     requestPermissions();
-// }, []);
 
 const dbPath = `${FileSystem.documentDirectory}SQLite/habits.db`;
 const backupDir = `${FileSystem.documentDirectory}Backup`;

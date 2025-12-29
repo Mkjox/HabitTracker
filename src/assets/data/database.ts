@@ -163,7 +163,6 @@ export const deleteHabitPermanently = async (habitId: number) => {
       return;
     }
 
-    // await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);
     await db.runAsync("DELETE FROM recycle_bin WHERE habit_id = ?;", [habitId]);
     await backupDatabase();
 
