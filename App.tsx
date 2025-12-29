@@ -1,10 +1,10 @@
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { PaperProvider } from 'react-native-paper';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { initializeDatabase } from './src/assets/data/database';
 import { startAutoBackup, stopAutoBackup, DEFAULT_BACKUP_INTERVAL_MS } from './src/assets/data/backup';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomStatusBar from './src/components/CustomStatusBar';
@@ -25,14 +25,18 @@ function AppContent() {
 }
 
 export default function App() {
+  const [isDbReady, setIsDbReady] = useState(false);
+
   useEffect(() => {
     const setupDB = async () => {
       try {
         await initializeDatabase();
         console.log("Database initialized successfully!");
+        setIsDbReady(true);
       }
       catch (error) {
         console.error("Database initialization failed", error);
+        setIsDbReady(true);
       }
     }
     setupDB();
@@ -46,25 +50,21 @@ export default function App() {
     };
   }, []);
 
-
-  try {
-    return (
-      <SafeAreaProvider>
-        <PaperProvider>
-          <ThemeProvider>
-            <CustomStatusBar />
+  return (
+    <SafeAreaProvider>
+      <PaperProvider>
+        <ThemeProvider>
+          <CustomStatusBar />
+          {!isDbReady ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#00adf5" />
+            </View>
+          ) : (
             <AppContent />
-          </ThemeProvider>
-        </PaperProvider>
-      </SafeAreaProvider>
-    );
-  } catch (error) {
-    console.error("Navigation Error", error);
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: 'red' }}>Navigation Error</Text>
-      </View>
-    );
-  }
+          )}
+        </ThemeProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
+  );
 }
 

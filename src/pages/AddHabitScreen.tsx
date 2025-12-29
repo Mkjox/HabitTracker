@@ -1,23 +1,19 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, memo } from "react";
 import {
   View,
   StyleSheet,
-  Dimensions,
   FlatList,
   TouchableOpacity,
   Keyboard,
   Alert,
   ToastAndroid,
   Platform,
-  StatusBar,
   SafeAreaView,
   Modal
 } from "react-native";
 import {
   Text,
   TextInput,
-  Button,
-  Card,
   Divider,
 } from "react-native-paper";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -40,7 +36,105 @@ type Habit = {
   category_id: number;
 };
 
-const { height } = Dimensions.get("window");
+const Header = memo(({
+  name,
+  setName,
+  description,
+  setDescription,
+  categories,
+  selectedCat,
+  setPickerVisible,
+  onAdd,
+  habitsCount,
+  theme
+}: any) => (
+  <View style={styles.headerContainer}>
+    <View style={styles.inputContainer}>
+      <TextInput
+        label="Habit Name"
+        value={name}
+        onChangeText={setName}
+        mode="outlined"
+        style={[styles.input, { backgroundColor: theme.colors.surface }]}
+        outlineColor={theme.colors.border}
+        activeOutlineColor={theme.colors.primary}
+        textColor={theme.colors.text}
+        placeholderTextColor={theme.colors.placeholder}
+      />
+      <TextInput
+        label="Description (optional)"
+        value={description}
+        onChangeText={setDescription}
+        mode="outlined"
+        multiline
+        numberOfLines={3}
+        style={[styles.input, { backgroundColor: theme.colors.surface, marginBottom: 20 }]}
+        outlineColor={theme.colors.border}
+        activeOutlineColor={theme.colors.primary}
+        textColor={theme.colors.text}
+        placeholderTextColor={theme.colors.placeholder}
+      />
+
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => setPickerVisible(true)}
+        style={[styles.pickerButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+      >
+        <Text style={{ color: theme.colors.textSecondary, fontSize: 12, marginBottom: 4 }}>Category</Text>
+        <View style={styles.pickerButtonContent}>
+          <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '500' }}>
+            {categories.find((c: any) => c.id === selectedCat)?.name ?? "Select Category"}
+          </Text>
+          <Entypo name="chevron-small-down" size={24} color={theme.colors.icon} />
+        </View>
+      </TouchableOpacity>
+
+      <CustomButton
+        title="Add Habit"
+        style={styles.addButton}
+        onPress={onAdd}
+      />
+    </View>
+
+    <View style={styles.sectionHeader}>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>My Habits</Text>
+      <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
+        <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{habitsCount}</Text>
+      </View>
+    </View>
+  </View>
+));
+
+const HabitItem = memo(({ item, categories, theme, nav, onDelete }: any) => {
+  const catName = categories.find((c: any) => c.id === item.category_id)?.name || "Uncategorized";
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={[styles.habitCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+      onPress={() =>
+        nav.navigate("HabitDetails", {
+          habitId: item.id,
+          habitName: item.name,
+          habitDescription: item.description
+        })
+      }
+    >
+      <View style={styles.habitCardContent}>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.habitName, { color: theme.colors.text }]}>{item.name}</Text>
+          <Text style={[styles.habitCategory, { color: theme.colors.textSecondary }]}>{catName}</Text>
+        </View>
+        <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.deleteButton}>
+          <Entypo
+            name="trash"
+            size={18}
+            color={theme.colors.error}
+          />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+});
 
 export default function AddHabitScreen() {
   const [name, setName] = useState("");
@@ -51,7 +145,7 @@ export default function AddHabitScreen() {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [filter, setFilter] = useState("");
 
-  const { isDark, theme } = useTheme();
+  const { theme } = useTheme();
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const loadData = useCallback(() => {
@@ -72,7 +166,7 @@ export default function AddHabitScreen() {
     if (Platform.OS === "android") ToastAndroid.show(msg, ToastAndroid.SHORT);
   };
 
-  const onAdd = async () => {
+  const onAdd = useCallback(async () => {
     if (!name.trim()) return Alert.alert("Error", "Enter a habit name.");
     if (!selectedCat) return Alert.alert("Error", "Select a category.");
     await addHabit(name, description, selectedCat);
@@ -81,9 +175,9 @@ export default function AddHabitScreen() {
     setName("");
     setDescription("");
     loadData();
-  };
+  }, [name, description, selectedCat, loadData]);
 
-  const onDelete = (id: number) =>
+  const onDelete = useCallback((id: number) =>
     Alert.alert("Delete Habit?", "This can’t be undone.", [
       { text: "Cancel" },
       {
@@ -95,157 +189,124 @@ export default function AddHabitScreen() {
           loadData();
         }
       }
-    ]);
+    ]), [loadData]);
+
+  const flatListData = useMemo(() => [
+    { id: "header-id", type: "header" as const },
+    ...habits.map(h => ({ ...h, type: "habit" as const }))
+  ], [habits]);
+
+  const renderItem = useCallback(({ item }: { item: any }) => {
+    if (item.type === "header") {
+      return (
+        <Header
+          name={name}
+          setName={setName}
+          description={description}
+          setDescription={setDescription}
+          categories={categories}
+          selectedCat={selectedCat}
+          setPickerVisible={setPickerVisible}
+          onAdd={onAdd}
+          habitsCount={habits.length}
+          theme={theme}
+        />
+      );
+    }
+
+    return (
+      <HabitItem
+        item={item}
+        categories={categories}
+        theme={theme}
+        nav={nav}
+        onDelete={onDelete}
+      />
+    );
+  }, [name, setName, description, setDescription, categories, selectedCat, onAdd, habits.length, theme, nav, onDelete]);
+
+  const renderSeparator = useCallback(() => (
+    <Divider style={{ backgroundColor: theme.colors.border }} />
+  ), [theme.colors.border]);
+
+  const renderEmpty = useCallback(() => (
+    <View style={styles.empty}>
+      <Ionicons name="clipboard-outline" size={48} color={theme.colors.icon} />
+      <Text style={{ color: theme.colors.textSecondary, marginTop: 12 }}>
+        No habits yet. Add one above!
+      </Text>
+    </View>
+  ), [theme.colors.icon]);
+
+  const filteredCategories = useMemo(() =>
+    categories.filter(c => c.name.toLowerCase().includes(filter.toLowerCase())),
+    [categories, filter]
+  );
 
   return (
     <SafeAreaView style={[styles.outer, { backgroundColor: theme.colors.background }]}>
       <FlatList
-        data={habits}
-        keyExtractor={(h) => h.id.toString()}
-        ItemSeparatorComponent={() => <Divider style={{ backgroundColor: theme.colors.border }} />}
+        data={flatListData}
+        keyExtractor={(item: any) => item.id.toString()}
+        ItemSeparatorComponent={renderSeparator}
         contentContainerStyle={{ paddingBottom: 50, flexGrow: 1 }}
-        ListHeaderComponent={() => (
-          <View style={styles.headerContainer}>
-            <View style={styles.inputContainer}>
-              <TextInput
-                label="Habit Name"
-                value={name}
-                onChangeText={setName}
-                mode="outlined"
-                style={[styles.input, { backgroundColor: theme.colors.surface }]}
-                outlineColor={theme.colors.border}
-                activeOutlineColor={theme.colors.primary}
-                textColor={theme.colors.text}
-                placeholderTextColor={theme.colors.placeholder}
-              />
-              <TextInput
-                label="Description (optional)"
-                value={description}
-                onChangeText={setDescription}
-                mode="outlined"
-                multiline
-                numberOfLines={3}
-                style={[styles.input, { backgroundColor: theme.colors.surface, marginBottom: 20 }]}
-                outlineColor={theme.colors.border}
-                activeOutlineColor={theme.colors.primary}
-                textColor={theme.colors.text}
-                placeholderTextColor={theme.colors.placeholder}
-              />
+        renderItem={renderItem}
+        ListEmptyComponent={habits.length === 0 ? renderEmpty : null}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={false}
+      />
 
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setPickerVisible(true)}
-                style={[styles.pickerButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-              >
-                <Text style={{ color: theme.colors.textSecondary, fontSize: 12, marginBottom: 4 }}>Category</Text>
-                <View style={styles.pickerButtonContent}>
-                  <Text style={{ color: theme.colors.text, fontSize: 16, fontWeight: '500' }}>
-                    {categories.find(c => c.id === selectedCat)?.name ?? "Select Category"}
-                  </Text>
-                  <Entypo name="chevron-small-down" size={24} color={theme.colors.icon} />
-                </View>
-              </TouchableOpacity>
-
-              <Modal visible={pickerVisible} animationType="slide" transparent onRequestClose={() => setPickerVisible(false)}>
-                <View style={styles.modalOverlay}>
-                  <View style={[styles.modalSheet, { backgroundColor: theme.colors.surface }]}>
-                    <View style={styles.modalHeader}>
-                      <Text style={{ fontSize: 20, fontWeight: '700', color: theme.colors.text }}>Select Category</Text>
-                      <TouchableOpacity onPress={() => { setPickerVisible(false); setFilter(""); }}>
-                        <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>Done</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    <TextInput
-                      placeholder="Search categories..."
-                      value={filter}
-                      onChangeText={setFilter}
-                      mode="outlined"
-                      style={[styles.searchInput, { backgroundColor: theme.colors.background }]}
-                      outlineColor={theme.colors.border}
-                      activeOutlineColor={theme.colors.primary}
-                      textColor={theme.colors.text}
-                      placeholderTextColor={theme.colors.placeholder}
-                      left={<TextInput.Icon icon="magnify" color={theme.colors.icon} />}
-                    />
-
-                    <FlatList
-                      data={categories.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()))}
-                      keyExtractor={c => c.id.toString()}
-                      style={{ flex: 1 }}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          onPress={() => { setSelectedCat(item.id); setPickerVisible(false); setFilter(""); }}
-                          style={styles.categoryItem}
-                        >
-                          <Text style={{ color: theme.colors.text, fontSize: 16 }}>{item.name}</Text>
-                          {selectedCat === item.id && (
-                            <Entypo name="check" size={20} color={theme.colors.primary} />
-                          )}
-                        </TouchableOpacity>
-                      )}
-                      ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: theme.colors.border }} />}
-                    />
-                  </View>
-                </View>
-              </Modal>
-
-              <CustomButton
-                title="Add Habit"
-                style={styles.addButton}
-                onPress={onAdd}
-              />
-            </View>
-
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>My Habits</Text>
-              <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
-                <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{habits.length}</Text>
-              </View>
-            </View>
-          </View>
-        )}
-        renderItem={({ item }) => {
-          const catName =
-            categories.find((c) => c.id === item.category_id)?.name ||
-            "Uncategorized";
-          return (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={[styles.habitCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-              onPress={() =>
-                nav.navigate("HabitDetails", {
-                  habitId: item.id,
-                  habitName: item.name,
-                  habitDescription: item.description
-                })
-              }
-            >
-              <View style={styles.habitCardContent}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.habitName, { color: theme.colors.text }]}>{item.name}</Text>
-                  <Text style={[styles.habitCategory, { color: theme.colors.textSecondary }]}>{catName}</Text>
-                </View>
-                <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.deleteButton}>
-                  <Entypo
-                    name="trash"
-                    size={18}
-                    color={theme.colors.error}
-                  />
+      {pickerVisible && (
+        <Modal
+          visible={pickerVisible}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setPickerVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalSheet, { backgroundColor: theme.colors.surface }]}>
+              <View style={styles.modalHeader}>
+                <Text style={{ fontSize: 20, fontWeight: '700', color: theme.colors.text }}>Select Category</Text>
+                <TouchableOpacity onPress={() => { setPickerVisible(false); setFilter(""); }}>
+                  <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>Done</Text>
                 </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          );
-        }}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="clipboard-outline" size={48} color={theme.colors.icon} />
-            <Text style={{ color: theme.colors.textSecondary, marginTop: 12 }}>
-              No habits yet. Add one above!
-            </Text>
+
+              <TextInput
+                placeholder="Search categories..."
+                value={filter}
+                onChangeText={setFilter}
+                mode="outlined"
+                style={[styles.searchInput, { backgroundColor: theme.colors.background }]}
+                outlineColor={theme.colors.border}
+                activeOutlineColor={theme.colors.primary}
+                textColor={theme.colors.text}
+                placeholderTextColor={theme.colors.placeholder}
+                left={<TextInput.Icon icon="magnify" color={theme.colors.icon} />}
+              />
+
+              <FlatList
+                data={filteredCategories}
+                keyExtractor={c => c.id.toString()}
+                style={{ flex: 1 }}
+                keyboardShouldPersistTaps="handled"
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => { setSelectedCat(item.id); setPickerVisible(false); setFilter(""); }}
+                    style={styles.categoryItem}
+                  >
+                    <Text style={{ color: theme.colors.text, fontSize: 16 }}>{item.name}</Text>
+                    {selectedCat === item.id && (
+                      <Entypo name="check" size={20} color={theme.colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: theme.colors.border }} />}
+              />
+            </View>
           </View>
-        }
-      />
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -351,7 +412,6 @@ const styles = StyleSheet.create({
     marginTop: 60,
     alignItems: "center",
   },
-  // Styles from the second block that were not duplicates or were new:
   scroll: {
     flexGrow: 1
   },

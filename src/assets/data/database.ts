@@ -5,70 +5,56 @@ import { Category, DeletedHabit, Habit, HabitFromRecycleBin, HabitProgress, Recy
 const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
 export const initializeDatabase = async () => {
-  await checkAndRestoreDatabase();
   const db = await dbPromise;
   await db.execAsync("PRAGMA foreign_keys = ON;");
 
   try {
-    await db.execAsync(
-      `CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-          );`
-    );
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
 
-    await db.execAsync(
-      `CREATE TABLE IF NOT EXISTS habits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            description TEXT,
-            category_id INTEGER,
-            added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
-          );`
-    );
+      CREATE TABLE IF NOT EXISTS habits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        category_id INTEGER,
+        added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+      );
 
-    await db.execAsync(
-      `CREATE TRIGGER IF NOT EXISTS update_habit_timestamp
-        AFTER UPDATE ON habits
-        FOR EACH ROW
-        BEGIN
-          UPDATE habits SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
-        END;`
-    );
+      CREATE TABLE IF NOT EXISTS habit_progress (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        habit_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        completed INTEGER DEFAULT 0,
+        custom_value TEXT,
+        UNIQUE(habit_id, date), 
+        FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
+      );
 
-    await db.execAsync(
-      `CREATE TABLE IF NOT EXISTS habit_progress (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            habit_id INTEGER NOT NULL,
-            date TEXT NOT NULL,
-            completed INTEGER DEFAULT 0,
-            custom_value TEXT,
-            UNIQUE(habit_id, date), 
-            FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
-          );`
-    );
-    await db.execAsync("CREATE INDEX IF NOT EXISTS idx_habit_id_date ON habit_progress(habit_id, date);");
+      CREATE INDEX IF NOT EXISTS idx_habit_id_date ON habit_progress(habit_id, date);
 
-    await db.execAsync(
-      `CREATE TABLE IF NOT EXISTS recycle_bin (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            habit_id INTEGER NOT NULL,
-            habit_name TEXT NOT NULL,
-            habit_description TEXT,
-            category_id INTEGER,
-            deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          );`
-    );
+      CREATE TABLE IF NOT EXISTS recycle_bin (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        habit_id INTEGER NOT NULL,
+        habit_name TEXT NOT NULL,
+        habit_description TEXT,
+        category_id INTEGER,
+        deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
   } catch (error) {
-    console.error("Error initializing database:", error);
+    console.error("Error initializing database tables:", error);
   }
-  // Diagnostic: log current counts to help detect unexpected deletions
+
+  // Diagnostic counts
   try {
-    const catCountRow = await db.getFirstAsync("SELECT COUNT(*) as cnt FROM categories;");
-    const habitCountRow = await db.getFirstAsync("SELECT COUNT(*) as cnt FROM habits;");
+    const catCountRow = (await db.getFirstAsync("SELECT COUNT(*) as cnt FROM categories;")) as any;
+    const habitCountRow = (await db.getFirstAsync("SELECT COUNT(*) as cnt FROM habits;")) as any;
     console.log(`DB counts after init - categories: ${catCountRow?.cnt ?? 0}, habits: ${habitCountRow?.cnt ?? 0}`);
   } catch (err) {
     console.warn("Could not read counts after DB init:", err);

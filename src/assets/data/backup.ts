@@ -25,11 +25,18 @@ export const backupDatabase = async () => {
         await ensureBackupDir();
         const dbInfo = await FileSystem.getInfoAsync(dbPath);
         if (!dbInfo.exists) {
-            console.warn('No database file to back up.');
+            console.warn('No database file found at', dbPath, '- cannot back up.');
             return false;
         }
+
+        // Safety: only backup if the file has content
+        if (dbInfo.size === 0) {
+            console.warn('Main database is empty, skipping backup to prevent overwriting good backups.');
+            return false;
+        }
+
         await FileSystem.copyAsync({ from: dbPath, to: backupPath });
-        console.log('Database backup created successfully.');
+        console.log(`Database backup created successfully (${dbInfo.size} bytes).`);
         return true;
     }
     catch (error) {
@@ -41,16 +48,22 @@ export const backupDatabase = async () => {
 export const restoreDatabase = async () => {
     try {
         console.log('Attempting to restore database from', backupPath, 'to', dbPath);
-        const backupExists = await FileSystem.getInfoAsync(backupPath);
+        const backupInfo = await FileSystem.getInfoAsync(backupPath);
 
-        if (!backupExists.exists) {
+        if (!backupInfo.exists) {
             console.warn('No backup found! Cannot restore.');
+            return false;
+        }
+
+        // CRITICAL SAFETY: Don't restore if the backup file is empty
+        if (backupInfo.size === 0) {
+            console.error('Backup file is empty! Aborting restore to prevent data loss.');
             return false;
         }
 
         await FileSystem.copyAsync({ from: backupPath, to: dbPath });
 
-        console.log('Database restored from backup.');
+        console.log(`Database restored from backup (${backupInfo.size} bytes).`);
         return true;
     }
     catch (error) {
@@ -60,14 +73,16 @@ export const restoreDatabase = async () => {
 };
 
 export const checkAndRestoreDatabase = async () => {
+    // This function is currently disabled in database.ts init to prevent accidental wipes.
+    // It can be manually called if needed, or re-enabled with caution.
     const dbExists = await FileSystem.getInfoAsync(dbPath);
     console.log('Checking if DB exists at', dbPath, 'exists:', dbExists.exists);
 
     if (!dbExists.exists) {
-        console.warn('Database is missing! Attempting to restore...');
+        console.warn('Database is missing! Attempting to restore from backup...');
         const restored = await restoreDatabase();
         if (!restored) {
-            console.error('Could not restore database. Creating a fresh one...');
+            console.error('Could not restore database from backup.');
         }
     }
     return true;
@@ -79,9 +94,9 @@ export const startAutoBackup = (intervalMs: number = DEFAULT_BACKUP_INTERVAL_MS)
         return;
     }
     // Immediately run once, then schedule
-    backupDatabase().catch(() => {});
+    backupDatabase().catch(() => { });
     _backupIntervalId = setInterval(() => {
-        backupDatabase().catch(() => {});
+        backupDatabase().catch(() => { });
     }, intervalMs) as unknown as number;
     console.log('Auto-backup started with interval (ms):', intervalMs);
 };
