@@ -6,14 +6,28 @@ const dbPromise = SQLite.openDatabaseAsync("habits.db");
 
 export const initializeDatabase = async () => {
   const db = await dbPromise;
-  await db.execAsync("PRAGMA foreign_keys = ON;");
+
+  // Configure database for reliability and data persistence
+  try {
+    // Disable WAL mode - use DELETE journal mode for better compatibility
+    const journalResult = await db.getFirstAsync("PRAGMA journal_mode = DELETE;");
+    console.log("Journal mode set to:", journalResult);
+
+    // CRITICAL: Set synchronous mode to FULL to ensure data is written to disk immediately
+    await db.execAsync("PRAGMA synchronous = FULL;");
+
+    // Enable foreign key constraints
+    await db.execAsync("PRAGMA foreign_keys = ON;");
+  } catch (error) {
+    console.error("Error setting PRAGMA options:", error);
+  }
 
   try {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        created_at TEXT DEFAULT (datetime('now'))
       );
 
       CREATE TABLE IF NOT EXISTS habits (
@@ -21,9 +35,9 @@ export const initializeDatabase = async () => {
         name TEXT NOT NULL,
         description TEXT,
         category_id INTEGER,
-        added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+        added_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
       );
 
       CREATE TABLE IF NOT EXISTS habit_progress (
@@ -44,7 +58,7 @@ export const initializeDatabase = async () => {
         habit_name TEXT NOT NULL,
         habit_description TEXT,
         category_id INTEGER,
-        deleted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        deleted_at TEXT DEFAULT (datetime('now'))
       );
     `);
   } catch (error) {
@@ -69,10 +83,13 @@ export const addHabit = async (name: string, description: string, categoryId: nu
 
   const db = await dbPromise;
   try {
-    await db.runAsync("INSERT INTO habits (name, description, category_id) VALUES (?, ?, ?);", [name, description, categoryId]);
+    console.log(`[DB] Adding habit: name="${name}", description="${description}", categoryId=${categoryId}`);
+    const result = await db.runAsync("INSERT INTO habits (name, description, category_id) VALUES (?, ?, ?);", [name, description, categoryId]);
+    console.log(`[DB] Habit added successfully. Insert ID: ${result.lastInsertRowId}`);
     await backupDatabase();
   } catch (error) {
-    console.error('Error adding habit:', error);
+    console.error('[DB] Error adding habit:', error);
+    throw error;
   }
 };
 
@@ -81,10 +98,13 @@ export const addHabit = async (name: string, description: string, categoryId: nu
 export const updateHabit = async (id: number, name: string, description: string, categoryId: number) => {
   const db = await dbPromise;
   try {
-    await db.runAsync("UPDATE habits SET name = ?, description = ?, category_id = ? WHERE id = ?;", [name, description, categoryId, id]);
+    console.log(`[DB] Updating habit ${id}: name="${name}", description="${description}", categoryId=${categoryId}`);
+    const result = await db.runAsync("UPDATE habits SET name = ?, description = ?, category_id = ? WHERE id = ?;", [name, description, categoryId, id]);
+    console.log(`[DB] Habit updated successfully. Rows affected: ${result.changes}`);
     await backupDatabase();
   } catch (error) {
-    console.error('Error updating habit:', error);
+    console.error('[DB] Error updating habit:', error);
+    throw error;
   }
 };
 
@@ -209,13 +229,13 @@ export const restoreHabit = async (id: number) => {
 export const cleanRecycleBin = async () => {
   const db = await dbPromise;
   try {
-    await db.runAsync(
-      `DELETE FROM recycle_bin 
-      WHERE datetime(deleted_at) <= datetime('now', '-30 days');`
-    );
+    console.log('[DB] Cleaning recycle bin - deleting all items');
+    const result = await db.runAsync('DELETE FROM recycle_bin;');
+    console.log(`[DB] Recycle bin cleaned. Rows deleted: ${result.changes}`);
     await backupDatabase();
   } catch (error) {
-    console.error("Error cleaning recycle bin:", error);
+    console.error('[DB] Error cleaning recycle bin:', error);
+    throw error;
   }
 };
 
@@ -296,10 +316,13 @@ export const removeProgress = async (habitId: number, formattedDate: string) => 
 export const addCategory = async (categoryName: string): Promise<void> => {
   const db = await dbPromise;
   try {
-    await db.runAsync("INSERT INTO categories (name) VALUES (?);", [categoryName]);
+    console.log(`[DB] Adding category: name="${categoryName}"`);
+    const result = await db.runAsync("INSERT INTO categories (name) VALUES (?);", [categoryName]);
+    console.log(`[DB] Category added successfully. Insert ID: ${result.lastInsertRowId}`);
     await backupDatabase();
   } catch (error) {
-    console.error('Error adding category:', error);
+    console.error('[DB] Error adding category:', error);
+    throw error;
   }
 };
 

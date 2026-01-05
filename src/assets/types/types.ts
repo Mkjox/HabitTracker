@@ -45,9 +45,9 @@ export type HabitFromRecycleBin = {
 
 export type InitializeDatabase = () => Promise<void>;
 
-export type AddHabit = (name: string, categoryId: number) => Promise<void>;
+export type AddHabit = (name: string, description: string, categoryId: number) => Promise<void>;
 
-export type UpdateHabit = (id: number, name: string, categoryId: number) => Promise<void>;
+export type UpdateHabit = (id: number, name: string, description: string, categoryId: number) => Promise<void>;
 
 export type GetHabits = () => Promise<Habit[]>;
 

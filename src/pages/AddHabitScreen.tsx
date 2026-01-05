@@ -257,6 +257,7 @@ export default function AddHabitScreen() {
           ListEmptyComponent={habits.length === 0 ? renderEmpty : null}
           keyboardShouldPersistTaps="handled"
           removeClippedSubviews={false}
+          showsVerticalScrollIndicator={false}
         />
 
         {pickerVisible && (
@@ -293,6 +294,7 @@ export default function AddHabitScreen() {
                   keyExtractor={c => c.id.toString()}
                   style={{ flex: 1 }}
                   keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
                   renderItem={({ item }) => (
                     <TouchableOpacity
                       onPress={() => { setSelectedCat(item.id); setPickerVisible(false); setFilter(""); }}
@@ -321,7 +323,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    // padding: 20,
+    paddingTop: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   title: {
     fontSize: 28,

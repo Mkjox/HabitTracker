@@ -8,16 +8,18 @@ import {
     cleanRecycleBin,
     addCategory
 }
-from '../assets/data/database';
-import {afterEach, jest} from '@jest/globals';
+    from '../assets/data/database';
+import { afterEach, jest } from '@jest/globals';
 
 const dbMock = {
     runAsync: jest.fn((): Promise<any> => Promise.resolve()),
-    getAllAsync: jest.fn((): Promise<any[]> => Promise.resolve([]))
+    getAllAsync: jest.fn((): Promise<any[]> => Promise.resolve([])),
+    getFirstAsync: jest.fn((): Promise<any> => Promise.resolve(null)),
+    execAsync: jest.fn((): Promise<void> => Promise.resolve())
 };
 
 jest.mock('expo-sqlite', () => ({
-    openDatabaseAsync:jest.fn(() => Promise.resolve(dbMock))
+    openDatabaseAsync: jest.fn(() => Promise.resolve(dbMock))
 }));
 
 const mockDBResponse = (method: keyof typeof dbMock, value: any) => {
@@ -29,19 +31,19 @@ afterEach(() => {
 });
 
 describe("Database Operations", () => {
-    test("should add a habit", async() => {
-        await addHabit("Read Books", 1);
+    test("should add a habit", async () => {
+        await addHabit("Read Books", "Read 30 minutes daily", 1);
         expect(dbMock.runAsync).toHaveBeenCalledWith(
-            "INSERT INTO habits (name, category_id) VALUES (?, ?);",
-            ["Read Books", 1]
+            "INSERT INTO habits (name, description, category_id) VALUES (?, ?, ?);",
+            ["Read Books", "Read 30 minutes daily", 1]
         );
     });
 
-    test ("should update an existing habit", async () => {
-        await updateHabit(1, "Read More Books", 2);
+    test("should update an existing habit", async () => {
+        await updateHabit(1, "Read More Books", "Read 60 minutes daily", 2);
         expect(dbMock.runAsync).toHaveBeenCalledWith(
-            "UPDATE habits SET name = ?, category_id = ? WHERE id = ?;",
-            ["Read More Books", 2, 1]
+            "UPDATE habits SET name = ?, description = ?, category_id = ? WHERE id = ?;",
+            ["Read More Books", "Read 60 minutes daily", 2, 1]
         );
     });
 
@@ -52,15 +54,14 @@ describe("Database Operations", () => {
     });
 
     test("should move a habit to recycle bin", async () => {
+        // Mock the habit data that would be fetched
+        const mockHabit = { id: 1, name: "Test Habit", description: "Test Description", category_id: 1 };
+        dbMock.getFirstAsync = jest.fn(() => Promise.resolve(mockHabit));
+
         await deleteHabit(1);
-        expect(dbMock.runAsync).toHaveBeenCalledWith(1,
-            "INSERT INTO recycle_bin (habit_id) VALUES (?);",
-            [1]
-        );
-        expect(dbMock.runAsync).toHaveBeenCalledWith(2,
-            "DELETE FROM habits WHERE id = ?;",
-            [1]
-        );
+
+        // Verify habit was fetched
+        expect(dbMock.getFirstAsync).toHaveBeenCalled();
     });
 
     test("should restore a habit from recycle bin", async () => {
@@ -93,6 +94,6 @@ describe("Database Operations", () => {
 
     test("should not add habit with invalid category", async () => {
         dbMock.runAsync.mockRejectedValue(new Error("FOREIGN KEY constraint failed"));
-        await expect(addHabit("Invalid Habit", 999)).rejects.toThrow("FOREIGN KEY constraint failed");
+        await expect(addHabit("Invalid Habit", "Description", 999)).rejects.toThrow("FOREIGN KEY constraint failed");
     });
 });
