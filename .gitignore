@@ -46,3 +46,4 @@ android/
 
 # Added for privacy
 app.json
+package-lock.json
