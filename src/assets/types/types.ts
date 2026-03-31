@@ -9,8 +9,14 @@ export interface Habit {
   name: string;
   description: string;
   category_id: number | null;
+  icon: string;
   added_at: string;
   updated_at: string;
+}
+
+export interface DashboardHabit extends Habit {
+  streak: number;
+  completedToday: boolean;
 }
 
 export interface HabitProgress {

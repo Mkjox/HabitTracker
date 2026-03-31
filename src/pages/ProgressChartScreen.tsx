@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView, Dimensions } from "react-native";
-import { BarGroup, CartesianChart } from "victory-native";
-import { getProgress } from "../assets/data/database";
+import { Bar, CartesianChart } from "victory-native";
+import { getMonthlyStats } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
 
 const { width } = Dimensions.get("window");
@@ -14,9 +14,13 @@ const ProgressChartScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getProgress();
-        const formatted = formatData(data);
-        setProgressData(formatted);
+        const stats = await getMonthlyStats();
+        const formatted = stats.map(s => ({
+          x: s.month_label,
+          y: s.total_completed,
+        }));
+        
+        setProgressData(formatted.length > 0 ? formatted : [{ x: 'Jan', y: 0 }]);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       } finally {
@@ -27,21 +31,7 @@ const ProgressChartScreen = () => {
     fetchData();
   }, []);
 
-  const formatData = (data: any[]) => {
-    const map: { [month: string]: number } = {};
-
-    data.forEach((item) => {
-      const month = new Date(item.date).toLocaleString("default", { month: "short" });
-      map[month] = (map[month] || 0) + (item.total_progress || 0);
-    });
-
-    const result = Object.keys(map).map((month) => ({
-      x: month,
-      y: map[month],
-    }));
-
-    return result.length > 0 ? result : [{ x: 'Jan', y: 0 }];
-  };
+  // Removed formatData as SQL aggregation handles this now
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -54,16 +44,25 @@ const ProgressChartScreen = () => {
           </View>
         ) : (
           <View style={[styles.chartContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-            <CartesianChart data={progressData} xKey="x" yKeys={["y", "z"]}>
+            <CartesianChart 
+              data={progressData} 
+              xKey="x" 
+              yKeys={["y"]}
+              axisOptions={{ 
+                font: undefined, // Default system font
+                labelColor: theme.colors.textSecondary,
+                lineColor: theme.colors.border,
+              }}
+            >
               {({ points, chartBounds }) => (
-                <BarGroup
-                  chartBounds={chartBounds}
-                  roundedCorners={{ topLeft: 10, topRight: 10 }}
-                  betweenGroupPadding={0.3}
-                >
-                  <BarGroup.Bar points={points.y} color={theme.colors.primary} />
-                  <BarGroup.Bar points={points.z} color={theme.colors.secondary} />
-                </BarGroup>
+                <View style={{ flex: 1 }}>
+                  <Bar 
+                    points={points.y} 
+                    chartBounds={chartBounds}
+                    color={theme.colors.primary} 
+                    roundedCorners={{ topLeft: 8, topRight: 8 }}
+                  />
+                </View>
               )}
             </CartesianChart>
           </View>

@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
-import { addCategory, deleteCategory, getCategories } from '../assets/data/database';
 import { useTheme } from '../context/ThemeContext';
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { Divider, TextInput } from 'react-native-paper';
 import CustomButton from '../components/CustomButton';
+import { useHabitStore } from '../store/useHabitStore';
 
 const { height } = Dimensions.get("window");
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
-    const [categories, setCategories] = useState<{ id: number; name: string; created_at: string }[]>([]);
     const { theme } = useTheme();
-
-    useEffect(() => {
-        fetchCategories();
-    }, []);
+    const { categories, addCategory, removeCategory } = useHabitStore();
 
     const showToastAdd = () => {
         if (Platform.OS === 'android') {
@@ -29,16 +25,6 @@ const CategoriesScreen = () => {
         }
     };
 
-    const fetchCategories = async () => {
-        try {
-            const data = await getCategories();
-            setCategories(data);
-        }
-        catch (error) {
-            Alert.alert("Error", "Failed to load categories");
-        }
-    };
-
     const handleAddCategory = async () => {
         if (!categoryName.trim()) {
             Alert.alert("Error", "Category name cannot be empty!");
@@ -49,7 +35,6 @@ const CategoriesScreen = () => {
             Keyboard.dismiss();
             showToastAdd();
             setCategoryName("");
-            fetchCategories();
         }
         catch (error) {
             Alert.alert("Error", "Category already exists or cannot be added.");
@@ -65,9 +50,12 @@ const CategoriesScreen = () => {
                 {
                     text: "Delete",
                     onPress: async () => {
-                        await deleteCategory(id);
-                        showToastDelete();
-                        fetchCategories();
+                        try {
+                            await removeCategory(id);
+                            showToastDelete();
+                        } catch (error) {
+                            Alert.alert("Error", "Failed to delete category.");
+                        }
                     },
                     style: "destructive"
                 }

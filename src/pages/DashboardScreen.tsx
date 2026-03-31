@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {
     View,
     Text,
@@ -6,98 +6,54 @@ import {
     FlatList,
     ActivityIndicator,
     RefreshControl,
-    TouchableOpacity,
-    Dimensions,
     SafeAreaView
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { getProgress } from '../assets/data/database';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-
-type ProgressRecord = {
-    habit_id: number;
-    habit_name: string;
-    date: string;            // "YYYY-MM-DD"
-    total_progress: number;
-    custom_value?: string;
-};
-
-type HabitStreak = {
-    habit_id: number;
-    habit_name: string;
-    streak: number;
-};
-
-const computeStreak = (dates: string[]): number => {
-    if (dates.length === 0) return 0;
-    const dayMs = 86400000;
-    const today = new Date().toISOString().slice(0, 10);
-    // build a Set for O(1) lookup
-    const dateSet = new Set(dates);
-    let streak = 0;
-    let cursor = new Date(today).getTime();
-
-    // if user didn’t complete today, start from yesterday
-    if (!dateSet.has(today)) {
-        cursor -= dayMs;
-    }
-
-    // count backward while each date exists
-    while (dateSet.has(new Date(cursor).toISOString().slice(0, 10))) {
-        streak++;
-        cursor -= dayMs;
-    }
-
-    return streak;
-};
-
-const { height } = Dimensions.get("window");
+import HabitListItem from '../components/HabitListItem';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../assets/types/navigationTypes';
+import { useHabitStore } from '../store/useHabitStore';
+import DailyProgressCircle from '../components/DailyProgressCircle';
 
 export default function DashboardScreen() {
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { isDark, theme, toggleTheme } = useTheme();
-    const [habits, setHabits] = useState<HabitStreak[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const { habits, loading, toggleHabit, refresh } = useHabitStore();
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            const data = await getProgress();  // all progress records
-            // group by habit_id
-            const map: Record<number, { name: string; dates: string[] }> = {};
-            data.forEach(rec => {
-                if (!map[rec.habit_id]) {
-                    map[rec.habit_id] = { name: rec.habit_name, dates: [] };
-                }
-                map[rec.habit_id].dates.push(rec.date);
-            });
-            // compute streaks
-            const list: HabitStreak[] = Object.entries(map).map(([id, { name, dates }]) => ({
-                habit_id: +id,
-                habit_name: name,
-                streak: computeStreak(dates)
-            }));
-            setHabits(list);
-        } catch (err) {
-            console.error('Error loading dashboard:', err);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    // re-fetch whenever screen is focused
-    useFocusEffect(useCallback(() => {
-        loadData();
-    }, []));
+    const completedCount = habits.filter(h => h.completedToday).length;
+    const totalCount = habits.length;
+    const progress = totalCount > 0 ? completedCount / totalCount : 0;
 
     const onRefresh = () => {
-        setRefreshing(true);
-        loadData();
+        refresh();
     };
 
-    if (loading && !refreshing) {
+    const renderHeader = () => (
+        <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={styles.summaryContent}>
+                <View style={{ flex: 1 }}>
+                    <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>Today's Goal</Text>
+                    <Text style={[styles.summarySub, { color: theme.colors.textSecondary }]}>
+                        {completedCount} of {totalCount} habits completed
+                    </Text>
+                    
+                    <View style={styles.streakBadgeContainer}>
+                        <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
+                            <Ionicons name="flame" size={14} color={theme.colors.primary} />
+                            <Text style={[styles.streakText, { color: theme.colors.primary }]}>
+                                {Math.max(...habits.map(h => h.streak), 0)} peak streak
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+                <DailyProgressCircle progress={progress} size={90} strokeWidth={8} />
+            </View>
+        </View>
+    );
+
+    if (loading && habits.length === 0) {
         return (
             <View style={[styles.loaderContainer, { backgroundColor: theme.colors.background }]}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -110,26 +66,31 @@ export default function DashboardScreen() {
             <View style={styles.content}>
                 <View style={styles.header}>
                     <Text style={[styles.title, { color: theme.colors.text }]}>Dashboard</Text>
-                    <TouchableOpacity
-                        onPress={toggleTheme}
-                        style={[styles.themeToggle, { backgroundColor: theme.colors.surface }]}
-                    >
-                        <Ionicons
-                            name={isDark ? 'sunny' : 'moon'}
-                            size={20}
-                            color={theme.colors.primary}
+                    <View style={styles.headerActions as any}>
+                        <Ionicons 
+                            name="notifications-outline" 
+                            size={24} 
+                            color={theme.colors.textSecondary} 
+                            style={{ marginRight: 16 }}
                         />
-                    </TouchableOpacity>
+                        <Ionicons 
+                            name={isDark ? 'sunny-outline' : 'moon-outline'} 
+                            size={24} 
+                            color={theme.colors.textSecondary}
+                            onPress={toggleTheme}
+                        />
+                    </View>
                 </View>
 
                 <FlatList
                     data={habits}
-                    keyExtractor={item => item.habit_id.toString()}
+                    keyExtractor={item => item.id.toString()}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    ListHeaderComponent={renderHeader}
                     refreshControl={
                         <RefreshControl
-                            refreshing={refreshing}
+                            refreshing={loading}
                             onRefresh={onRefresh}
                             tintColor={theme.colors.primary}
                             colors={[theme.colors.primary]}
@@ -144,25 +105,20 @@ export default function DashboardScreen() {
                         </View>
                     }
                     renderItem={({ item }) => (
-                        <View style={[
-                            styles.card,
-                            {
-                                backgroundColor: theme.colors.surface,
-                                borderColor: theme.colors.border,
-                                borderRadius: theme.borderRadius.l
-                            }
-                        ]}>
-                            <View style={styles.cardHeader}>
-                                <Text style={[styles.habitName, { color: theme.colors.text }]}>
-                                    {item.habit_name}
-                                </Text>
-                                <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
-                                    <Text style={[styles.streakText, { color: theme.colors.primary }]}>
-                                        🔥 {item.streak} day{item.streak !== 1 ? 's' : ''}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
+                        <HabitListItem
+                            habitId={item.id}
+                            name={item.name}
+                            streak={item.streak}
+                            completedToday={item.completedToday}
+                            icon={item.icon}
+                            onToggle={() => toggleHabit(item.id)}
+                            onPress={() => navigation.navigate("HabitDetails", {
+                                habitId: item.id,
+                                habitName: item.name,
+                                habitDescription: item.description || "",
+                                icon: item.icon
+                            })}
+                        />
                     )}
                 />
             </View>
@@ -186,23 +142,16 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     title: {
-        fontSize: 28,
-        fontWeight: '700',
+        fontSize: 32,
+        fontWeight: '800',
+        letterSpacing: -0.5,
     },
-    themeToggle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: 'center',
+    headerActions: {
+        flexDirection: 'row',
         alignItems: 'center',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
     },
     listContent: {
-        paddingBottom: 20,
+        paddingBottom: 40,
     },
     loaderContainer: {
         flex: 1,
@@ -219,32 +168,47 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
     },
-    card: {
-        padding: 16,
-        marginBottom: 12,
+    summaryCard: {
+        padding: 24,
+        borderRadius: 24,
         borderWidth: 1,
+        marginBottom: 24,
         elevation: 2,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
     },
-    cardHeader: {
+    summaryContent: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
     },
-    habitName: {
-        fontSize: 18,
-        fontWeight: '600',
+    summaryTitle: {
+        fontSize: 24,
+        fontWeight: '800',
+        letterSpacing: -0.5,
+        marginBottom: 4,
+    },
+    summarySub: {
+        fontSize: 14,
+        fontWeight: '500',
+        marginBottom: 16,
+    },
+    streakBadgeContainer: {
+        flexDirection: 'row',
     },
     streakBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: 10,
-        paddingVertical: 4,
+        paddingVertical: 6,
         borderRadius: 12,
     },
     streakText: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
+        fontSize: 12,
+        fontWeight: '700',
+        marginLeft: 4,
+        textTransform: 'uppercase',
+    }
 });

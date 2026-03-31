@@ -1,0 +1,186 @@
+import React, { useEffect, useState } from "react";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  SafeAreaView, 
+  ActivityIndicator, 
+  Dimensions 
+} from "react-native";
+import { Bar, CartesianChart } from "victory-native";
+import { Calendar } from "react-native-calendars";
+import { getMonthlyStats, getAllProgress } from "../assets/data/database";
+import { useTheme } from "../context/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get("window");
+
+const InsightsScreen = () => {
+  const { theme, isDark } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [markedDates, setMarkedDates] = useState<any>({});
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [stats, progress] = await Promise.all([
+        getMonthlyStats(),
+        getAllProgress()
+      ]);
+
+      // Process Chart Data
+      const formattedChart = stats.map((s: { month_label: string; total_completed: number }) => ({
+        x: s.month_label,
+        y: s.total_completed,
+      }));
+      setChartData(formattedChart.length > 0 ? formattedChart : [{ x: 'Jan', y: 0 }]);
+
+      // Process Marked Dates for Calendar
+      const marks: any = {};
+      progress.forEach((item: any) => {
+        marks[item.date] = {
+          marked: true,
+          dotColor: theme.colors.primary,
+        };
+      });
+      setMarkedDates(marks);
+
+    } catch (error) {
+      console.error("[Insights] Fetch Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Insights</Text>
+
+        {/* Monthly Trend Section */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Monthly Trends</Text>
+          </View>
+          
+          <View style={styles.chartWrapper}>
+            <CartesianChart 
+              data={chartData} 
+              xKey="x" 
+              yKeys={["y"]}
+              axisOptions={{ labelColor: theme.colors.textSecondary, lineColor: theme.colors.border }}
+            >
+              {({ points, chartBounds }) => (
+                <Bar 
+                  points={points.y} 
+                  chartBounds={chartBounds}
+                  color={theme.colors.primary} 
+                  roundedCorners={{ topLeft: 6, topRight: 6 }}
+                />
+              )}
+            </CartesianChart>
+          </View>
+        </View>
+
+        {/* Consistency Calendar Section */}
+        <View style={[styles.sectionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="calendar" size={20} color={theme.colors.primary} />
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Consistency Map</Text>
+          </View>
+
+          <Calendar
+            markedDates={{
+              ...markedDates,
+              [selectedDate]: { ...markedDates[selectedDate], selected: true, selectedColor: theme.colors.primary }
+            }}
+            onDayPress={(day: any) => setSelectedDate(day.dateString)}
+            theme={{
+              calendarBackground: 'transparent',
+              textSectionTitleColor: theme.colors.textSecondary,
+              selectedDayBackgroundColor: theme.colors.primary,
+              selectedDayTextColor: '#ffffff',
+              todayTextColor: theme.colors.primary,
+              dayTextColor: theme.colors.text,
+              textDisabledColor: theme.colors.placeholder,
+              dotColor: theme.colors.primary,
+              monthTextColor: theme.colors.text,
+              indicatorColor: theme.colors.primary,
+            }}
+            style={styles.calendar}
+          />
+        </View>
+
+        {/* Bottom Padding */}
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '800',
+    marginBottom: 24,
+    letterSpacing: -0.5,
+  },
+  sectionCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginLeft: 10,
+  },
+  chartWrapper: {
+    height: 180,
+    width: '100%',
+  },
+  calendar: {
+    borderRadius: 12,
+  }
+});
+
+export default InsightsScreen;

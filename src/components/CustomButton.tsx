@@ -8,8 +8,10 @@ import {
   ActivityIndicator,
   View,
   GestureResponderEvent,
+  StyleProp,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { hapticFeedback } from '../lib/haptics';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost';
 type Size = 'small' | 'medium' | 'large';
@@ -23,8 +25,8 @@ type Props = {
   fullWidth?: boolean;
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle | ViewStyle[];
-  textStyle?: TextStyle | TextStyle[];
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   testID?: string;
 };
 
@@ -42,8 +44,13 @@ export default function CustomButton({
   testID,
 }: Props) {
   const { theme } = useTheme();
+  
+  const handlePress = (e?: GestureResponderEvent) => {
+    hapticFeedback.light();
+    if (onPress) onPress(e);
+  };
 
-  const containerStyles: (ViewStyle | number)[] = [
+  const containerStyles: StyleProp<ViewStyle>[] = [
     styles.base,
     { borderRadius: theme.borderRadius.m }
   ];
@@ -96,7 +103,7 @@ export default function CustomButton({
 
   if (style) containerStyles.push(style as any);
 
-  const textStyles: (TextStyle | number)[] = [
+  const textStyles: StyleProp<TextStyle>[] = [
     styles.textBase,
     { color: textColor }
   ];
@@ -105,7 +112,7 @@ export default function CustomButton({
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.8}
       disabled={disabled || loading}
       style={containerStyles}
