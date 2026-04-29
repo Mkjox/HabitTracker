@@ -32,18 +32,18 @@ afterEach(() => {
 
 describe("Database Operations", () => {
     test("should add a habit", async () => {
-        await addHabit("Read Books", "Read 30 minutes daily", 1);
+        await addHabit("Read Books", "Read 30 minutes daily", 1, 'leaf', 'daily', 0);
         expect(dbMock.runAsync).toHaveBeenCalledWith(
-            "INSERT INTO habits (name, description, category_id) VALUES (?, ?, ?);",
-            ["Read Books", "Read 30 minutes daily", 1]
+            "INSERT INTO habits (name, description, category_id, icon, frequency_type, frequency_value) VALUES (?, ?, ?, ?, ?, ?);",
+            ["Read Books", "Read 30 minutes daily", 1, 'leaf', 'daily', 0]
         );
     });
 
     test("should update an existing habit", async () => {
-        await updateHabit(1, "Read More Books", "Read 60 minutes daily", 2);
+        await updateHabit(1, "Read More Books", "Read 60 minutes daily", 2, 'leaf', 'daily', 0);
         expect(dbMock.runAsync).toHaveBeenCalledWith(
-            "UPDATE habits SET name = ?, description = ?, category_id = ? WHERE id = ?;",
-            ["Read More Books", "Read 60 minutes daily", 2, 1]
+            "UPDATE habits SET name = ?, description = ?, category_id = ?, icon = ?, frequency_type = ?, frequency_value = ? WHERE id = ?;",
+            ["Read More Books", "Read 60 minutes daily", 2, 'leaf', 'daily', 0, 1]
         );
     });
 

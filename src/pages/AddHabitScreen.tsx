@@ -35,6 +35,8 @@ export default function AddHabitScreen() {
   const [description, setDescription] = useState("");
   const [selectedCat, setSelectedCat] = useState<number | null>(null);
   const [selectedIcon, setSelectedIcon] = useState("leaf");
+  const [frequencyType, setFrequencyType] = useState<'daily' | 'weekly' | 'custom'>('daily');
+  const [frequencyValue, setFrequencyValue] = useState(0); // For weekly: count, for custom: bitmask
   const [loading, setLoading] = useState(false);
 
   const { theme } = useTheme();
@@ -57,7 +59,7 @@ export default function AddHabitScreen() {
     
     setLoading(true);
     try {
-      await addHabitStore(name, description, selectedCat, selectedIcon);
+      await addHabitStore(name, description, selectedCat, selectedIcon, frequencyType, frequencyValue);
       Keyboard.dismiss();
       showToast("Habit added successfully! 🌿");
       nav.goBack();
@@ -148,6 +150,91 @@ export default function AddHabitScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+        </Animated.View>
+
+        {/* Frequency Selection */}
+        <Animated.View entering={FadeInUp.delay(450).duration(400)} style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Frequency</Text>
+          <View style={styles.frequencyTabs}>
+            {(['daily', 'weekly', 'custom'] as const).map((type) => (
+              <TouchableOpacity
+                key={type}
+                onPress={() => {
+                  setFrequencyType(type);
+                  if (type === 'weekly') setFrequencyValue(3);
+                  if (type === 'custom') setFrequencyValue(127); // All days by default
+                }}
+                style={[
+                  styles.freqTab,
+                  { 
+                    backgroundColor: frequencyType === type ? theme.colors.primary : theme.colors.surface,
+                    borderColor: frequencyType === type ? theme.colors.primary : theme.colors.border
+                  }
+                ]}
+              >
+                <Text style={[
+                  styles.freqTabText,
+                  { color: frequencyType === type ? '#fff' : theme.colors.textSecondary }
+                ]}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {frequencyType === 'weekly' && (
+            <View style={styles.frequencyConfig}>
+              <Text style={[styles.configLabel, { color: theme.colors.textSecondary }]}>
+                Goal: {frequencyValue} times per week
+              </Text>
+              <View style={styles.weeklyControls}>
+                {[1, 2, 3, 4, 5, 6].map(val => (
+                  <TouchableOpacity
+                    key={val}
+                    onPress={() => setFrequencyValue(val)}
+                    style={[
+                      styles.weeklyCircle,
+                      { 
+                        backgroundColor: frequencyValue === val ? theme.colors.primary + '20' : 'transparent',
+                        borderColor: frequencyValue === val ? theme.colors.primary : theme.colors.border
+                      }
+                    ]}
+                  >
+                    <Text style={{ color: frequencyValue === val ? theme.colors.primary : theme.colors.text }}>{val}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {frequencyType === 'custom' && (
+            <View style={styles.frequencyConfig}>
+              <Text style={[styles.configLabel, { color: theme.colors.textSecondary }]}>
+                Select active days:
+              </Text>
+              <View style={styles.daySelection}>
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
+                  const bit = 1 << index;
+                  const isActive = (frequencyValue & bit) !== 0;
+                  return (
+                    <TouchableOpacity
+                      key={`${day}-${index}`}
+                      onPress={() => setFrequencyValue(prev => prev ^ bit)}
+                      style={[
+                        styles.dayCircle,
+                        { 
+                          backgroundColor: isActive ? theme.colors.primary : 'transparent',
+                          borderColor: isActive ? theme.colors.primary : theme.colors.border
+                        }
+                      ]}
+                    >
+                      <Text style={{ color: isActive ? '#fff' : theme.colors.text }}>{day}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
         </Animated.View>
 
         {/* Description */}
@@ -251,5 +338,56 @@ const styles = StyleSheet.create({
   addButton: {
     height: 56,
     borderRadius: 28,
+  },
+  frequencyTabs: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  freqTab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  freqTabText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  frequencyConfig: {
+    marginTop: 8,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.02)',
+  },
+  configLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  weeklyControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  weeklyCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  daySelection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dayCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });

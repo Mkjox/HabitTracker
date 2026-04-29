@@ -2,7 +2,7 @@ import { addHabit, updateHabit, getHabits, deleteHabit, restoreHabit, getProgres
 
 export const createHabit = async (name: string, categoryId: number): Promise<void> => {
   try {
-    await addHabit(name, "", categoryId);
+    await addHabit(name, "", categoryId, 'leaf', 'daily', 0);
   } catch (error) {
     console.error("Error adding habit:", error);
     throw new Error("Failed to add habit.");
@@ -11,7 +11,7 @@ export const createHabit = async (name: string, categoryId: number): Promise<voi
 
 export const editHabit = async (id: number, name: string, categoryId: number): Promise<void> => {
   try {
-    await updateHabit(id, name, "", categoryId);
+    await updateHabit(id, name, "", categoryId, 'leaf', 'daily', 0);
   } catch (error) {
     console.error("Error updating habit:", error);
     throw new Error("Failed to update habit.");
@@ -48,7 +48,7 @@ export const recoverHabit = async (id: number): Promise<void> => {
 
 export const fetchHabitProgress = async (): Promise<{ habit_id: number; total_progress: number; date: string }[]> => {
   try {
-    return await getProgress();
+    return (await getProgress()) as { habit_id: number; total_progress: number; date: string }[];
   } catch (error) {
     console.error("Error fetching progress:", error);
     throw new Error("Failed to retrieve habit progress.");

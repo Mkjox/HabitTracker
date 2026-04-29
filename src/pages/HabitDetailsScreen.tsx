@@ -21,7 +21,7 @@ type ProgressItem = {
 };
 
 const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
-  const { habitId, habitName, habitDescription, icon = "leaf" } = route.params;
+  const { habitId, habitName, habitDescription, icon = "leaf", frequencyType, frequencyValue } = route.params;
   const { theme, isDark } = useTheme();
   const toggleHabitStore = useHabitStore(state => state.toggleHabit);
 
@@ -105,6 +105,15 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           </View>
           <Text style={[styles.habitName, { color: theme.colors.text }]}>{habitName}</Text>
           <Text style={[styles.habitDescription, { color: theme.colors.textSecondary }]}>{habitDescription}</Text>
+          
+          <View style={[styles.frequencyBadge, { backgroundColor: theme.colors.primary + '10', borderColor: theme.colors.primary + '30' }]}>
+            <Ionicons name="repeat-outline" size={14} color={theme.colors.primary} />
+            <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
+              {frequencyType === 'daily' && 'Every Day'}
+              {frequencyType === 'weekly' && `${frequencyValue} times a week`}
+              {frequencyType === 'custom' && 'Specific Days'}
+            </Text>
+          </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
@@ -277,6 +286,21 @@ const styles = StyleSheet.create({
   customInput: {
     marginBottom: 20,
   },
+  frequencyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 12,
+  },
+  frequencyText: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  }
 });
 
 export default HabitDetailsScreen;

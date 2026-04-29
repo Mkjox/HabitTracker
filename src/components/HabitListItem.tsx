@@ -18,6 +18,9 @@ type Props = {
   streak: number;
   completedToday: boolean;
   icon?: string;
+  frequencyType?: 'daily' | 'weekly' | 'custom';
+  frequencyValue?: number;
+  weeklyProgress?: number;
   onToggle: () => void;
   onPress: () => void;
 };
@@ -27,6 +30,9 @@ export default function HabitListItem({
   streak, 
   completedToday, 
   icon = "leaf",
+  frequencyType = "daily",
+  frequencyValue = 0,
+  weeklyProgress = 0,
   onToggle, 
   onPress 
 }: Props) {
@@ -121,10 +127,28 @@ export default function HabitListItem({
                 ]}>
                   {name}
                 </Text>
-                <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '15' }]}>
-                  <Text style={[styles.streakText, { color: theme.colors.primary }]}>
-                    🔥 {streak} {streak === 1 ? 'day' : 'days'}
-                  </Text>
+                <View style={styles.badgeRow}>
+                  <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '15' }]}>
+                    <Text style={[styles.streakText, { color: theme.colors.primary }]}>
+                      🔥 {streak} {streak === 1 ? 'day' : 'days'}
+                    </Text>
+                  </View>
+                  
+                  {frequencyType === 'weekly' && (
+                    <View style={[styles.freqBadge, { backgroundColor: theme.colors.success + '15' }]}>
+                      <Text style={[styles.freqText, { color: theme.colors.success }]}>
+                         {weeklyProgress}/{frequencyValue} this week
+                      </Text>
+                    </View>
+                  )}
+                  
+                  {frequencyType === 'custom' && (
+                    <View style={[styles.freqBadge, { backgroundColor: (theme.colors.info || '#00adf5') + '15' }]}>
+                      <Text style={[styles.freqText, { color: theme.colors.info || '#00adf5' }]}>
+                         Custom schedule
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
               
@@ -132,8 +156,9 @@ export default function HabitListItem({
                 styles.statusIndicator, 
                 animatedIndicatorStyle,
                 { 
-                  backgroundColor: completedToday ? theme.colors.success : theme.colors.border + '50',
-                  borderColor: completedToday ? theme.colors.success : theme.colors.border
+                  backgroundColor: completedToday ? theme.colors.success : theme.colors.border + '30',
+                  borderColor: completedToday ? theme.colors.success : theme.colors.border,
+                  borderWidth: 1.5,
                 }
               ]}>
                 {completedToday && <Ionicons name="checkmark" size={16} color="#fff" />}
@@ -186,6 +211,20 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 12,
+    fontWeight: '700',
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  freqBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  freqText: {
+    fontSize: 11,
     fontWeight: '700',
   },
   statusIndicator: {

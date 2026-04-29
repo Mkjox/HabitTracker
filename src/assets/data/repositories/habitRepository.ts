@@ -2,7 +2,7 @@ import { Habit, DeletedHabit, HabitFromRecycleBin } from '../../types/types';
 import { backupDatabase } from '../backup';
 import { dbPromise } from '../dbConnection';
 
-export const addHabit = async (name: string, description: string, categoryId: number, icon: string = 'leaf') => {
+export const addHabit = async (name: string, description: string, categoryId: number, icon: string = 'leaf', frequencyType: 'daily' | 'weekly' | 'custom' = 'daily', frequencyValue: number = 0) => {
   if (!name.trim()) {
     console.error("Error: Habit name cannot be empty.");
     return;
@@ -11,7 +11,10 @@ export const addHabit = async (name: string, description: string, categoryId: nu
   const db = await dbPromise;
   try {
     console.log(`[DB] Adding habit: name="${name}", description="${description}", categoryId=${categoryId}, icon=${icon}`);
-    const result = await db.runAsync("INSERT INTO habits (name, description, category_id, icon) VALUES (?, ?, ?, ?);", [name, description, categoryId, icon]);
+    const result = await db.runAsync(
+      "INSERT INTO habits (name, description, category_id, icon, frequency_type, frequency_value) VALUES (?, ?, ?, ?, ?, ?);", 
+      [name, description, categoryId, icon, frequencyType, frequencyValue]
+    );
     console.log(`[DB] Habit added successfully. Insert ID: ${result.lastInsertRowId}`);
     await backupDatabase();
   } catch (error) {
@@ -20,11 +23,14 @@ export const addHabit = async (name: string, description: string, categoryId: nu
   }
 };
 
-export const updateHabit = async (id: number, name: string, description: string, categoryId: number, icon: string) => {
+export const updateHabit = async (id: number, name: string, description: string, categoryId: number, icon: string, frequencyType: 'daily' | 'weekly' | 'custom' = 'daily', frequencyValue: number = 0) => {
   const db = await dbPromise;
   try {
     console.log(`[DB] Updating habit ${id}: name="${name}", description="${description}", categoryId=${categoryId}, icon=${icon}`);
-    const result = await db.runAsync("UPDATE habits SET name = ?, description = ?, category_id = ?, icon = ? WHERE id = ?;", [name, description, categoryId, icon, id]);
+    const result = await db.runAsync(
+      "UPDATE habits SET name = ?, description = ?, category_id = ?, icon = ?, frequency_type = ?, frequency_value = ? WHERE id = ?;", 
+      [name, description, categoryId, icon, frequencyType, frequencyValue, id]
+    );
     console.log(`[DB] Habit updated successfully. Rows affected: ${result.changes}`);
     await backupDatabase();
   } catch (error) {
@@ -67,8 +73,8 @@ export const deleteHabit = async (habitId: number): Promise<void> => {
     }
 
     await db.runAsync(
-      "INSERT INTO recycle_bin (habit_id, habit_name, habit_description, category_id, icon, deleted_at) VALUES (?, ?, ?, ?, ?, datetime('now'));",
-      [habitId, habit.name, habit.description, habit.category_id, habit.icon]
+      "INSERT INTO recycle_bin (habit_id, habit_name, habit_description, category_id, icon, frequency_type, frequency_value, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'));",
+      [habitId, habit.name, habit.description, habit.category_id, habit.icon, habit.frequency_type, habit.frequency_value]
     );
 
     await db.runAsync("DELETE FROM habits WHERE id = ?;", [habitId]);

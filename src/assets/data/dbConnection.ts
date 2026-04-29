@@ -29,6 +29,8 @@ export const initializeDatabase = async () => {
         icon TEXT DEFAULT 'leaf',
         added_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now')),
+        frequency_type TEXT DEFAULT 'daily',
+        frequency_value INTEGER DEFAULT 0,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
       );
 
@@ -51,7 +53,9 @@ export const initializeDatabase = async () => {
         habit_description TEXT,
         category_id INTEGER,
         icon TEXT DEFAULT 'leaf',
-        deleted_at TEXT DEFAULT (datetime('now'))
+        deleted_at TEXT DEFAULT (datetime('now')),
+        frequency_type TEXT DEFAULT 'daily',
+        frequency_value INTEGER DEFAULT 0
       );
     `);
 
@@ -59,8 +63,13 @@ export const initializeDatabase = async () => {
     try {
       await db.execAsync("ALTER TABLE habits ADD COLUMN icon TEXT DEFAULT 'leaf';");
       await db.execAsync("ALTER TABLE recycle_bin ADD COLUMN icon TEXT DEFAULT 'leaf';");
+      
+      await db.execAsync("ALTER TABLE habits ADD COLUMN frequency_type TEXT DEFAULT 'daily';");
+      await db.execAsync("ALTER TABLE habits ADD COLUMN frequency_value INTEGER DEFAULT 0;");
+      await db.execAsync("ALTER TABLE recycle_bin ADD COLUMN frequency_type TEXT DEFAULT 'daily';");
+      await db.execAsync("ALTER TABLE recycle_bin ADD COLUMN frequency_value INTEGER DEFAULT 0;");
     } catch (e) {
-      // Ignored if column already exists
+      // Ignored if columns already exist
     }
   } catch (error) {
     console.error("Error initializing database tables:", error);

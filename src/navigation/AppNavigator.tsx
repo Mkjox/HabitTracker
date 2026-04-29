@@ -10,6 +10,7 @@ import AddHabitScreen from "../pages/AddHabitScreen";
 import CategoriesScreen from "../pages/CategoriesScreen";
 import RecycleBinScreen from "../pages/RecycleBinScreen";
 import HabitDetailsScreen from "../pages/HabitDetailsScreen";
+import NotificationsScreen from "../pages/NotificationsScreen";
 import CustomTabBar from "../components/CustomTabBar";
 import { RootStackParamList } from "../assets/types/navigationTypes";
 
@@ -38,6 +39,7 @@ function StackNavigator() {
             <Stack.Screen name="AddHabit" component={AddHabitScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Categories" component={CategoriesScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Recycle Bin" component={RecycleBinScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 }

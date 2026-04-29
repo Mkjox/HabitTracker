@@ -12,6 +12,8 @@ export interface Habit {
   icon: string;
   added_at: string;
   updated_at: string;
+  frequency_type: 'daily' | 'weekly' | 'custom';
+  frequency_value: number;
 }
 
 export interface DashboardHabit extends Habit {

@@ -34,3 +34,19 @@ export const deleteCategory = async (categoryId: number): Promise<void> => {
     console.error('Error deleting category:', error);
   }
 };
+
+export const getCategoryStats = async (): Promise<{ name: string; count: number }[]> => {
+  const db = await dbPromise;
+  try {
+    const rows = await db.getAllAsync(`
+      SELECT c.name, COUNT(h.id) as count
+      FROM categories c
+      LEFT JOIN habits h ON h.category_id = c.id
+      GROUP BY c.id;
+    `);
+    return rows as { name: string; count: number }[];
+  } catch (error) {
+    console.error("Error fetching category stats:", error);
+    return [];
+  }
+};

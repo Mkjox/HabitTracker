@@ -20,7 +20,7 @@ import DailyProgressCircle from '../components/DailyProgressCircle';
 export default function DashboardScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { isDark, theme, toggleTheme } = useTheme();
-    const { habits, loading, toggleHabit, refresh } = useHabitStore();
+    const { habits, loading, toggleHabit, refresh, weeklyProgress } = useHabitStore();
 
     const completedCount = habits.filter(h => h.completedToday).length;
     const totalCount = habits.length;
@@ -72,6 +72,7 @@ export default function DashboardScreen() {
                             size={24} 
                             color={theme.colors.textSecondary} 
                             style={{ marginRight: 16 }}
+                            onPress={() => navigation.navigate("Notifications")}
                         />
                         <Ionicons 
                             name={isDark ? 'sunny-outline' : 'moon-outline'} 
@@ -111,12 +112,17 @@ export default function DashboardScreen() {
                             streak={item.streak}
                             completedToday={item.completedToday}
                             icon={item.icon}
+                            frequencyType={item.frequency_type}
+                            frequencyValue={item.frequency_value}
+                            weeklyProgress={weeklyProgress[item.id] || 0}
                             onToggle={() => toggleHabit(item.id)}
                             onPress={() => navigation.navigate("HabitDetails", {
                                 habitId: item.id,
                                 habitName: item.name,
                                 habitDescription: item.description || "",
-                                icon: item.icon
+                                icon: item.icon,
+                                frequencyType: item.frequency_type,
+                                frequencyValue: item.frequency_value
                             })}
                         />
                     )}
@@ -171,9 +177,9 @@ const styles = StyleSheet.create({
     summaryCard: {
         padding: 24,
         borderRadius: 24,
-        borderWidth: 1,
+        borderWidth: 1.5,
         marginBottom: 24,
-        elevation: 2,
+        elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,

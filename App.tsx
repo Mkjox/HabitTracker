@@ -10,6 +10,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomStatusBar from './src/components/CustomStatusBar';
+import { registerForPushNotificationsAsync } from './src/lib/notifications';
 
 enableScreens();
 
@@ -36,6 +37,7 @@ export default function App() {
         await initializeDatabase();
         await initializeStore();
         console.log("Database initialized successfully!");
+        await registerForPushNotificationsAsync();
         setIsDbReady(true);
       }
       catch (error) {

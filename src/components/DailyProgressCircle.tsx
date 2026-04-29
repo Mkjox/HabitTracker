@@ -98,7 +98,7 @@ const DailyProgressCircle: React.FC<DailyProgressCircleProps> = ({
             style="stroke"
             strokeWidth={strokeWidth}
             color={theme.colors.border}
-            opacity={0.3}
+            opacity={0.6}
           />
           
           {/* Progress Fill */}

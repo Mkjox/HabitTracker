@@ -8,14 +8,18 @@ import {
   deleteHabit as deleteHabitDb,
   getCategories,
   addCategory as addCategoryDb,
-  deleteCategory as deleteCategoryDb
+  deleteCategory as deleteCategoryDb,
+  getWeeklyProgress
 } from '../assets/data/database';
 import { DashboardHabit, Category } from '../assets/types/types';
 import { hapticFeedback } from '../lib/haptics';
+import { updateHabitReminders } from '../lib/notifications';
+import { updateWidgetData } from '../lib/widgetService';
 
 interface HabitState {
   habits: DashboardHabit[];
   categories: Category[];
+  weeklyProgress: Record<number, number>;
   loading: boolean;
   initialized: boolean;
   
@@ -23,7 +27,7 @@ interface HabitState {
   initialize: () => Promise<void>;
   refresh: () => Promise<void>;
   toggleHabit: (habitId: number) => Promise<void>;
-  addHabit: (name: string, description: string, categoryId: number, icon: string) => Promise<void>;
+  addHabit: (name: string, description: string, categoryId: number, icon: string, frequencyType?: 'daily' | 'weekly' | 'custom', frequencyValue?: number) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
   
   // Category Actions
@@ -35,6 +39,7 @@ interface HabitState {
 export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
   categories: [],
+  weeklyProgress: {},
   loading: false,
   initialized: false,
 
@@ -50,9 +55,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   refresh: async () => {
     set({ loading: true });
     try {
-      const [baseData, streakData] = await Promise.all([
+      const [baseData, streakData, weeklyData] = await Promise.all([
         getDashboardData(),
-        getHabitStreaks()
+        getHabitStreaks(),
+        getWeeklyProgress()
       ]);
 
       const merged: DashboardHabit[] = (baseData as any).map((h: any) => ({
@@ -61,7 +67,13 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         completedToday: !!h.completed_today
       }));
 
-      set({ habits: merged, loading: false });
+      set({ 
+        habits: merged, 
+        weeklyProgress: weeklyData,
+        loading: false 
+      });
+      await updateHabitReminders(merged);
+      await updateWidgetData(merged);
     } catch (error) {
       console.error("[Store] Error refreshing habits:", error);
       set({ loading: false });
@@ -117,6 +129,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       )
     });
 
+    // Update notifications and widgets based on new state
+    await updateHabitReminders(get().habits);
+    await updateWidgetData(get().habits);
+
     // 2. Persistent Update
     try {
       if (wasCompleted) {
@@ -140,9 +156,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
   },
 
-  addHabit: async (name: string, description: string, categoryId: number, icon: string) => {
+  addHabit: async (name: string, description: string, categoryId: number, icon: string, frequencyType: 'daily' | 'weekly' | 'custom' = 'daily', frequencyValue: number = 0) => {
     try {
-      await addHabitDb(name, description, categoryId, icon);
+      await addHabitDb(name, description, categoryId, icon, frequencyType, frequencyValue);
       await get().refresh();
     } catch (error) {
       console.error("[Store] Error adding habit:", error);

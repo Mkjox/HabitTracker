@@ -17,6 +17,7 @@ export type Theme = {
         warning: string;
         placeholder: string;
         icon: string;
+        info: string;
         transparent: string;
         tabBar: string;
         shadow: string;
@@ -47,13 +48,14 @@ export const lightTheme: Theme = {
         card: '#FFFFFF',
         text: '#111827', // Gray 900
         textSecondary: '#4B5563', // Gray 600
-        border: '#E5E7EB', // Gray 200
+        border: '#E2E8F0', // Slate 200 - more visible than Gray 200
         notification: '#EF4444',
         error: '#EF4444',
         success: '#10B981',
         warning: '#F59E0B',
         placeholder: '#9CA3AF',
         icon: '#6B7280',
+        info: '#3B82F6',
         transparent: 'rgba(255, 255, 255, 0.8)',
         tabBar: '#FFFFFF',
         shadow: '#000000',
@@ -91,6 +93,7 @@ export const darkTheme: Theme = {
         warning: '#FBBF24',
         placeholder: '#6B7280',
         icon: '#9CA3AF',
+        info: '#60A5FA',
         transparent: 'rgba(15, 23, 42, 0.8)',
         tabBar: '#1E293B',
         shadow: '#000000',
