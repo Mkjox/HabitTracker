@@ -47,3 +47,5 @@ android/
 # Added for privacy
 app.json
 package-lock.json
+create-apk.ps1
+debug-all.ps1
