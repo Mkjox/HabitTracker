@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
+import { Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { Divider, TextInput } from 'react-native-paper';
@@ -10,6 +11,8 @@ const { height } = Dimensions.get("window");
 
 const CategoriesScreen = () => {
     const [categoryName, setCategoryName] = useState("");
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null);
     const { theme } = useTheme();
     const { categories, addCategory, removeCategory } = useHabitStore();
 
@@ -41,34 +44,33 @@ const CategoriesScreen = () => {
         }
     };
 
-    const handleDeleteCategory = async (id: number) => {
-        Alert.alert(
-            "Delete Category",
-            "Are you sure you want to delete this category?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    onPress: async () => {
-                        try {
-                            await removeCategory(id);
-                            showToastDelete();
-                        } catch (error) {
-                            Alert.alert("Error", "Failed to delete category.");
-                        }
-                    },
-                    style: "destructive"
-                }
-            ]
-        );
+    const handleDeleteCategory = (id: number, name?: string) => {
+        setToDelete({ id, name: name || '' });
+        setDeleteModalVisible(true);
+    };
+
+    const confirmDeleteCategory = async () => {
+        if (!toDelete) return;
+        try {
+            await removeCategory(toDelete.id);
+            showToastDelete();
+        } catch (error) {
+            Alert.alert("Error", "Failed to delete category.");
+        } finally {
+            setDeleteModalVisible(false);
+            setToDelete(null);
+        }
+    };
+
+    const cancelDelete = () => {
+        setDeleteModalVisible(false);
+        setToDelete(null);
     };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <View style={styles.content}>
-                <Text style={[styles.title, { color: theme.colors.text }]}>
-                    Categories
-                </Text>
+                <Text style={[styles.title, { color: theme.colors.text }]}>Categories</Text>
 
                 <View style={[styles.inputCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <TextInput
@@ -112,7 +114,7 @@ const CategoriesScreen = () => {
                             </View>
                             <TouchableOpacity
                                 style={[styles.deleteButton, { backgroundColor: theme.colors.error + '10' }]}
-                                onPress={() => handleDeleteCategory(item.id)}
+                                onPress={() => handleDeleteCategory(item.id, item.name)}
                             >
                                 <Entypo name='trash' size={18} color={theme.colors.error} />
                             </TouchableOpacity>
@@ -127,6 +129,27 @@ const CategoriesScreen = () => {
                         </View>
                     }
                 />
+                <Modal
+                    visible={deleteModalVisible}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={cancelDelete}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}> 
+                            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Delete Category</Text>
+                            <Text style={{ color: theme.colors.textSecondary, textAlign: 'center' }}>Are you sure you want to delete "{toDelete?.name}"? This action cannot be undone.</Text>
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity style={[styles.modalCancel, { borderColor: theme.colors.border }]} onPress={cancelDelete}>
+                                    <Text style={{ color: theme.colors.textSecondary, fontWeight: '700' }}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.modalDelete, { backgroundColor: theme.colors.error }]} onPress={confirmDeleteCategory}>
+                                    <Text style={{ color: '#fff', fontWeight: '700' }}>Delete</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </View>
         </SafeAreaView>
     )
@@ -215,6 +238,46 @@ const styles = StyleSheet.create({
         fontSize: 15,
         textAlign: 'center',
         lineHeight: 22,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        paddingHorizontal: 20,
+    },
+    modalContent: {
+        width: '100%',
+        maxWidth: 420,
+        padding: 20,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        marginBottom: 8,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 12,
+        marginTop: 18,
+    },
+    modalCancel: {
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 10,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalDelete: {
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 })
 

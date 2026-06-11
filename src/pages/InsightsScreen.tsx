@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { 
   View, 
   Text, 
@@ -18,6 +18,7 @@ import {
     getHabitStreaks 
 } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
@@ -32,11 +33,7 @@ const InsightsScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [markedDates, setMarkedDates] = useState<any>({});
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [stats, progress, global, categories, streaks] = await Promise.all([
@@ -58,11 +55,6 @@ const InsightsScreen = () => {
       setGlobalStats(global);
       setCategoryStats(categories);
 
-      // Process Top Streaks
-      // Streaks is Record<number, number>. We need habit names.
-      // For simplicity, we'll just show the max streak in the cards for now, 
-      // but we could join with habits table if we wanted a full list.
-      
       // Process Marked Dates for Calendar
       const marks: any = {};
       progress.forEach((item: any) => {
@@ -78,7 +70,19 @@ const InsightsScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [theme]);
+
+  useEffect(() => {
+    // initial load
+    fetchData();
+  }, [fetchData]);
+
+  // Refresh when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const StatCard = ({ title, value, icon, color }: any) => (
     <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
@@ -116,6 +120,8 @@ const InsightsScreen = () => {
             <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Monthly Trends</Text>
           </View>
+          <Text style={[styles.sectionDesc, { color: theme.colors.textSecondary }]}>Total habit completions per month (last 12 months). Use this to spot increases or drops in activity.</Text>
+          <Text style={[styles.sectionStat, { color: theme.colors.text }]}>Total this period: {chartData.reduce((sum, d) => sum + (d.y || 0), 0)}</Text>
           
           <View style={styles.chartWrapper}>
             <CartesianChart 
@@ -266,6 +272,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  sectionDesc: {
+    fontSize: 13,
+    marginBottom: 8,
+    lineHeight: 18,
+  },
+  sectionStat: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 20,

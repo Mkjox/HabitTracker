@@ -25,7 +25,7 @@ export function TodayProgressWidget({
       }}
     >
       <FlexWidget style={{ flexDirection: 'column' }}>
-        <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexGap: 4}}>
           <TextWidget
             text="Today"
             style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}

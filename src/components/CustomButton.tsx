@@ -69,13 +69,13 @@ export default function CustomButton({
 
   // variant styles
   let bgColor = theme.colors.primary;
-  let textColor = theme.colors.surface;
+  let textColor = '#fff';
   let borderColor = 'transparent';
   let borderWidth = 0;
 
   if (variant === 'primary') {
     bgColor = theme.colors.primary;
-    textColor = theme.colors.surface;
+    textColor = '#fff';
   } else if (variant === 'secondary') {
     bgColor = theme.colors.surface;
     textColor = theme.colors.primary;

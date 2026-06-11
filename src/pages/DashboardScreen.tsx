@@ -6,7 +6,8 @@ import {
     FlatList,
     ActivityIndicator,
     RefreshControl,
-    SafeAreaView
+    SafeAreaView,
+    TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -20,7 +21,7 @@ import DailyProgressCircle from '../components/DailyProgressCircle';
 export default function DashboardScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { isDark, theme, toggleTheme } = useTheme();
-    const { habits, loading, toggleHabit, refresh, weeklyProgress } = useHabitStore();
+    const { habits, loading, toggleHabit, refresh, weeklyProgress, categories } = useHabitStore();
 
     const completedCount = habits.filter(h => h.completedToday).length;
     const totalCount = habits.length;
@@ -31,7 +32,8 @@ export default function DashboardScreen() {
     };
 
     const renderHeader = () => (
-        <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <View>
+                    <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.summaryContent}>
                 <View style={{ flex: 1 }}>
                     <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>Today's Goal</Text>
@@ -50,7 +52,20 @@ export default function DashboardScreen() {
                 </View>
                 <DailyProgressCircle progress={progress} size={90} strokeWidth={8} />
             </View>
-        </View>
+                    </View>
+
+                    {categories.length === 0 && (
+                        <View style={[styles.noticeCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={[styles.noticeTitle, { color: theme.colors.text }]}>No categories found</Text>
+                                <Text style={[styles.noticeSub, { color: theme.colors.textSecondary }]}>You need at least one category to create habits. Create categories in Settings.</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => navigation.navigate('Categories' as any)} style={[styles.noticeButton, { backgroundColor: theme.colors.primary }]}>
+                                <Text style={{ color: '#fff', fontWeight: '700' }}>Open Categories</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
     );
 
     if (loading && habits.length === 0) {
@@ -174,6 +189,31 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
     },
+        noticeCard: {
+            marginTop: 12,
+            padding: 14,
+            borderRadius: 14,
+            borderWidth: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            marginBottom: 18,
+        },
+        noticeTitle: {
+            fontSize: 16,
+            fontWeight: '700',
+            marginBottom: 4,
+        },
+        noticeSub: {
+            fontSize: 13,
+        },
+        noticeButton: {
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 10,
+            marginLeft: 12,
+        },
     summaryCard: {
         padding: 24,
         borderRadius: 24,

@@ -64,12 +64,8 @@ export default function HabitListItem({
   const animatedCardStyle = useAnimatedStyle(() => {
     const scale = withSpring(completedToday ? 1.02 : 1, { damping: 15 });
     return {
-      backgroundColor: withSpring(
-        completedToday ? theme.colors.success + '15' : theme.colors.surface
-      ),
-      borderColor: withSpring(
-        completedToday ? theme.colors.success : theme.colors.border
-      ),
+      backgroundColor: completedToday ? theme.colors.success + '15' : theme.colors.surface,
+      borderColor: completedToday ? theme.colors.success : theme.colors.border,
       transform: [{ scale }]
     };
   });
@@ -101,9 +97,18 @@ export default function HabitListItem({
           onPress={onPress}
         >
           <Animated.View style={[
-            styles.card, 
+            styles.card,
             animatedCardStyle,
-            { borderRadius: theme.borderRadius.l }
+            { 
+              borderRadius: theme.borderRadius.l,
+              borderWidth: completedToday ? 1 : 0,
+              borderColor: completedToday ? theme.colors.success + '40' : theme.colors.border,
+              elevation: completedToday ? 0 : 2,
+              shadowOpacity: completedToday ? 0 : 0.05,
+              marginHorizontal: 5,
+              marginVertical: 5,
+              backgroundColor: theme.colors.background
+            }
           ]}>
             <View style={styles.content}>
               <View style={[
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 18,
     marginBottom: 12,
-    borderWidth: 1,
+    borderWidth: 0,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
