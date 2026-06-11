@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Switch, SafeAreaView, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Switch, SafeAreaView, ScrollView, Alert, ToastAndroid, Platform, Dimensions } from "react-native";
 import { TextInput } from "react-native-paper";
 import { RouteProp } from "@react-navigation/native";
 import { Calendar } from "react-native-calendars";
-import { addProgress, removeProgress, getProgressByHabitId } from "../assets/data/database";
+import { addProgress, removeProgress, getProgressByHabitId, updateHabit } from "../assets/data/database";
 import { RootStackParamList } from "../assets/types/navigationTypes";
 import { useTheme } from "../context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,6 +12,8 @@ import { hapticFeedback } from "../lib/haptics";
 import { useHabitStore } from "../store/useHabitStore";
 
 type HabitDetailsScreenRouteProp = RouteProp<RootStackParamList, "HabitDetails">;
+
+const { width } = Dimensions.get("window");
 
 type ProgressItem = {
   id: number;
@@ -29,6 +31,10 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   const [progressHistory, setProgressHistory] = useState<ProgressItem[]>([]);
   const [useCustom, setUseCustom] = useState<boolean>(false);
   const [customValue, setCustomValue] = useState<string>("");
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(habitName);
+  const [desc, setDesc] = useState(habitDescription || "");
+  const refreshStore = useHabitStore(state => state.refresh);
 
   const fetchProgress = async (): Promise<void> => {
     try {
@@ -70,7 +76,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
 
   const markedDates = useMemo(() => {
     const marked: any = {};
-    
+
     // Mark completed days
     progressHistory.forEach(item => {
       marked[item.date] = {
@@ -103,9 +109,76 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
             <Ionicons name={icon as any} size={40} color={theme.colors.primary} />
           </View>
-          <Text style={[styles.habitName, { color: theme.colors.text }]}>{habitName}</Text>
-          <Text style={[styles.habitDescription, { color: theme.colors.textSecondary }]}>{habitDescription}</Text>
-          
+          {!editing ? (
+            <>
+
+            </>
+          ) : (
+            <>
+              <TextInput
+                label="Name"
+                value={name}
+                onChangeText={setName}
+                mode="flat"
+                style={[styles.editNameInput, { backgroundColor: theme.colors.surface }]}
+                textColor={theme.colors.text}
+                activeUnderlineColor={theme.colors.primary}
+              />
+              <TextInput
+                label="Description"
+                value={desc}
+                onChangeText={setDesc}
+                mode="flat"
+                style={[styles.editDescInput, { backgroundColor: theme.colors.surface }]}
+                textColor={theme.colors.text}
+                activeUnderlineColor={theme.colors.primary}
+              />
+            </>
+          )}
+
+          {/* Rename controls */}
+          <View style={{ flexDirection: 'row', marginTop: 12 }}>
+            {!editing ? (
+              <>
+                <Text style={[styles.habitName, { color: theme.colors.text }]}>{name}</Text>
+                <Text style={[styles.habitDescription, { color: theme.colors.textSecondary }]}>{desc}</Text>
+                <TouchableOpacity onPress={() => setEditing(true)} style={{ paddingHorizontal: 4, paddingVertical: 8 }}>
+                  <Ionicons name="pencil" size={18} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <CustomButton
+                  title="Save"
+                  onPress={async () => {
+                    if (!name.trim()) return Alert.alert('Error', 'Name cannot be empty');
+                    try {
+                      // find existing category id from store
+                      const storeHabits = useHabitStore.getState().habits;
+                      const current = storeHabits.find(h => h.id === habitId);
+                      const categoryId = current ? (current.category_id ?? (current as any).categoryId ?? 0) : 0;
+                      await updateHabit(habitId, name.trim(), desc || '', categoryId, icon as any, frequencyType, frequencyValue || 0);
+                      await refreshStore();
+                      setEditing(false);
+                      hapticFeedback.success();
+                      if (Platform.OS === 'android') ToastAndroid.show('Habit renamed', ToastAndroid.SHORT);
+                    } catch (err) {
+                      console.error('Rename failed', err);
+                      Alert.alert('Error', 'Failed to rename habit');
+                    }
+                  }}
+                  style={{ paddingHorizontal: 12, alignSelf: 'flex-start', width: width / 2.5 }}
+                />
+                <CustomButton
+                  title="Cancel"
+                  variant="outline"
+                  onPress={() => { setName(habitName); setDesc(habitDescription || ''); setEditing(false); }}
+                  style={{ marginLeft: 8, paddingHorizontal: 12, alignSelf: 'flex-start', width: width / 2.5 }}
+                />
+              </>
+            )}
+          </View>
+
           <View style={[styles.frequencyBadge, { backgroundColor: theme.colors.primary + '10', borderColor: theme.colors.primary + '30' }]}>
             <Ionicons name="repeat-outline" size={14} color={theme.colors.primary} />
             <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
@@ -114,6 +187,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
               {frequencyType === 'custom' && 'Specific Days'}
             </Text>
           </View>
+
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
@@ -300,6 +374,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
+  }
+  ,
+  editNameInput: {
+    width: 260,
+    marginBottom: 8,
+  },
+  editDescInput: {
+    width: 260,
+    marginBottom: 8,
   }
 });
 
