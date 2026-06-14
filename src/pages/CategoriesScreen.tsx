@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
 import { fonts } from '../assets/fonts/fonts';
 import { Modal } from 'react-native';
@@ -11,6 +12,7 @@ import { useHabitStore } from '../store/useHabitStore';
 const { height } = Dimensions.get("window");
 
 const CategoriesScreen = () => {
+    const { t } = useTranslation();
     const [categoryName, setCategoryName] = useState("");
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null);
@@ -19,19 +21,19 @@ const CategoriesScreen = () => {
 
     const showToastAdd = () => {
         if (Platform.OS === 'android') {
-            ToastAndroid.show("Category saved successfully!", ToastAndroid.SHORT);
+            ToastAndroid.show(t('categories.successAdd'), ToastAndroid.SHORT);
         }
     };
 
     const showToastDelete = () => {
         if (Platform.OS === 'android') {
-            ToastAndroid.show("Category deleted successfully!", ToastAndroid.SHORT);
+            ToastAndroid.show(t('categories.successDelete'), ToastAndroid.SHORT);
         }
     };
 
     const handleAddCategory = async () => {
         if (!categoryName.trim()) {
-            Alert.alert("Error", "Category name cannot be empty!");
+            Alert.alert(t('common.error'), t('categories.errEmpty'));
             return;
         }
         try {
@@ -41,7 +43,7 @@ const CategoriesScreen = () => {
             setCategoryName("");
         }
         catch (error) {
-            Alert.alert("Error", "Category already exists or cannot be added.");
+            Alert.alert(t('common.error'), t('categories.errExists'));
         }
     };
 
@@ -56,7 +58,7 @@ const CategoriesScreen = () => {
             await removeCategory(toDelete.id);
             showToastDelete();
         } catch (error) {
-            Alert.alert("Error", "Failed to delete category.");
+            Alert.alert(t('common.error'), t('categories.errDelete'));
         } finally {
             setDeleteModalVisible(false);
             setToDelete(null);
@@ -71,11 +73,11 @@ const CategoriesScreen = () => {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <View style={styles.content}>
-                <Text style={[styles.title, { color: theme.colors.text }]}>Categories</Text>
+                <Text style={[styles.title, { color: theme.colors.text }]}>{t('categories.title')}</Text>
 
                 <View style={[styles.inputCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <TextInput
-                        label='Category Name'
+                        label={t('categories.inputLabel')}
                         value={categoryName}
                         onChangeText={setCategoryName}
                         mode='outlined'
@@ -87,14 +89,14 @@ const CategoriesScreen = () => {
                     />
 
                     <CustomButton
-                        title='Add Category'
+                        title={t('categories.addBtn')}
                         onPress={handleAddCategory}
                         size="medium"
                     />
                 </View>
 
                 <View style={styles.listHeader}>
-                    <Text style={[styles.listTitle, { color: theme.colors.text }]}>All Categories</Text>
+                    <Text style={[styles.listTitle, { color: theme.colors.text }]}>{t('categories.allCategories')}</Text>
                     <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
                         <Text style={{ color: theme.colors.primary, fontSize: 12, fontFamily: fonts.semiBold }}>{categories.length}</Text>
                     </View>
@@ -110,7 +112,7 @@ const CategoriesScreen = () => {
                             <View style={styles.categoryInfo}>
                                 <Text style={[styles.categoryName, { color: theme.colors.text }]}>{item.name}</Text>
                                 <Text style={[styles.categoryDate, { color: theme.colors.textSecondary }]}>
-                                    Added on {new Date(item.created_at).toLocaleDateString()}
+                                    {t('categories.addedOn', { date: new Date(item.created_at).toLocaleDateString() })}
                                 </Text>
                             </View>
                             <TouchableOpacity
@@ -125,7 +127,7 @@ const CategoriesScreen = () => {
                         <View style={styles.emptyContainer}>
                             <Ionicons name="folder-open-outline" size={64} color={theme.colors.icon} />
                             <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-                                No categories yet. Create one above to organize your habits.
+                                {t('categories.emptyMsg')}
                             </Text>
                         </View>
                     }
@@ -138,14 +140,16 @@ const CategoriesScreen = () => {
                 >
                     <View style={styles.modalContainer}>
                         <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}> 
-                            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Delete Category</Text>
-                            <Text style={{ color: theme.colors.textSecondary, textAlign: 'center' }}>Are you sure you want to delete "{toDelete?.name}"? This action cannot be undone.</Text>
+                            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('categories.deleteTitle')}</Text>
+                            <Text style={{ color: theme.colors.textSecondary, textAlign: 'center' }}>
+                                {t('categories.deleteConfirm', { name: toDelete?.name })}
+                            </Text>
                             <View style={styles.modalButtons}>
                                 <TouchableOpacity style={[styles.modalCancel, { borderColor: theme.colors.border }]} onPress={cancelDelete}>
-                                    <Text style={{ color: theme.colors.textSecondary, fontFamily: fonts.bold }}>Cancel</Text>
+                                    <Text style={{ color: theme.colors.textSecondary, fontFamily: fonts.bold }}>{t('categories.cancelBtn')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.modalDelete, { backgroundColor: theme.colors.error }]} onPress={confirmDeleteCategory}>
-                                    <Text style={{ color: '#fff', fontFamily: fonts.bold }}>Delete</Text>
+                                    <Text style={{ color: '#fff', fontFamily: fonts.bold }}>{t('categories.deleteBtn')}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

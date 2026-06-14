@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../lib/i18n';
 import { fonts } from '../assets/fonts/fonts';
 import { Divider } from 'react-native-paper';
 import CustomButton from '../components/CustomButton';
@@ -11,10 +13,15 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../assets/types/navigationTypes';
 
 export default function SettingsScreen() {
+    const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [loadingBackup, setLoadingBackup] = useState(false);
     const [loadingRestore, setLoadingRestore] = useState(false);
+
+    const onChangeLanguage = () => {
+        navigation.navigate("Language");
+    };
 
     const onBackup = async () => {
         setLoadingBackup(true);
@@ -54,13 +61,13 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
+                <Text style={[styles.title, { color: theme.colors.text }]}>{t('settings.title')}</Text>
 
                 {/* Management Section */}
                 <View style={[styles.section, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <View style={styles.sectionHeader}>
                         <Ionicons name="apps-outline" size={24} color={theme.colors.primary} />
-                        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Management</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.management')}</Text>
                     </View>
                     
                     <TouchableOpacity 
@@ -69,7 +76,7 @@ export default function SettingsScreen() {
                     >
                         <View style={styles.menuLeft}>
                             <Ionicons name="grid-outline" size={22} color={theme.colors.text} />
-                            <Text style={[styles.menuLabel, { color: theme.colors.text }]}>Categories</Text>
+                            <Text style={[styles.menuLabel, { color: theme.colors.text }]}>{t('settings.categories')}</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
                     </TouchableOpacity>
@@ -82,7 +89,20 @@ export default function SettingsScreen() {
                     >
                         <View style={styles.menuLeft}>
                             <Ionicons name="trash-outline" size={22} color={theme.colors.text} />
-                            <Text style={[styles.menuLabel, { color: theme.colors.text }]}>Recycle Bin</Text>
+                            <Text style={[styles.menuLabel, { color: theme.colors.text }]}>{t('settings.recycleBin')}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+                    </TouchableOpacity>
+
+                    <Divider style={styles.divider} />
+
+                    <TouchableOpacity 
+                        style={styles.menuRow}
+                        onPress={onChangeLanguage}
+                    >
+                        <View style={styles.menuLeft}>
+                            <Ionicons name="language-outline" size={22} color={theme.colors.text} />
+                            <Text style={[styles.menuLabel, { color: theme.colors.text }]}>{t('settings.language')} ({i18n.language.toUpperCase()})</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
                     </TouchableOpacity>
@@ -92,22 +112,22 @@ export default function SettingsScreen() {
                 <View style={[styles.section, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <View style={styles.sectionHeader}>
                         <Ionicons name="server-outline" size={24} color={theme.colors.primary} />
-                        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Database</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.database')}</Text>
                     </View>
                     <Text style={[styles.sectionDesc, { color: theme.colors.textSecondary }]}>
-                        Backup your habits and progress to a local file or restore from a previous backup.
+                        {t('settings.databaseDesc')}
                     </Text>
 
                     <CustomButton
                         onPress={onBackup}
-                        title="Backup Database"
+                        title={t('settings.backupDb')}
                         loading={loadingBackup}
                         style={styles.button}
                     />
 
                     <CustomButton
                         onPress={confirmAndRestore}
-                        title="Restore Database"
+                        title={t('settings.restoreDb')}
                         loading={loadingRestore}
                         style={styles.button}
                         variant="outline"

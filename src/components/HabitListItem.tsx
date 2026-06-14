@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { fonts } from '../assets/fonts/fonts';
 import Animated, { 
@@ -37,6 +38,7 @@ export default function HabitListItem({
   onToggle, 
   onPress 
 }: Props) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
 
   const handleToggle = () => {
@@ -56,7 +58,7 @@ export default function HabitListItem({
             size={28} 
             color="#fff" 
           />
-          <Text style={styles.actionText}>{completedToday ? "Undo" : "Done"}</Text>
+          <Text style={styles.actionText}>{completedToday ? t('dashboard.undo') : t('dashboard.done')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -136,14 +138,14 @@ export default function HabitListItem({
                 <View style={styles.badgeRow}>
                   <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '15' }]}>
                     <Text style={[styles.streakText, { color: theme.colors.primary }]}>
-                      🔥 {streak} {streak === 1 ? 'day' : 'days'}
+                      🔥 {streak} {streak === 1 ? t('dashboard.day') : t('dashboard.days')}
                     </Text>
                   </View>
                   
                   {frequencyType === 'weekly' && (
                     <View style={[styles.freqBadge, { backgroundColor: theme.colors.success + '15' }]}>
                       <Text style={[styles.freqText, { color: theme.colors.success }]}>
-                         {weeklyProgress}/{frequencyValue} this week
+                         {t('dashboard.thisWeek', { current: weeklyProgress, total: frequencyValue })}
                       </Text>
                     </View>
                   )}
@@ -151,7 +153,7 @@ export default function HabitListItem({
                   {frequencyType === 'custom' && (
                     <View style={[styles.freqBadge, { backgroundColor: (theme.colors.info || '#00adf5') + '15' }]}>
                       <Text style={[styles.freqText, { color: theme.colors.info || '#00adf5' }]}>
-                         Custom schedule
+                         {t('dashboard.customSchedule')}
                       </Text>
                     </View>
                   )}

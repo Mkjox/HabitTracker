@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useTranslation } from 'react-i18next';
+import i18n from '../lib/i18n';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, SafeAreaView, ScrollView, Alert, ToastAndroid, Platform, Dimensions } from "react-native";
 import { TextInput } from "react-native-paper";
 import { RouteProp } from "@react-navigation/native";
@@ -24,6 +26,7 @@ type ProgressItem = {
 };
 
 const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) => {
+  const { t } = useTranslation();
   const { habitId, habitName, habitDescription, icon = "leaf", frequencyType, frequencyValue } = route.params;
   const { theme, isDark } = useTheme();
   const toggleHabitStore = useHabitStore(state => state.toggleHabit);
@@ -117,7 +120,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           ) : (
             <>
               <TextInput
-                label="Name"
+                label={t('habitDetails.nameInput')}
                 value={name}
                 onChangeText={setName}
                 mode="flat"
@@ -126,7 +129,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
                 activeUnderlineColor={theme.colors.primary}
               />
               <TextInput
-                label="Description"
+                label={t('habitDetails.descInput')}
                 value={desc}
                 onChangeText={setDesc}
                 mode="flat"
@@ -150,9 +153,9 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
             ) : (
               <>
                 <CustomButton
-                  title="Save"
+                  title={t('habitDetails.saveBtn')}
                   onPress={async () => {
-                    if (!name.trim()) return Alert.alert('Error', 'Name cannot be empty');
+                    if (!name.trim()) return Alert.alert(t('common.error'), t('habitDetails.errEmptyName'));
                     try {
                       // find existing category id from store
                       const storeHabits = useHabitStore.getState().habits;
@@ -162,16 +165,16 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
                       await refreshStore();
                       setEditing(false);
                       hapticFeedback.success();
-                      if (Platform.OS === 'android') ToastAndroid.show('Habit renamed', ToastAndroid.SHORT);
+                      if (Platform.OS === 'android') ToastAndroid.show(t('habitDetails.successRename'), ToastAndroid.SHORT);
                     } catch (err) {
                       console.error('Rename failed', err);
-                      Alert.alert('Error', 'Failed to rename habit');
+                      Alert.alert(t('common.error'), t('habitDetails.errRename'));
                     }
                   }}
                   style={{ paddingHorizontal: 12, alignSelf: 'flex-start', width: width / 2.5 }}
                 />
                 <CustomButton
-                  title="Cancel"
+                  title={t('habitDetails.cancelBtn')}
                   variant="outline"
                   onPress={() => { setName(habitName); setDesc(habitDescription || ''); setEditing(false); }}
                   style={{ marginLeft: 8, paddingHorizontal: 12, alignSelf: 'flex-start', width: width / 2.5 }}
@@ -183,17 +186,18 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           <View style={[styles.frequencyBadge, { backgroundColor: theme.colors.primary + '10', borderColor: theme.colors.primary + '30' }]}>
             <Ionicons name="repeat-outline" size={14} color={theme.colors.primary} />
             <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
-              {frequencyType === 'daily' && 'Every Day'}
-              {frequencyType === 'weekly' && `${frequencyValue} times a week`}
-              {frequencyType === 'custom' && 'Specific Days'}
+              {frequencyType === 'daily' && t('habitDetails.everyDay')}
+              {frequencyType === 'weekly' && t('habitDetails.timesAWeek', { val: frequencyValue })}
+              {frequencyType === 'custom' && t('habitDetails.specificDays')}
             </Text>
           </View>
 
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Progress Calendar</Text>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('habitDetails.progressCalendar')}</Text>
           <Calendar
+            key={i18n.language}
             theme={{
               backgroundColor: theme.colors.surface,
               calendarBackground: theme.colors.surface,
@@ -217,7 +221,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
             onDayLongPress={(day: any) => handleToggleDate(day.dateString)}
           />
           <Text style={[styles.calendarHint, { color: theme.colors.textSecondary }]}>
-            Tip: Long press a date to toggle completion
+            {t('habitDetails.calendarHint')}
           </Text>
         </View>
 
@@ -225,14 +229,14 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           <View style={styles.actionHeader}>
             <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
             <Text style={[styles.actionTitle, { color: theme.colors.text }]}>
-              Selected: {new Date(selectedDate).toDateString()}
+              {t('habitDetails.selectedDate', { date: new Date(selectedDate).toDateString() })}
             </Text>
           </View>
 
           <View style={styles.switchRow}>
             <View>
-              <Text style={[styles.switchLabel, { color: theme.colors.text }]}>Add details</Text>
-              <Text style={[styles.switchSublabel, { color: theme.colors.textSecondary }]}>Units or measurements</Text>
+              <Text style={[styles.switchLabel, { color: theme.colors.text }]}>{t('habitDetails.addDetails')}</Text>
+              <Text style={[styles.switchSublabel, { color: theme.colors.textSecondary }]}>{t('habitDetails.units')}</Text>
             </View>
             <Switch
               value={useCustom}
@@ -244,7 +248,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
 
           {useCustom && (
             <TextInput
-              label="Value (e.g., 2km, 50 pushups)"
+              label={t('habitDetails.customInput')}
               value={customValue}
               onChangeText={setCustomValue}
               mode="outlined"
@@ -258,7 +262,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
 
           <CustomButton
             onPress={() => handleToggleDate(selectedDate)}
-            title={progressHistory.some(h => h.date === selectedDate) ? "Remove Progress" : "Mark as Done"}
+            title={progressHistory.some(h => h.date === selectedDate) ? t('habitDetails.removeProgress') : t('habitDetails.markDone')}
             variant={progressHistory.some(h => h.date === selectedDate) ? "outline" : "primary"}
             style={{ marginTop: 10 }}
           />

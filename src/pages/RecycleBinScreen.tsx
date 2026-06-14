@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -29,6 +30,7 @@ type Habit = {
 };
 
 const RecycleBinScreen: React.FC = () => {
+  const { t } = useTranslation();
   const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
   const { theme } = useTheme();
 
@@ -40,7 +42,7 @@ const RecycleBinScreen: React.FC = () => {
 
   const showToastDelete = () => {
     if (Platform.OS === 'android') {
-      ToastAndroid.show("Habit deleted permanently", ToastAndroid.SHORT);
+      ToastAndroid.show(t('recycleBin.successDelete'), ToastAndroid.SHORT);
     }
   };
 
@@ -64,10 +66,10 @@ const RecycleBinScreen: React.FC = () => {
   };
 
   const handleDeletePermanently = (habitId: number): void => {
-    Alert.alert("Confirm Delete", "Are you sure you want to permanently delete this habit?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t('recycleBin.confirmDeleteTitle'), t('recycleBin.confirmDelete'), [
+      { text: t('recycleBin.cancelBtn'), style: "cancel" },
       {
-        text: "Delete",
+        text: t('recycleBin.deleteBtn'),
         style: "destructive",
         onPress: async () => {
           try {
@@ -84,10 +86,10 @@ const RecycleBinScreen: React.FC = () => {
 
   const handleCleanBin = (): void => {
     if (deletedHabits.length === 0) return;
-    Alert.alert("Empty Bin", "This will permanently delete all items. Proceed?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t('recycleBin.confirmEmptyTitle'), t('recycleBin.confirmEmpty'), [
+      { text: t('recycleBin.cancelBtn'), style: "cancel" },
       {
-        text: "Delete All",
+        text: t('recycleBin.deleteAllBtn'),
         style: "destructive",
         onPress: async () => {
           await cleanRecycleBin();
@@ -101,10 +103,10 @@ const RecycleBinScreen: React.FC = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Recycle Bin</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('recycleBin.title')}</Text>
           {deletedHabits.length > 0 && (
             <TouchableOpacity onPress={handleCleanBin}>
-              <Text style={{ color: theme.colors.error, fontFamily: fonts.semiBold }}>Empty Bin</Text>
+              <Text style={{ color: theme.colors.error, fontFamily: fonts.semiBold }}>{t('recycleBin.emptyBinBtn')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -118,7 +120,7 @@ const RecycleBinScreen: React.FC = () => {
             <View style={styles.emptyContainer}>
               <Ionicons name="trash-outline" size={64} color={theme.colors.icon} />
               <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-                Recycle bin is empty. Deleted habits will appear here.
+                {t('recycleBin.emptyMsg')}
               </Text>
             </View>
           }
@@ -126,7 +128,7 @@ const RecycleBinScreen: React.FC = () => {
             <View style={[styles.habitCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <View style={styles.habitInfo}>
                 <Text style={[styles.habitName, { color: theme.colors.text }]}>{item.name}</Text>
-                <Text style={[styles.habitSub, { color: theme.colors.textSecondary }]}>Ready to restore</Text>
+                <Text style={[styles.habitSub, { color: theme.colors.textSecondary }]}>{t('recycleBin.readyToRestore')}</Text>
               </View>
               <View style={styles.actions}>
                 <TouchableOpacity

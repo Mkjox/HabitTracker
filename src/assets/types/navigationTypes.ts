@@ -14,6 +14,7 @@ export type RootStackParamList = {
   Categories: undefined;
   "Recycle Bin": undefined;
   Notifications: undefined;
+  Language: undefined;
 };
 
 export type HabitDetailsScreenProps = NativeStackScreenProps<

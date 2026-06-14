@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   View,
   StyleSheet,
@@ -32,6 +33,7 @@ const ICONS = [
 ];
 
 export default function AddHabitScreen() {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCat, setSelectedCat] = useState<number | null>(null);
@@ -55,17 +57,17 @@ export default function AddHabitScreen() {
   };
 
   const onAdd = async () => {
-    if (!name.trim()) return Alert.alert("Error", "Give your habit a name.");
-    if (!selectedCat) return Alert.alert("Error", "Select a category.");
+    if (!name.trim()) return Alert.alert(t('common.error'), t('addHabit.errNoName'));
+    if (!selectedCat) return Alert.alert(t('common.error'), t('addHabit.errNoCat'));
     
     setLoading(true);
     try {
       await addHabitStore(name, description, selectedCat, selectedIcon, frequencyType, frequencyValue);
       Keyboard.dismiss();
-      showToast("Habit added successfully! 🌿");
+      showToast(t('addHabit.successMsg'));
       nav.goBack();
     } catch (error) {
-      Alert.alert("Error", "Failed to add habit.");
+      Alert.alert(t('common.error'), t('addHabit.errMsg'));
     } finally {
       setLoading(false);
     }
@@ -80,29 +82,29 @@ export default function AddHabitScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View entering={FadeInDown.duration(400).springify()}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>New Habit</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('addHabit.title')}</Text>
           <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-            What positive change will you start today?
+            {t('addHabit.subtitle')}
           </Text>
         </Animated.View>
 
         {/* Name Input */}
         <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.inputSection}>
           <TextInput
-            label="Name"
+            label={t('addHabit.nameInput')}
             value={name}
             onChangeText={setName}
             mode="flat"
             style={[styles.input, { backgroundColor: 'transparent' }]}
             activeUnderlineColor={theme.colors.primary}
             textColor={theme.colors.text}
-            placeholder="e.g., Morning Meditation"
+            placeholder={t('addHabit.namePlaceholder')}
           />
         </Animated.View>
 
         {/* Icon Selection */}
         <Animated.View entering={FadeInUp.delay(300).duration(400)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Choose an Icon</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('addHabit.chooseIcon')}</Text>
           <View style={styles.iconGrid}>
             {ICONS.map((icon) => (
               <TouchableOpacity
@@ -128,7 +130,7 @@ export default function AddHabitScreen() {
 
         {/* Category Chips */}
         <Animated.View entering={FadeInUp.delay(400).duration(400)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Category</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('addHabit.category')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
             {categories.map((cat) => (
               <TouchableOpacity
@@ -155,7 +157,7 @@ export default function AddHabitScreen() {
 
         {/* Frequency Selection */}
         <Animated.View entering={FadeInUp.delay(450).duration(400)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Frequency</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('addHabit.frequency')}</Text>
           <View style={styles.frequencyTabs}>
             {(['daily', 'weekly', 'custom'] as const).map((type) => (
               <TouchableOpacity
@@ -177,7 +179,7 @@ export default function AddHabitScreen() {
                   styles.freqTabText,
                   { color: frequencyType === type ? '#fff' : theme.colors.textSecondary }
                 ]}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {t(`addHabit.${type}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -186,7 +188,7 @@ export default function AddHabitScreen() {
           {frequencyType === 'weekly' && (
             <View style={styles.frequencyConfig}>
               <Text style={[styles.configLabel, { color: theme.colors.textSecondary }]}>
-                Goal: {frequencyValue} times per week
+                {t('addHabit.goalWeekly', { val: frequencyValue })}
               </Text>
               <View style={styles.weeklyControls}>
                 {[1, 2, 3, 4, 5, 6].map(val => (
@@ -211,10 +213,10 @@ export default function AddHabitScreen() {
           {frequencyType === 'custom' && (
             <View style={styles.frequencyConfig}>
               <Text style={[styles.configLabel, { color: theme.colors.textSecondary }]}>
-                Select active days:
+                {t('addHabit.selectActiveDays')}
               </Text>
               <View style={styles.daySelection}>
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => {
+                {[t('days.mon'), t('days.tue'), t('days.wed'), t('days.thu'), t('days.fri'), t('days.sat'), t('days.sun')].map((day, index) => {
                   const bit = 1 << index;
                   const isActive = (frequencyValue & bit) !== 0;
                   return (
@@ -241,7 +243,7 @@ export default function AddHabitScreen() {
         {/* Description */}
         <Animated.View entering={FadeInUp.delay(500).duration(400)} style={styles.inputSection}>
           <TextInput
-            label="Note (optional)"
+            label={t('addHabit.noteLabel')}
             value={description}
             onChangeText={setDescription}
             mode="flat"
@@ -255,7 +257,7 @@ export default function AddHabitScreen() {
         {/* Create Button */}
         <Animated.View entering={FadeInUp.delay(600).duration(400)} style={styles.buttonWrapper}>
           <CustomButton 
-            title="Create Habit" 
+            title={t('addHabit.createBtn')}
             onPress={onAdd} 
             loading={loading}
             style={styles.addButton}

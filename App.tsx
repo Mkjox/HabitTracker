@@ -11,6 +11,7 @@ import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomStatusBar from './src/components/CustomStatusBar';
 import { registerForPushNotificationsAsync } from './src/lib/notifications';
+import { initI18n } from './src/lib/i18n';
 import {
   useFonts,
   Inter_400Regular,
@@ -37,6 +38,7 @@ function AppContent() {
 
 export default function App() {
   const [isDbReady, setIsDbReady] = useState(false);
+  const [isI18nReady, setIsI18nReady] = useState(false);
   const initializeStore = useHabitStore(state => state.initialize);
 
   const [fontsLoaded] = useFonts({
@@ -50,6 +52,8 @@ export default function App() {
   useEffect(() => {
     const setupDB = async () => {
       try {
+        await initI18n();
+        setIsI18nReady(true);
         await initializeDatabase();
         await initializeStore();
         console.log("Database initialized successfully!");
@@ -78,7 +82,7 @@ export default function App() {
         <PaperProvider>
           <ThemeProvider>
             <CustomStatusBar />
-            {!isDbReady || !fontsLoaded ? (
+            {!isDbReady || !fontsLoaded || !isI18nReady ? (
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color="#00adf5" />
               </View>

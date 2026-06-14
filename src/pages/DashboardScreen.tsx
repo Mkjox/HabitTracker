@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { fonts } from '../assets/fonts/fonts';
 import {
     View,
@@ -20,6 +21,7 @@ import { useHabitStore } from '../store/useHabitStore';
 import DailyProgressCircle from '../components/DailyProgressCircle';
 
 export default function DashboardScreen() {
+    const { t } = useTranslation();
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { isDark, theme, toggleTheme } = useTheme();
     const { habits, loading, toggleHabit, refresh, weeklyProgress, categories } = useHabitStore();
@@ -37,16 +39,16 @@ export default function DashboardScreen() {
                     <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.summaryContent}>
                 <View style={{ flex: 1 }}>
-                    <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>Today's Goal</Text>
+                    <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>{t('dashboard.todaysGoal')}</Text>
                     <Text style={[styles.summarySub, { color: theme.colors.textSecondary }]}>
-                        {completedCount} of {totalCount} habits completed
+                        {t('dashboard.completedOf', { completed: completedCount, total: totalCount })}
                     </Text>
                     
                     <View style={styles.streakBadgeContainer}>
                         <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
                             <Ionicons name="flame" size={14} color={theme.colors.primary} />
                             <Text style={[styles.streakText, { color: theme.colors.primary }]}>
-                                {Math.max(...habits.map(h => h.streak), 0)} peak streak
+                                {t('dashboard.peakStreak', { streak: Math.max(...habits.map(h => h.streak), 0) })}
                             </Text>
                         </View>
                     </View>
@@ -58,11 +60,11 @@ export default function DashboardScreen() {
                     {categories.length === 0 && (
                         <View style={[styles.noticeCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                             <View style={{ flex: 1 }}>
-                                <Text style={[styles.noticeTitle, { color: theme.colors.text }]}>No categories found</Text>
-                                <Text style={[styles.noticeSub, { color: theme.colors.textSecondary }]}>You need at least one category to create habits. Create categories in Settings.</Text>
+                                <Text style={[styles.noticeTitle, { color: theme.colors.text }]}>{t('dashboard.noCategoriesFound')}</Text>
+                                <Text style={[styles.noticeSub, { color: theme.colors.textSecondary }]}>{t('dashboard.noCategoriesSub')}</Text>
                             </View>
                             <TouchableOpacity onPress={() => navigation.navigate('Categories' as any)} style={[styles.noticeButton, { backgroundColor: theme.colors.primary }]}>
-                                <Text style={{ color: '#fff', fontFamily: fonts.bold }}>Open Categories</Text>
+                                <Text style={{ color: '#fff', fontFamily: fonts.bold }}>{t('dashboard.openCategories')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -81,7 +83,7 @@ export default function DashboardScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <Text style={[styles.title, { color: theme.colors.text }]}>Dashboard</Text>
+                    <Text style={[styles.title, { color: theme.colors.text }]}>{t('dashboard.title')}</Text>
                     <View style={styles.headerActions as any}>
                         <Ionicons 
                             name="notifications-outline" 
@@ -117,7 +119,7 @@ export default function DashboardScreen() {
                         <View style={styles.emptyContainer}>
                             <Ionicons name="leaf-outline" size={64} color={theme.colors.textSecondary} />
                             <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-                                No habits tracked yet.
+                                {t('dashboard.noHabitsTracked')}
                             </Text>
                         </View>
                     }

@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from 'react-i18next';
+import i18n from '../lib/i18n';
 import { fonts } from '../assets/fonts/fonts';
 import { 
   View, 
@@ -25,6 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 const { width } = Dimensions.get("window");
 
 const InsightsScreen = () => {
+  const { t } = useTranslation();
   const { theme, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -106,23 +109,23 @@ const InsightsScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Insights</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>{t('insights.title')}</Text>
 
         {/* Summary Row */}
         <View style={styles.statsGrid}>
-          <StatCard title="Habits" value={globalStats.totalHabits} icon="leaf" color={theme.colors.primary} />
-          <StatCard title="Best Streak" value={`${globalStats.bestStreak}d`} icon="flame" color="#FF9500" />
-          <StatCard title="Total" value={globalStats.totalCompletions} icon="checkmark-circle" color={theme.colors.success} />
+          <StatCard title={t('insights.habits')} value={globalStats.totalHabits} icon="leaf" color={theme.colors.primary} />
+          <StatCard title={t('insights.bestStreak')} value={`${globalStats.bestStreak}d`} icon="flame" color="#FF9500" />
+          <StatCard title={t('insights.total')} value={globalStats.totalCompletions} icon="checkmark-circle" color={theme.colors.success} />
         </View>
 
         {/* Monthly Trend Section */}
         <View style={[styles.sectionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Monthly Trends</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('insights.monthlyTrends')}</Text>
           </View>
-          <Text style={[styles.sectionDesc, { color: theme.colors.textSecondary }]}>Total habit completions per month (last 12 months). Use this to spot increases or drops in activity.</Text>
-          <Text style={[styles.sectionStat, { color: theme.colors.text }]}>Total this period: {chartData.reduce((sum, d) => sum + (d.y || 0), 0)}</Text>
+          <Text style={[styles.sectionDesc, { color: theme.colors.textSecondary }]}>{t('insights.monthlyDesc')}</Text>
+          <Text style={[styles.sectionStat, { color: theme.colors.text }]}>{t('insights.totalPeriod', { total: chartData.reduce((sum, d) => sum + (d.y || 0), 0) })}</Text>
           
           <View style={styles.chartWrapper}>
             <CartesianChart 
@@ -151,7 +154,7 @@ const InsightsScreen = () => {
         <View style={[styles.sectionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="grid" size={20} color={theme.colors.primary} />
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Category Distribution</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('insights.categoryDist')}</Text>
           </View>
           
           {categoryStats.map((cat, index) => {
@@ -160,7 +163,7 @@ const InsightsScreen = () => {
               <View key={cat.name} style={styles.categoryRow}>
                 <View style={styles.categoryInfo}>
                   <Text style={[styles.categoryName, { color: theme.colors.text }]}>{cat.name}</Text>
-                  <Text style={[styles.categoryCount, { color: theme.colors.textSecondary }]}>{cat.count} habits</Text>
+                  <Text style={[styles.categoryCount, { color: theme.colors.textSecondary }]}>{t('insights.habitsCount', { count: cat.count })}</Text>
                 </View>
                 <View style={[styles.progressBarBg, { backgroundColor: theme.colors.border + '50' }]}>
                   <View style={[styles.progressBarFill, { width: `${percentage}%`, backgroundColor: theme.colors.primary }]} />
@@ -174,10 +177,11 @@ const InsightsScreen = () => {
         <View style={[styles.sectionCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="calendar" size={20} color={theme.colors.primary} />
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Consistency Map</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('insights.consistencyMap')}</Text>
           </View>
 
           <Calendar
+            key={i18n.language}
             markedDates={{
               ...markedDates,
               [selectedDate]: { ...markedDates[selectedDate], selected: true, selectedColor: theme.colors.primary }

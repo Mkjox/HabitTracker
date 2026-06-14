@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { View, TouchableOpacity, Text, StyleSheet, Platform, Dimensions } from "react-native";
 import { fonts } from "../assets/fonts/fonts";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,6 +17,7 @@ import { hapticFeedback } from "../lib/haptics";
 const { width } = Dimensions.get("window");
 
 const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const fabScale = useSharedValue(1);
 
@@ -57,7 +59,10 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                 };
 
                 const iconName = getIconName(route.name, isFocused);
-                const label = getLabel(route.name);
+                let label = route.name;
+                if (route.name === 'DashboardTab') label = t('tabBar.home');
+                else if (route.name === 'Insights') label = t('tabBar.stats');
+                else if (route.name === 'Settings') label = t('tabBar.settings');
 
                 // Insert FAB at index 1 (between Dashboard and Insights)
                 const renderTab = (
@@ -123,15 +128,6 @@ const getIconName = (routeName: string, isFocused: boolean) => {
             return 'home';
     }
 };
-
-const getLabel = (routeName: string) => {
-    switch (routeName) {
-        case 'DashboardTab': return 'Home';
-        case 'Insights': return 'Stats';
-        case 'Settings': return 'Settings';
-        default: return routeName;
-    }
-}
 
 const styles = StyleSheet.create({
     tabContainer: {
