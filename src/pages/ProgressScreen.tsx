@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Dimensions, SafeAreaView } from "react-native";
+import { fonts } from '../assets/fonts/fonts';
 import { Calendar } from "react-native-calendars";
 import { getProgress } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
@@ -77,9 +78,9 @@ const ProgressScreen = () => {
               todayTextColor: theme.colors.primary,
               arrowColor: theme.colors.primary,
               monthTextColor: theme.colors.text,
-              textDayFontWeight: '400',
-              textMonthFontWeight: '700',
-              textDayHeaderFontWeight: '600',
+              textDayFontFamily: fonts.regular,
+              textMonthFontFamily: fonts.bold,
+              textDayHeaderFontFamily: fonts.semiBold,
             }}
           />
         </View>
@@ -89,7 +90,7 @@ const ProgressScreen = () => {
             {new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </Text>
           <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
-            <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{habitsForSelectedDate.length}</Text>
+            <Text style={{ color: theme.colors.primary, fontSize: 12, fontFamily: fonts.semiBold }}>{habitsForSelectedDate.length}</Text>
           </View>
         </View>
 
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginTop: 20,
     marginBottom: 24,
   },
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
   },
   listTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginRight: 8,
   },
   badge: {
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
   },
   habitName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   habitValue: {
     fontSize: 13,

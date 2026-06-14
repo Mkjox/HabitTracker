@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
+import { fonts } from '../assets/fonts/fonts';
 
 export function TodayProgressWidget({ 
   progress = 0, 
@@ -28,11 +29,11 @@ export function TodayProgressWidget({
         <FlexWidget style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexGap: 4}}>
           <TextWidget
             text="Today"
-            style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}
+            style={{ fontSize: 18, fontFamily: fonts.bold, color: '#111827' }}
           />
           <TextWidget
             text={`${progress}%`}
-            style={{ fontSize: 14, color: '#4F46E5', fontWeight: 'bold' }}
+            style={{ fontSize: 14, color: '#4F46E5', fontFamily: fonts.bold }}
           />
         </FlexWidget>
 

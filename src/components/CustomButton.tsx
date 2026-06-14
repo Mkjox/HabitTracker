@@ -1,4 +1,5 @@
 import React from 'react';
+import { fonts } from '../assets/fonts/fonts';
 import {
   TouchableOpacity,
   Text as RNText,
@@ -144,6 +145,6 @@ const styles = StyleSheet.create({
   },
   textBase: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
 });

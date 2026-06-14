@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch, SafeAreaView, ScrollV
 import { TextInput } from "react-native-paper";
 import { RouteProp } from "@react-navigation/native";
 import { Calendar } from "react-native-calendars";
+import { fonts } from '../assets/fonts/fonts';
 import { addProgress, removeProgress, getProgressByHabitId, updateHabit } from "../assets/data/database";
 import { RootStackParamList } from "../assets/types/navigationTypes";
 import { useTheme } from "../context/ThemeContext";
@@ -207,9 +208,9 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
               arrowColor: theme.colors.primary,
               monthTextColor: theme.colors.text,
               indicatorColor: theme.colors.primary,
-              textDayFontWeight: '600',
-              textMonthFontWeight: 'bold',
-              textDayHeaderFontWeight: '600',
+              textDayFontFamily: fonts.semiBold,
+              textMonthFontFamily: fonts.bold,
+              textDayHeaderFontFamily: fonts.semiBold,
             }}
             markedDates={markedDates}
             onDayPress={(day: any) => setSelectedDate(day.dateString)}
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   },
   habitName: {
     fontSize: 28,
-    fontWeight: "800",
+    fontFamily: fonts.extraBold,
     textAlign: "center",
     marginBottom: 8,
     letterSpacing: -0.5,
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginBottom: 16,
     marginLeft: 4,
   },
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
   },
   actionTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginLeft: 10,
   },
   switchRow: {
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   switchSublabel: {
     fontSize: 12,
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
   },
   frequencyText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     textTransform: 'uppercase',
   }
   ,

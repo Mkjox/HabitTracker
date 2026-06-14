@@ -1,5 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet, Platform, Dimensions } from "react-native";
+import { fonts } from "../assets/fonts/fonts";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "../context/ThemeContext";
@@ -75,7 +76,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                             styles.tabLabel,
                             {
                                 color: isFocused ? theme.colors.primary : theme.colors.textSecondary,
-                                fontWeight: isFocused ? '700' : '500'
+                                fontFamily: isFocused ? fonts.bold : fonts.medium
                             }
                         ]}>
                             {label}

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { fonts } from '../assets/fonts/fonts';
 import Animated, { 
   FadeInDown, 
   FadeOutLeft, 
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   },
   habitName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     marginBottom: 6,
   },
   streakBadge: {
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   },
   freqText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   statusIndicator: {
     width: 28,
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   actionText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginTop: 2,
   },
 });

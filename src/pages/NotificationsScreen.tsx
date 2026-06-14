@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     ScrollView
 } from 'react-native';
+import { fonts } from '../assets/fonts/fonts';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 20,
-        fontWeight: '700',
+        fontFamily: fonts.bold,
     },
     content: {
         flexGrow: 1,
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     },
     emptyTitle: {
         fontSize: 24,
-        fontWeight: '800',
+        fontFamily: fonts.extraBold,
         marginBottom: 12,
         textAlign: 'center',
     },

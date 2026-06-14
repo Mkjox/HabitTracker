@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
+import { fonts } from '../assets/fonts/fonts';
 import { Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Entypo, Ionicons } from '@expo/vector-icons';
@@ -95,7 +96,7 @@ const CategoriesScreen = () => {
                 <View style={styles.listHeader}>
                     <Text style={[styles.listTitle, { color: theme.colors.text }]}>All Categories</Text>
                     <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
-                        <Text style={{ color: theme.colors.primary, fontSize: 12, fontWeight: '600' }}>{categories.length}</Text>
+                        <Text style={{ color: theme.colors.primary, fontSize: 12, fontFamily: fonts.semiBold }}>{categories.length}</Text>
                     </View>
                 </View>
 
@@ -141,10 +142,10 @@ const CategoriesScreen = () => {
                             <Text style={{ color: theme.colors.textSecondary, textAlign: 'center' }}>Are you sure you want to delete "{toDelete?.name}"? This action cannot be undone.</Text>
                             <View style={styles.modalButtons}>
                                 <TouchableOpacity style={[styles.modalCancel, { borderColor: theme.colors.border }]} onPress={cancelDelete}>
-                                    <Text style={{ color: theme.colors.textSecondary, fontWeight: '700' }}>Cancel</Text>
+                                    <Text style={{ color: theme.colors.textSecondary, fontFamily: fonts.bold }}>Cancel</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.modalDelete, { backgroundColor: theme.colors.error }]} onPress={confirmDeleteCategory}>
-                                    <Text style={{ color: '#fff', fontWeight: '700' }}>Delete</Text>
+                                    <Text style={{ color: '#fff', fontFamily: fonts.bold }}>Delete</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 28,
-        fontWeight: '700',
+        fontFamily: fonts.bold,
         marginTop: 20,
         marginBottom: 24,
     },
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
     },
     listTitle: {
         fontSize: 20,
-        fontWeight: '700',
+        fontFamily: fonts.bold,
         marginRight: 8,
     },
     badge: {
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     },
     categoryName: {
         fontSize: 16,
-        fontWeight: '600',
+        fontFamily: fonts.semiBold,
     },
     categoryDate: {
         fontSize: 12,
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: '800',
+        fontFamily: fonts.extraBold,
         marginBottom: 8,
     },
     modalButtons: {

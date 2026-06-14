@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { fonts } from '../assets/fonts/fonts';
 import { 
   View, 
   Text, 
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     marginBottom: 24,
     letterSpacing: -1,
   },
@@ -248,12 +249,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -280,12 +281,12 @@ const styles = StyleSheet.create({
   },
   sectionStat: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginLeft: 10,
   },
   chartWrapper: {
@@ -303,11 +304,11 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   categoryCount: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.medium,
   },
   progressBarBg: {
     height: 8,

@@ -10,6 +10,7 @@ import {
   ToastAndroid,
   SafeAreaView,
 } from "react-native";
+import { fonts } from '../assets/fonts/fonts';
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import {
@@ -103,7 +104,7 @@ const RecycleBinScreen: React.FC = () => {
           <Text style={[styles.title, { color: theme.colors.text }]}>Recycle Bin</Text>
           {deletedHabits.length > 0 && (
             <TouchableOpacity onPress={handleCleanBin}>
-              <Text style={{ color: theme.colors.error, fontWeight: '600' }}>Empty Bin</Text>
+              <Text style={{ color: theme.colors.error, fontFamily: fonts.semiBold }}>Empty Bin</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
   },
   listContainer: {
     paddingBottom: 20,
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
   },
   habitName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: fonts.semiBold,
   },
   habitSub: {
     fontSize: 12,

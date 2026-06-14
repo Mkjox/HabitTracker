@@ -15,6 +15,7 @@ import {
   Text,
   TextInput,
 } from "react-native-paper";
+import { fonts } from "../assets/fonts/fonts";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -279,14 +280,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
     marginTop: 4,
     marginBottom: 32,
-    fontWeight: '500',
+    fontFamily: fonts.medium,
   },
   inputSection: {
     marginBottom: 24,
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginBottom: 16,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
   },
   chipLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
   },
   buttonWrapper: {
     marginTop: 16,
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
   },
   freqTabText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
   },
   frequencyConfig: {
     marginTop: 8,
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   },
   configLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.semiBold,
     marginBottom: 12,
   },
   weeklyControls: {

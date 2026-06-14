@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
+import { fonts } from '../assets/fonts/fonts';
 import { 
   Canvas, 
   Path, 
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
   },
   percentage: {
     fontSize: 32,
-    fontWeight: '800',
+    fontFamily: fonts.extraBold,
     letterSpacing: -0.5,
   }
 });

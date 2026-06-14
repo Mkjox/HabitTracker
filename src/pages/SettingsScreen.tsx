@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import { fonts } from '../assets/fonts/fonts';
 import { Divider } from 'react-native-paper';
 import CustomButton from '../components/CustomButton';
 import { backupDatabase, restoreDatabase } from '../assets/data/backup';
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 28,
-        fontWeight: '700',
+        fontFamily: fonts.bold,
         marginTop: 20,
         marginBottom: 24,
     },
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 20,
-        fontWeight: '700',
+        fontFamily: fonts.bold,
     },
     sectionDesc: {
         fontSize: 14,
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     },
     infoText: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: fonts.medium,
     },
     menuRow: {
         flexDirection: 'row',
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     },
     menuLabel: {
         fontSize: 16,
-        fontWeight: '500',
+        fontFamily: fonts.medium,
     },
     divider: {
         marginVertical: 4,

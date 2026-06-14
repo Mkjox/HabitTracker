@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView, Dimensions } from "react-native";
+import { fonts } from '../assets/fonts/fonts';
 import { Bar, CartesianChart } from "victory-native";
 import { getMonthlyStats } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginTop: 20,
     marginBottom: 24,
   },
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     marginBottom: 8,
   },
   infoText: {

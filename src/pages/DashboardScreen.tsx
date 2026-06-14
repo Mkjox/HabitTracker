@@ -1,4 +1,5 @@
 import React from 'react';
+import { fonts } from '../assets/fonts/fonts';
 import {
     View,
     Text,
@@ -61,7 +62,7 @@ export default function DashboardScreen() {
                                 <Text style={[styles.noticeSub, { color: theme.colors.textSecondary }]}>You need at least one category to create habits. Create categories in Settings.</Text>
                             </View>
                             <TouchableOpacity onPress={() => navigation.navigate('Categories' as any)} style={[styles.noticeButton, { backgroundColor: theme.colors.primary }]}>
-                                <Text style={{ color: '#fff', fontWeight: '700' }}>Open Categories</Text>
+                                <Text style={{ color: '#fff', fontFamily: fonts.bold }}>Open Categories</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: '800',
+        fontFamily: fonts.extraBold,
         letterSpacing: -0.5,
     },
     headerActions: {
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
         },
         noticeTitle: {
             fontSize: 16,
-            fontWeight: '700',
+            fontFamily: fonts.bold,
             marginBottom: 4,
         },
         noticeSub: {
@@ -232,13 +233,13 @@ const styles = StyleSheet.create({
     },
     summaryTitle: {
         fontSize: 24,
-        fontWeight: '800',
+        fontFamily: fonts.extraBold,
         letterSpacing: -0.5,
         marginBottom: 4,
     },
     summarySub: {
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: fonts.medium,
         marginBottom: 16,
     },
     streakBadgeContainer: {
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     },
     streakText: {
         fontSize: 12,
-        fontWeight: '700',
+        fontFamily: fonts.bold,
         marginLeft: 4,
         textTransform: 'uppercase',
     }
