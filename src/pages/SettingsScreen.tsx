@@ -61,7 +61,7 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                <Text style={[styles.title, { color: theme.colors.text }]}>{t('settings.title')}</Text>
+                <View style={styles.title} />
 
                 {/* Management Section */}
                 <View style={[styles.section, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
@@ -69,8 +69,8 @@ export default function SettingsScreen() {
                         <Ionicons name="apps-outline" size={24} color={theme.colors.primary} />
                         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.management')}</Text>
                     </View>
-                    
-                    <TouchableOpacity 
+
+                    <TouchableOpacity
                         style={styles.menuRow}
                         onPress={() => navigation.navigate("Categories" as any)}
                     >
@@ -83,7 +83,7 @@ export default function SettingsScreen() {
 
                     <Divider style={styles.divider} />
 
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.menuRow}
                         onPress={() => navigation.navigate("Recycle Bin" as any)}
                     >
@@ -96,7 +96,7 @@ export default function SettingsScreen() {
 
                     <Divider style={styles.divider} />
 
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.menuRow}
                         onPress={onChangeLanguage}
                     >

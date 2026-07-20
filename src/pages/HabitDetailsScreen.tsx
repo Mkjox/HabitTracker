@@ -188,7 +188,15 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
             <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
               {frequencyType === 'daily' && t('habitDetails.everyDay')}
               {frequencyType === 'weekly' && t('habitDetails.timesAWeek', { val: frequencyValue })}
-              {frequencyType === 'custom' && t('habitDetails.specificDays')}
+              {frequencyType === 'custom' && (() => {
+                const dayKeys = ['days.mon', 'days.tue', 'days.wed', 'days.thu', 'days.fri', 'days.sat', 'days.sun'];
+                const activeDays = dayKeys
+                  .filter((_, i) => (frequencyValue & (1 << i)) !== 0)
+                  .map(key => t(key));
+                return activeDays.length === 7
+                  ? t('habitDetails.everyDay')
+                  : activeDays.join(' · ');
+              })()}
             </Text>
           </View>
 

@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { DashboardHabit } from '../assets/types/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configure how notifications should be handled when the app is running
 Notifications.setNotificationHandler({
@@ -78,12 +79,32 @@ export async function cancelAllReminders() {
 }
 
 /**
- * Schedule a daily reminder at 8:00 PM.
+ * Read stored reminder time (defaults to 20:00).
+ */
+async function getStoredReminderTime(): Promise<{ hour: number; minute: number }> {
+  try {
+    const raw = await AsyncStorage.getItem('dailyReminderTime');
+    if (!raw) return { hour: 20, minute: 0 };
+    const [hourStr, minuteStr] = raw.split(':');
+    const hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+    if (isNaN(hour) || isNaN(minute)) return { hour: 20, minute: 0 };
+    return { hour, minute };
+  } catch (e) {
+    console.warn('[Notifications] Failed to read stored reminder time:', e);
+    return { hour: 20, minute: 0 };
+  }
+}
+
+/**
+ * Schedule a daily reminder at the stored time (default 8:00 PM).
  */
 async function scheduleDailyReminder(count: number) {
   const message = count === 1 
     ? "You still have one habit to complete today! 🌿"
     : `You still have ${count} habits to complete today! 🌿`;
+
+  const { hour, minute } = await getStoredReminderTime();
 
   await Notifications.scheduleNotificationAsync({
     content: {
@@ -93,8 +114,17 @@ async function scheduleDailyReminder(count: number) {
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 20,
-      minute: 0,
+      hour,
+      minute,
     } as Notifications.DailyTriggerInput,
   });
+}
+
+export async function setStoredReminderTime(hour: number, minute: number) {
+  try {
+    const val = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    await AsyncStorage.setItem('dailyReminderTime', val);
+  } catch (e) {
+    console.warn('[Notifications] Failed to store reminder time:', e);
+  }
 }

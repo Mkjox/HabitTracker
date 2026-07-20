@@ -11,6 +11,8 @@ import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomStatusBar from './src/components/CustomStatusBar';
 import { registerForPushNotificationsAsync } from './src/lib/notifications';
+import { saveNotificationToHistory, syncPresentedNotifications } from './src/lib/notificationHistory';
+import * as Notifications from 'expo-notifications';
 import { initI18n } from './src/lib/i18n';
 import {
   useFonts,
@@ -58,6 +60,7 @@ export default function App() {
         await initializeStore();
         console.log("Database initialized successfully!");
         await registerForPushNotificationsAsync();
+        await syncPresentedNotifications();
         setIsDbReady(true);
       }
       catch (error) {
@@ -66,6 +69,19 @@ export default function App() {
       }
     }
     setupDB();
+
+    const receivedSubscription = Notifications.addNotificationReceivedListener(notification => {
+      saveNotificationToHistory(notification);
+    });
+
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
+      saveNotificationToHistory(response.notification);
+    });
+
+    return () => {
+      receivedSubscription.remove();
+      responseSubscription.remove();
+    };
   }, []);
 
   useEffect(() => {

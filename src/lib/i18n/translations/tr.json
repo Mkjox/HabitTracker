@@ -1,6 +1,9 @@
 {
   "dashboard": {
     "title": "Anasayfa",
+    "greetingMorning": "Günaydın ☀️",
+    "greetingAfternoon": "İyi günler 👋",
+    "greetingEvening": "İyi akşamlar 🌙",
     "todaysGoal": "Bugünün Hedefi",
     "completedOf": "{{total}} alışkanlıktan {{completed}} tanesi tamamlandı",
     "peakStreak": "en yüksek seri: {{streak}}",
@@ -59,7 +62,7 @@
     "habitsCount": "{{count}} alışkanlık",
     "consistencyMap": "Tutarlılık Haritası"
   },
-  "days": {
+  "daysShort": {
     "mon": "P",
     "tue": "S",
     "wed": "Ç",
@@ -67,6 +70,15 @@
     "fri": "C",
     "sat": "C",
     "sun": "P"
+  },
+  "days": {
+    "mon": "Pzt",
+    "tue": "Sal",
+    "wed": "Çar",
+    "thu": "Per",
+    "fri": "Cum",
+    "sat": "Cmt",
+    "sun": "Paz"
   },
   "habitDetails": {
     "nameInput": "İsim",

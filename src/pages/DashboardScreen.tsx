@@ -28,6 +28,13 @@ export default function DashboardScreen() {
 
     const completedCount = habits.filter(h => h.completedToday).length;
     const totalCount = habits.length;
+
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return t('dashboard.greetingMorning');
+        if (hour < 18) return t('dashboard.greetingAfternoon');
+        return t('dashboard.greetingEvening');
+    };
     const progress = totalCount > 0 ? completedCount / totalCount : 0;
 
     const onRefresh = () => {
@@ -83,7 +90,7 @@ export default function DashboardScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <Text style={[styles.title, { color: theme.colors.text }]}>{t('dashboard.title')}</Text>
+                    <Text style={[styles.greeting, { color: theme.colors.text }]}>{getGreeting()}</Text>
                     <View style={styles.headerActions as any}>
                         <Ionicons
                             name="notifications-outline"
@@ -165,10 +172,10 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 24,
     },
-    title: {
-        fontSize: 32,
-        fontFamily: fonts.extraBold,
-        letterSpacing: -0.5,
+    greeting: {
+        fontSize: 22,
+        fontFamily: fonts.bold,
+        letterSpacing: -0.3,
     },
     headerActions: {
         flexDirection: 'row',

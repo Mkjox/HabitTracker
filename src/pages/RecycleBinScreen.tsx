@@ -13,6 +13,9 @@ import {
 } from "react-native";
 import { fonts } from '../assets/fonts/fonts';
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../assets/types/navigationTypes';
 import { useTheme } from "../context/ThemeContext";
 import {
   restoreHabit,
@@ -33,6 +36,7 @@ const RecycleBinScreen: React.FC = () => {
   const { t } = useTranslation();
   const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
   const { theme } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useFocusEffect(
     useCallback(() => {
@@ -103,11 +107,16 @@ const RecycleBinScreen: React.FC = () => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>{t('recycleBin.title')}</Text>
-          {deletedHabits.length > 0 && (
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>{t('recycleBin.title')}</Text>
+          {deletedHabits.length > 0 ? (
             <TouchableOpacity onPress={handleCleanBin}>
               <Text style={{ color: theme.colors.error, fontFamily: fonts.semiBold }}>{t('recycleBin.emptyBinBtn')}</Text>
             </TouchableOpacity>
+          ) : (
+            <View style={{ width: 24 }} />
           )}
         </View>
 
@@ -162,13 +171,21 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 24,
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    paddingBottom: 20,
+    marginTop: 32,
   },
   title: {
     fontSize: 28,
+    fontFamily: fonts.bold,
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontFamily: fonts.bold,
   },
   listContainer: {

@@ -1,6 +1,9 @@
 {
   "dashboard": {
     "title": "Dashboard",
+    "greetingMorning": "Good morning ☀️",
+    "greetingAfternoon": "Good afternoon 👋",
+    "greetingEvening": "Good evening 🌙",
     "todaysGoal": "Today's Goal",
     "completedOf": "{{completed}} of {{total}} habits completed",
     "peakStreak": "{{streak}} peak streak",
@@ -59,7 +62,7 @@
     "habitsCount": "{{count}} habits",
     "consistencyMap": "Consistency Map"
   },
-  "days": {
+  "daysShort": {
     "mon": "M",
     "tue": "T",
     "wed": "W",
@@ -67,6 +70,15 @@
     "fri": "F",
     "sat": "S",
     "sun": "S"
+  },
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
   },
   "habitDetails": {
     "nameInput": "Name",

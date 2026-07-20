@@ -2,12 +2,12 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { fonts } from '../assets/fonts/fonts';
-import Animated, { 
-  FadeInDown, 
-  FadeOutLeft, 
-  useAnimatedStyle, 
-  withSpring, 
-  interpolateColor 
+import Animated, {
+  FadeInDown,
+  FadeOutLeft,
+  useAnimatedStyle,
+  withSpring,
+  interpolateColor
 } from 'react-native-reanimated';
 import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,16 +27,16 @@ type Props = {
   onPress: () => void;
 };
 
-export default function HabitListItem({ 
-  name, 
-  streak, 
-  completedToday, 
+export default function HabitListItem({
+  name,
+  streak,
+  completedToday,
   icon = "leaf",
   frequencyType = "daily",
   frequencyValue = 0,
   weeklyProgress = 0,
-  onToggle, 
-  onPress 
+  onToggle,
+  onPress
 }: Props) {
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -49,14 +49,14 @@ export default function HabitListItem({
   const renderRightActions = () => {
     return (
       <View style={styles.rightActionContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleToggle}
           style={[styles.completeAction, { backgroundColor: theme.colors.success }]}
         >
-          <Ionicons 
-            name={completedToday ? "close-circle-outline" : "checkmark-circle-outline"} 
-            size={28} 
-            color="#fff" 
+          <Ionicons
+            name={completedToday ? "close-circle-outline" : "checkmark-circle-outline"}
+            size={28}
+            color="#fff"
           />
           <Text style={styles.actionText}>{completedToday ? t('dashboard.undo') : t('dashboard.done')}</Text>
         </TouchableOpacity>
@@ -81,8 +81,8 @@ export default function HabitListItem({
   });
 
   return (
-    <Animated.View 
-      entering={FadeInDown.duration(400).springify()} 
+    <Animated.View
+      entering={FadeInDown.duration(400).springify()}
       exiting={FadeOutLeft.duration(300)}
     >
       <Swipeable
@@ -102,7 +102,7 @@ export default function HabitListItem({
           <Animated.View style={[
             styles.card,
             animatedCardStyle,
-            { 
+            {
               borderRadius: theme.borderRadius.l,
               borderWidth: completedToday ? 1 : 0,
               borderColor: completedToday ? theme.colors.success + '40' : theme.colors.border,
@@ -115,19 +115,19 @@ export default function HabitListItem({
           ]}>
             <View style={styles.content}>
               <View style={[
-                styles.iconContainer, 
+                styles.iconContainer,
                 { backgroundColor: completedToday ? theme.colors.success + '20' : theme.colors.primary + '10' }
               ]}>
-                <Ionicons 
-                  name={icon as any} 
-                  size={24} 
-                  color={completedToday ? theme.colors.success : theme.colors.primary} 
+                <Ionicons
+                  name={icon as any}
+                  size={24}
+                  color={completedToday ? theme.colors.success : theme.colors.primary}
                 />
               </View>
               <View style={styles.mainInfo}>
                 <Text style={[
-                  styles.habitName, 
-                  { 
+                  styles.habitName,
+                  {
                     color: theme.colors.text,
                     textDecorationLine: completedToday ? 'line-through' : 'none',
                     opacity: completedToday ? 0.6 : 1
@@ -141,29 +141,37 @@ export default function HabitListItem({
                       🔥 {streak} {streak === 1 ? t('dashboard.day') : t('dashboard.days')}
                     </Text>
                   </View>
-                  
+
                   {frequencyType === 'weekly' && (
                     <View style={[styles.freqBadge, { backgroundColor: theme.colors.success + '15' }]}>
                       <Text style={[styles.freqText, { color: theme.colors.success }]}>
-                         {t('dashboard.thisWeek', { current: weeklyProgress, total: frequencyValue })}
+                        {t('dashboard.thisWeek', { current: weeklyProgress, total: frequencyValue })}
                       </Text>
                     </View>
                   )}
-                  
+
                   {frequencyType === 'custom' && (
                     <View style={[styles.freqBadge, { backgroundColor: (theme.colors.info || '#00adf5') + '15' }]}>
                       <Text style={[styles.freqText, { color: theme.colors.info || '#00adf5' }]}>
-                         {t('dashboard.customSchedule')}
+                        {(() => {
+                          const dayKeys = ['daysShort.mon', 'daysShort.tue', 'daysShort.wed', 'daysShort.thu', 'daysShort.fri', 'daysShort.sat', 'daysShort.sun'];
+                          const activeDays = dayKeys
+                            .filter((_, i) => (frequencyValue & (1 << i)) !== 0)
+                            .map(key => t(key));
+                          return activeDays.length === 7
+                            ? t('dashboard.customSchedule')
+                            : activeDays.join(' · ');
+                        })()}
                       </Text>
                     </View>
                   )}
                 </View>
               </View>
-              
+
               <Animated.View style={[
-                styles.statusIndicator, 
+                styles.statusIndicator,
                 animatedIndicatorStyle,
-                { 
+                {
                   backgroundColor: completedToday ? theme.colors.success : theme.colors.border + '30',
                   borderColor: completedToday ? theme.colors.success : theme.colors.border,
                   borderWidth: 1.5,

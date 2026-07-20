@@ -5,6 +5,9 @@ import { fonts } from '../assets/fonts/fonts';
 import { Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Entypo, Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../assets/types/navigationTypes';
 import { Divider, TextInput } from 'react-native-paper';
 import CustomButton from '../components/CustomButton';
 import { useHabitStore } from '../store/useHabitStore';
@@ -18,6 +21,7 @@ const CategoriesScreen = () => {
     const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null);
     const { theme } = useTheme();
     const { categories, addCategory, removeCategory } = useHabitStore();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const showToastAdd = () => {
         if (Platform.OS === 'android') {
@@ -73,7 +77,13 @@ const CategoriesScreen = () => {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <View style={styles.content}>
-                <Text style={[styles.title, { color: theme.colors.text }]}>{t('categories.title')}</Text>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
+                    </TouchableOpacity>
+                    <Text style={[styles.headerTitle, { color: theme.colors.text }]}>{t('categories.title')}</Text>
+                    <View style={{ width: 24 }} />
+                </View>
 
                 <View style={[styles.inputCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <TextInput
@@ -283,6 +293,21 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: 10,
+        paddingBottom: 20,
+        marginTop: 32,
+    },
+    backButton: {
+        padding: 4,
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontFamily: fonts.bold,
     },
 })
 

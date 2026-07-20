@@ -14,6 +14,7 @@ export type RootStackParamList = {
   Categories: undefined;
   "Recycle Bin": undefined;
   Notifications: undefined;
+  NotificationSettings: undefined;
   Language: undefined;
 };
 
