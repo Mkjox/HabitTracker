@@ -229,7 +229,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           <View style={styles.actionHeader}>
             <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
             <Text style={[styles.actionTitle, { color: theme.colors.text }]}>
-              {t('habitDetails.selectedDate', { date: new Date(selectedDate).toDateString() })}
+              {t('habitDetails.selectedDate', { date: new Date(selectedDate).toLocaleDateString(i18n.language, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) })}
             </Text>
           </View>
 

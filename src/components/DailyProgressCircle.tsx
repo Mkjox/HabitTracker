@@ -1,21 +1,21 @@
 import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { fonts } from '../assets/fonts/fonts';
-import { 
-  Canvas, 
-  Path, 
-  Circle, 
-  Skia, 
-  LinearGradient, 
-  vec, 
-  Text as SkiaText, 
-  useFont 
+import {
+  Canvas,
+  Path,
+  Circle,
+  Skia,
+  LinearGradient,
+  vec,
+  Text as SkiaText,
+  useFont
 } from '@shopify/react-native-skia';
-import Animated, { 
-  useSharedValue, 
-  useDerivedValue, 
-  withSpring, 
-  withTiming, 
+import Animated, {
+  useSharedValue,
+  useDerivedValue,
+  withSpring,
+  withTiming,
   interpolate,
   withRepeat,
   useAnimatedStyle
@@ -28,10 +28,10 @@ interface DailyProgressCircleProps {
   strokeWidth?: number;
 }
 
-const DailyProgressCircle: React.FC<DailyProgressCircleProps> = ({ 
-  progress, 
-  size = 180, 
-  strokeWidth = 15 
+const DailyProgressCircle: React.FC<DailyProgressCircleProps> = ({
+  progress,
+  size = 180,
+  strokeWidth = 15
 }) => {
   const { theme } = useTheme();
   const radius = (size - strokeWidth) / 2;
@@ -101,7 +101,7 @@ const DailyProgressCircle: React.FC<DailyProgressCircleProps> = ({
             color={theme.colors.border}
             opacity={0.6}
           />
-          
+
           {/* Progress Fill */}
           <Path
             path={path}
@@ -120,9 +120,9 @@ const DailyProgressCircle: React.FC<DailyProgressCircleProps> = ({
         </Canvas>
       </Animated.View>
       <View style={styles.textOverlay}>
-         <Animated.Text style={[styles.percentage, { color: theme.colors.text }]}>
-            {Math.round(progress * 100)}%
-         </Animated.Text>
+        <Animated.Text style={[styles.percentage, { color: theme.colors.text }]}>
+          {Math.round(progress * 100)}%
+        </Animated.Text>
       </View>
     </View>
   );
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   percentage: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: fonts.extraBold,
     letterSpacing: -0.5,
   }

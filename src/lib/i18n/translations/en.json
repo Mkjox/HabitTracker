@@ -53,7 +53,7 @@
     "bestStreak": "Best Streak",
     "total": "Total",
     "monthlyTrends": "Monthly Trends",
-    "monthlyDesc": "Total habit completions per month (last 12 months). Use this to spot increases or drops in activity.",
+    "monthlyDesc": "Total habit completions per month (last 6 months). Use this to spot increases or drops in activity.",
     "totalPeriod": "Total this period: {{total}}",
     "categoryDist": "Category Distribution",
     "habitsCount": "{{count}} habits",

@@ -35,40 +35,40 @@ export default function DashboardScreen() {
     };
 
     const renderHeader = () => (
-                <View>
-                    <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-            <View style={styles.summaryContent}>
-                <View style={{ flex: 1 }}>
-                    <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>{t('dashboard.todaysGoal')}</Text>
-                    <Text style={[styles.summarySub, { color: theme.colors.textSecondary }]}>
-                        {t('dashboard.completedOf', { completed: completedCount, total: totalCount })}
-                    </Text>
-                    
-                    <View style={styles.streakBadgeContainer}>
-                        <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
-                            <Ionicons name="flame" size={14} color={theme.colors.primary} />
-                            <Text style={[styles.streakText, { color: theme.colors.primary }]}>
-                                {t('dashboard.peakStreak', { streak: Math.max(...habits.map(h => h.streak), 0) })}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-                <DailyProgressCircle progress={progress} size={90} strokeWidth={8} />
-            </View>
-                    </View>
+        <View>
+            <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <View style={styles.summaryContent}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={[styles.summaryTitle, { color: theme.colors.text }]}>{t('dashboard.todaysGoal')}</Text>
+                        <Text style={[styles.summarySub, { color: theme.colors.textSecondary }]}>
+                            {t('dashboard.completedOf', { completed: completedCount, total: totalCount })}
+                        </Text>
 
-                    {categories.length === 0 && (
-                        <View style={[styles.noticeCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={[styles.noticeTitle, { color: theme.colors.text }]}>{t('dashboard.noCategoriesFound')}</Text>
-                                <Text style={[styles.noticeSub, { color: theme.colors.textSecondary }]}>{t('dashboard.noCategoriesSub')}</Text>
+                        <View style={styles.streakBadgeContainer}>
+                            <View style={[styles.streakBadge, { backgroundColor: theme.colors.primary + '20' }]}>
+                                <Ionicons name="flame" size={14} color={theme.colors.primary} />
+                                <Text style={[styles.streakText, { color: theme.colors.primary }]}>
+                                    {t('dashboard.peakStreak', { streak: Math.max(...habits.map(h => h.streak), 0) })}
+                                </Text>
                             </View>
-                            <TouchableOpacity onPress={() => navigation.navigate('Categories' as any)} style={[styles.noticeButton, { backgroundColor: theme.colors.primary }]}>
-                                <Text style={{ color: '#fff', fontFamily: fonts.bold }}>{t('dashboard.openCategories')}</Text>
-                            </TouchableOpacity>
                         </View>
-                    )}
+                    </View>
+                    <DailyProgressCircle progress={progress} size={100} strokeWidth={8} />
                 </View>
+            </View>
+
+            {categories.length === 0 && (
+                <View style={[styles.noticeCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={[styles.noticeTitle, { color: theme.colors.text }]}>{t('dashboard.noCategoriesFound')}</Text>
+                        <Text style={[styles.noticeSub, { color: theme.colors.textSecondary }]}>{t('dashboard.noCategoriesSub')}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => navigation.navigate('Categories' as any)} style={[styles.noticeButton, { backgroundColor: theme.colors.primary }]}>
+                        <Text style={{ color: '#fff', fontFamily: fonts.bold }}>{t('dashboard.openCategories')}</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+        </View>
     );
 
     if (loading && habits.length === 0) {
@@ -85,16 +85,16 @@ export default function DashboardScreen() {
                 <View style={styles.header}>
                     <Text style={[styles.title, { color: theme.colors.text }]}>{t('dashboard.title')}</Text>
                     <View style={styles.headerActions as any}>
-                        <Ionicons 
-                            name="notifications-outline" 
-                            size={24} 
-                            color={theme.colors.textSecondary} 
+                        <Ionicons
+                            name="notifications-outline"
+                            size={24}
+                            color={theme.colors.textSecondary}
                             style={{ marginRight: 16 }}
                             onPress={() => navigation.navigate("Notifications")}
                         />
-                        <Ionicons 
-                            name={isDark ? 'sunny-outline' : 'moon-outline'} 
-                            size={24} 
+                        <Ionicons
+                            name={isDark ? 'sunny-outline' : 'moon-outline'}
+                            size={24}
                             color={theme.colors.textSecondary}
                             onPress={toggleTheme}
                         />
@@ -192,31 +192,31 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
     },
-        noticeCard: {
-            marginTop: 12,
-            padding: 14,
-            borderRadius: 14,
-            borderWidth: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingHorizontal: 16,
-            marginBottom: 18,
-        },
-        noticeTitle: {
-            fontSize: 16,
-            fontFamily: fonts.bold,
-            marginBottom: 4,
-        },
-        noticeSub: {
-            fontSize: 13,
-        },
-        noticeButton: {
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 10,
-            marginLeft: 12,
-        },
+    noticeCard: {
+        marginTop: 12,
+        padding: 14,
+        borderRadius: 14,
+        borderWidth: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        marginBottom: 18,
+    },
+    noticeTitle: {
+        fontSize: 16,
+        fontFamily: fonts.bold,
+        marginBottom: 4,
+    },
+    noticeSub: {
+        fontSize: 13,
+    },
+    noticeButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        marginLeft: 12,
+    },
     summaryCard: {
         padding: 24,
         borderRadius: 24,

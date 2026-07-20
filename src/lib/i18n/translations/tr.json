@@ -53,7 +53,7 @@
     "bestStreak": "En İyi Seri",
     "total": "Toplam",
     "monthlyTrends": "Aylık Eğilimler",
-    "monthlyDesc": "Aylık toplam alışkanlık tamamlama (son 12 ay). Aktivitedeki değişimleri görmek için kullanın.",
+    "monthlyDesc": "Aylık toplam alışkanlık tamamlama (son 6 ay). Aktivitedeki değişimleri görmek için kullanın.",
     "totalPeriod": "Bu dönem toplamı: {{total}}",
     "categoryDist": "Kategori Dağılımı",
     "habitsCount": "{{count}} alışkanlık",

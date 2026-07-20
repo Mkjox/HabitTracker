@@ -2,27 +2,29 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from 'react-i18next';
 import i18n from '../lib/i18n';
 import { fonts } from '../assets/fonts/fonts';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  SafeAreaView, 
-  ActivityIndicator, 
-  Dimensions 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  ActivityIndicator,
+  Dimensions
 } from "react-native";
 import { Bar, CartesianChart } from "victory-native";
+import { useFont } from "@shopify/react-native-skia";
 import { Calendar } from "react-native-calendars";
-import { 
-    getMonthlyStats, 
-    getAllProgress, 
-    getGlobalStats, 
-    getCategoryStats,
-    getHabitStreaks 
+import {
+  getMonthlyStats,
+  getAllProgress,
+  getGlobalStats,
+  getCategoryStats,
+  getHabitStreaks
 } from "../assets/data/database";
 import { useTheme } from "../context/ThemeContext";
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from "@expo/vector-icons";
+import { Inter_400Regular } from '@expo-google-fonts/inter';
 
 const { width } = Dimensions.get("window");
 
@@ -36,6 +38,7 @@ const InsightsScreen = () => {
   const [topHabits, setTopHabits] = useState<{ name: string; streak: number }[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [markedDates, setMarkedDates] = useState<any>({});
+  const font = useFont(Inter_400Regular, 12);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -48,12 +51,27 @@ const InsightsScreen = () => {
         getHabitStreaks()
       ]);
 
-      // Process Monthly Chart Data
-      const formattedChart = stats.map((s: { month_label: string; total_completed: number }) => ({
+      // Process Monthly Chart Data (Pad to 6 months)
+      const last6Months = Array.from({ length: 6 }).map((_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        return {
+          month_id: d.toISOString().substring(0, 7),
+          month_label: d.toLocaleString('en-US', { month: 'short' }),
+          total_completed: 0
+        };
+      });
+
+      stats.forEach((s: any) => {
+        const match = last6Months.find(m => m.month_id === s.month_id);
+        if (match) match.total_completed = s.total_completed;
+      });
+
+      const formattedChart = last6Months.map(s => ({
         x: s.month_label,
         y: s.total_completed,
       }));
-      setChartData(formattedChart.length > 0 ? formattedChart : [{ x: 'Jan', y: 0 }]);
+      setChartData(formattedChart);
 
       // Process Global Stats
       setGlobalStats(global);
@@ -126,27 +144,33 @@ const InsightsScreen = () => {
           </View>
           <Text style={[styles.sectionDesc, { color: theme.colors.textSecondary }]}>{t('insights.monthlyDesc')}</Text>
           <Text style={[styles.sectionStat, { color: theme.colors.text }]}>{t('insights.totalPeriod', { total: chartData.reduce((sum, d) => sum + (d.y || 0), 0) })}</Text>
-          
+
           <View style={styles.chartWrapper}>
-            <CartesianChart 
-              data={chartData} 
-              xKey="x" 
-              yKeys={["y"]}
-              axisOptions={{ 
-                labelColor: theme.colors.textSecondary, 
-                lineColor: theme.colors.border,
-                font: undefined // Uses default
-              }}
-            >
-              {({ points, chartBounds }) => (
-                <Bar 
-                  points={points.y} 
-                  chartBounds={chartBounds}
-                  color={theme.colors.primary} 
-                  roundedCorners={{ topLeft: 8, topRight: 8 }}
-                />
-              )}
-            </CartesianChart>
+            {font && (
+              <CartesianChart
+                data={chartData}
+                xKey="x"
+                yKeys={["y"]}
+                domainPadding={{ left: 50, right: 50, top: 30 }}
+                axisOptions={{
+                  labelColor: theme.colors.textSecondary,
+                  lineColor: theme.colors.border,
+                  font: font,
+                  formatYLabel: (val) => `${Math.round(val)}`,
+                  formatXLabel: (val) => `${val}`
+                }}
+              >
+                {({ points, chartBounds }) => (
+                  <Bar
+                    points={points.y}
+                    chartBounds={chartBounds}
+                    color={theme.colors.primary}
+                    roundedCorners={{ topLeft: 8, topRight: 8 }}
+                    innerPadding={0.3}
+                  />
+                )}
+              </CartesianChart>
+            )}
           </View>
         </View>
 
@@ -156,13 +180,18 @@ const InsightsScreen = () => {
             <Ionicons name="grid" size={20} color={theme.colors.primary} />
             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('insights.categoryDist')}</Text>
           </View>
-          
+
           {categoryStats.map((cat, index) => {
             const percentage = globalStats.totalHabits > 0 ? (cat.count / globalStats.totalHabits) * 100 : 0;
+            const isInvalidName = !cat.name || cat.name === 'null' || cat.name === 'undefined';
+            const displayName = isInvalidName ? t('common.uncategorized', 'Uncategorized') : cat.name;
+
             return (
-              <View key={cat.name} style={styles.categoryRow}>
+              <View key={cat.name || `cat-${index}`} style={styles.categoryRow}>
                 <View style={styles.categoryInfo}>
-                  <Text style={[styles.categoryName, { color: theme.colors.text }]}>{cat.name}</Text>
+                  <Text style={[styles.categoryName, { color: theme.colors.text }]}>
+                    {displayName}
+                  </Text>
                   <Text style={[styles.categoryCount, { color: theme.colors.textSecondary }]}>{t('insights.habitsCount', { count: cat.count })}</Text>
                 </View>
                 <View style={[styles.progressBarBg, { backgroundColor: theme.colors.border + '50' }]}>
