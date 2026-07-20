@@ -63,7 +63,7 @@ export default function NotificationSettingsScreen() {
                 >
                     <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
-                <Text style={[styles.title, { color: theme.colors.text }]}>Notification Settings</Text>
+                <Text style={[styles.title, { color: theme.colors.text }]}>{t('notifications.settingsTitle')}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -71,10 +71,10 @@ export default function NotificationSettingsScreen() {
                 <View style={[styles.settingCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <View style={styles.settingRow}>
                         <View style={styles.settingInfo}>
-                            <Text style={[styles.settingTitle, { color: theme.colors.text }]}>Daily Reminder</Text>
+                            <Text style={[styles.settingTitle, { color: theme.colors.text }]}>{t('notifications.dailyReminder')}</Text>
                             <TouchableOpacity onPress={() => setShowPicker(true)} style={{ paddingVertical: 6 }}>
                                 <Text style={[styles.settingDesc, { color: theme.colors.textSecondary }]}>
-                                    {`Get reminded at ${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')} to complete your habits for the day.`}
+                                    {t('notifications.reminderAt', { time: `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}` })}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -102,8 +102,8 @@ export default function NotificationSettingsScreen() {
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Ionicons name="information-circle-outline" size={20} color={theme.colors.primary} style={{ marginRight: 12 }} />
                         <View style={{ flex: 1 }}>
-                            <Text style={[styles.settingTitle, { color: theme.colors.text }]}>Change Reminder Time</Text>
-                            <Text style={[styles.settingDesc, { color: theme.colors.textSecondary }]}>Tap the time text to open the time picker and select your preferred reminder time.</Text>
+                            <Text style={[styles.settingTitle, { color: theme.colors.text }]}>{t('notifications.changeTimeTitle')}</Text>
+                            <Text style={[styles.settingDesc, { color: theme.colors.textSecondary }]}>{t('notifications.changeTimeDesc')}</Text>
                         </View>
                     </View>
                 </View>

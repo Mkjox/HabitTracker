@@ -25,6 +25,7 @@ type Props = {
   weeklyProgress?: number;
   onToggle: () => void;
   onPress: () => void;
+  onDelete?: () => void;
 };
 
 export default function HabitListItem({
@@ -36,7 +37,8 @@ export default function HabitListItem({
   frequencyValue = 0,
   weeklyProgress = 0,
   onToggle,
-  onPress
+  onPress,
+  onDelete
 }: Props) {
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -64,6 +66,19 @@ export default function HabitListItem({
     );
   };
 
+  const renderLeftActions = () => {
+    return (
+      <View style={styles.leftActionContainer}>
+        <TouchableOpacity
+          onPress={() => onDelete && onDelete()}
+          style={[styles.deleteAction, { backgroundColor: '#ff3b30' }]}
+        >
+          <Ionicons name="trash-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const animatedCardStyle = useAnimatedStyle(() => {
     const scale = withSpring(completedToday ? 1.02 : 1, { damping: 15 });
     return {
@@ -86,6 +101,9 @@ export default function HabitListItem({
       exiting={FadeOutLeft.duration(300)}
     >
       <Swipeable
+        renderLeftActions={renderLeftActions}
+        leftThreshold={40}
+        onSwipeableLeftOpen={() => { if (onDelete) onDelete(); }}
         renderRightActions={renderRightActions}
         friction={2}
         rightThreshold={40}
@@ -268,5 +286,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.bold,
     marginTop: 2,
+  },
+  leftActionContainer: {
+    marginBottom: 12,
+    width: 80,
+    justifyContent: 'center',
+  },
+  deleteAction: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+    marginRight: 8,
+    paddingVertical: 8,
   },
 });

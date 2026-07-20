@@ -10,6 +10,7 @@ import {
     RefreshControl,
     SafeAreaView,
     TouchableOpacity,
+    Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -24,7 +25,7 @@ export default function DashboardScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { isDark, theme, toggleTheme } = useTheme();
-    const { habits, loading, toggleHabit, refresh, weeklyProgress, categories } = useHabitStore();
+    const { habits, loading, toggleHabit, refresh, weeklyProgress, categories, removeHabit } = useHabitStore();
 
     const completedCount = habits.filter(h => h.completedToday).length;
     const totalCount = habits.length;
@@ -149,6 +150,22 @@ export default function DashboardScreen() {
                                 frequencyType: item.frequency_type,
                                 frequencyValue: item.frequency_value
                             })}
+                            onDelete={() => {
+                                Alert.alert(
+                                    t('habitDetails.deleteTitle'),
+                                    t('categories.deleteConfirm', { name: item.name }),
+                                    [
+                                        { text: t('common.cancel'), style: 'cancel' },
+                                        { text: t('common.delete'), style: 'destructive', onPress: async () => {
+                                            try {
+                                                await removeHabit(item.id);
+                                            } catch (e) {
+                                                console.error('Failed to delete habit', e);
+                                            }
+                                        } }
+                                    ]
+                                );
+                            }}
                         />
                     )}
                 />

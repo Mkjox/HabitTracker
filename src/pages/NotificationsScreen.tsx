@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { fonts } from '../assets/fonts/fonts';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +26,7 @@ import {
 export default function NotificationsScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -94,7 +96,7 @@ export default function NotificationsScreen() {
                     <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
                 <View style={styles.headerCenter}>
-                    <Text style={[styles.title, { color: theme.colors.text, textAlign: 'center' }]}>Notifications</Text>
+                    <Text style={[styles.title, { color: theme.colors.text, textAlign: 'center' }]}>{t('notifications.title')}</Text>
                 </View>
 
                 <View style={styles.rightActions}>
@@ -121,9 +123,9 @@ export default function NotificationsScreen() {
                         <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
                             <Ionicons name="notifications-off-outline" size={64} color={theme.colors.primary} />
                         </View>
-                        <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>All quiet here</Text>
+                        <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>{t('notifications.emptyTitle')}</Text>
                         <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
-                            You don't have any notifications at the moment. Check back later!
+                            {t('notifications.emptySubtitle')}
                         </Text>
                     </View>
                 </View>

@@ -127,6 +127,7 @@ const InsightsScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.title}/>
 
         {/* Summary Row */}
         <View style={styles.statsGrid}>

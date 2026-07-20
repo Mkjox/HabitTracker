@@ -113,7 +113,7 @@ const RecycleBinScreen: React.FC = () => {
           <Text style={[styles.headerTitle, { color: theme.colors.text }]}>{t('recycleBin.title')}</Text>
           {deletedHabits.length > 0 ? (
             <TouchableOpacity onPress={handleCleanBin}>
-              <Text style={{ color: theme.colors.error, fontFamily: fonts.semiBold }}>{t('recycleBin.emptyBinBtn')}</Text>
+              <Ionicons name="trash-bin" size={20} color={theme.colors.error} />
             </TouchableOpacity>
           ) : (
             <View style={{ width: 24 }} />

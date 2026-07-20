@@ -98,7 +98,8 @@
     "units": "Units or measurements",
     "customInput": "Value (e.g., 2km, 50 pushups)",
     "removeProgress": "Remove Progress",
-    "markDone": "Mark as Done"
+    "markDone": "Mark as Done",
+    "deleteTitle": "Delete Habit"
   },
   "categories": {
     "title": "Categories",
@@ -130,6 +131,17 @@
     "deleteBtn": "Delete",
     "deleteAllBtn": "Delete All",
     "successDelete": "Habit deleted permanently"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "defaultTitle": "Habit Reminder",
+    "emptyTitle": "All quiet here",
+    "emptySubtitle": "You don't have any notifications at the moment. Check back later!",
+    "settingsTitle": "Notification Settings",
+    "dailyReminder": "Daily Reminder",
+    "reminderAt": "Get reminded at {{time}} to complete your habits for the day.",
+    "changeTimeTitle": "Change Reminder Time",
+    "changeTimeDesc": "Tap the time text to open the time picker and select your preferred reminder time."
   },
   "tabBar": {
     "home": "Home",

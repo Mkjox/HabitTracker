@@ -98,7 +98,8 @@
     "units": "Birimler veya ölçümler",
     "customInput": "Değer (örn. 2km, 50 şınav)",
     "removeProgress": "İlerlemeyi Kaldır",
-    "markDone": "Tamamlandı İşaretle"
+    "markDone": "Tamamlandı İşaretle",
+    "deleteTitle": "Alışkanlığı Sil"
   },
   "categories": {
     "title": "Kategoriler",
@@ -130,6 +131,17 @@
     "deleteBtn": "Sil",
     "deleteAllBtn": "Tümünü Sil",
     "successDelete": "Alışkanlık kalıcı olarak silindi"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "defaultTitle": "Alışkanlık Hatırlatıcısı",
+    "emptyTitle": "Burada her şey sakin",
+    "emptySubtitle": "Şu anda herhangi bir bildiriminiz yok. Daha sonra tekrar kontrol edin!",
+    "settingsTitle": "Bildirim Ayarları",
+    "dailyReminder": "Günlük Hatırlatıcı",
+    "reminderAt": "Alışkanlıklarınızı tamamlamanız için size {{time}}'de hatırlatma gönderilecek.",
+    "changeTimeTitle": "Hatırlatma Saatini Değiştir",
+    "changeTimeDesc": "Zaman metnine dokunarak saat seçiciyi açın ve tercih ettiğiniz hatırlatma saatini seçin."
   },
   "tabBar": {
     "home": "Anasayfa",
