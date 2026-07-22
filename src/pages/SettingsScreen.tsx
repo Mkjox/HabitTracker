@@ -137,7 +137,7 @@ export default function SettingsScreen() {
                 <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                     <View style={styles.infoRow}>
                         <Ionicons name="information-circle-outline" size={20} color={theme.colors.textSecondary} />
-                        <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>HabitTracker v1.0.0</Text>
+                        <Text style={[styles.infoText, { color: theme.colors.textSecondary }]}>HabitTracker v1.0.1</Text>
                     </View>
                 </View>
                 <View style={{ height: 40 }} />

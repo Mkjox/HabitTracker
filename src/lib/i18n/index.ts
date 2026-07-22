@@ -6,12 +6,14 @@ import { LocaleConfig } from 'react-native-calendars';
 
 import en from './translations/en.json';
 import tr from './translations/tr.json';
+import es from './translations/es.json';
 
 const LANGUAGE_KEY = '@app_language';
 
 const resources = {
   en: { translation: en },
   tr: { translation: tr },
+  es: { translation: es },
 };
 
 LocaleConfig.locales['en'] = {
@@ -28,6 +30,14 @@ LocaleConfig.locales['tr'] = {
   dayNames: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
   dayNamesShort: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'],
   today: 'Bugün'
+};
+
+LocaleConfig.locales['es'] = {
+  monthNames: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+  monthNamesShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+  dayNames: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+  dayNamesShort: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+  today: 'Hoy'
 };
 
 const initI18n = async () => {
@@ -50,14 +60,14 @@ const initI18n = async () => {
       },
     });
 
-  LocaleConfig.defaultLocale = savedLanguage === 'tr' ? 'tr' : 'en';
+  LocaleConfig.defaultLocale = ['tr', 'es'].includes(savedLanguage) ? savedLanguage : 'en';
 };
 
 // Custom wrapper to change language and persist it
 export const changeLanguage = async (lng: string) => {
   await i18n.changeLanguage(lng);
   await AsyncStorage.setItem(LANGUAGE_KEY, lng);
-  LocaleConfig.defaultLocale = lng === 'tr' ? 'tr' : 'en';
+  LocaleConfig.defaultLocale = ['tr', 'es'].includes(lng) ? lng : 'en';
 };
 
 export { initI18n };

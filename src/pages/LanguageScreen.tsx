@@ -18,6 +18,7 @@ export default function LanguageScreen() {
 
     const languages = [
         { code: 'en', name: 'English' },
+        { code: 'es', name: 'Español' },
         { code: 'tr', name: 'Türkçe' },
     ];
 
