@@ -18,6 +18,11 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
             const totalCount = habits.length;
             const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+            const widgetWidth = widgetInfo.width ?? 0;
+            const widgetHeight = widgetInfo.height ?? 0;
+            const isWide = widgetWidth >= 220;
+            const isTall = widgetHeight >= 220;
+
             const data = {
                 completedCount,
                 totalCount,
@@ -26,7 +31,11 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
                 topHabits: habits.slice(0, 3).map(h => ({
                     name: h.name,
                     completed: !!h.completed_today
-                }))
+                })),
+                widgetWidth,
+                widgetHeight,
+                isWide,
+                isTall
             };
 
             props.renderWidget(<TodayProgressWidget {...data} />);
