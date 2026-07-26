@@ -4,8 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { changeLanguage } from '../lib/i18n';
 import { fonts } from '../assets/fonts/fonts';
 import { Divider } from 'react-native-paper';
-import CustomButton from '../components/CustomButton';
-import { backupDatabase, restoreDatabase } from '../assets/data/backup';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -16,46 +14,9 @@ export default function SettingsScreen() {
     const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const [loadingBackup, setLoadingBackup] = useState(false);
-    const [loadingRestore, setLoadingRestore] = useState(false);
 
     const onChangeLanguage = () => {
         navigation.navigate("Language");
-    };
-
-    const onBackup = async () => {
-        setLoadingBackup(true);
-        try {
-            const ok = await backupDatabase();
-            Alert.alert('Backup', ok ? 'Backup completed successfully.' : 'Backup failed.');
-        } catch (err) {
-            Alert.alert('Backup', 'Backup failed.');
-        } finally {
-            setLoadingBackup(false);
-        }
-    };
-
-    const confirmAndRestore = () => {
-        Alert.alert(
-            'Restore database',
-            'Restoring will overwrite the current database. Continue?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Restore', style: 'destructive', onPress: onRestore }
-            ]
-        );
-    };
-
-    const onRestore = async () => {
-        setLoadingRestore(true);
-        try {
-            const ok = await restoreDatabase();
-            Alert.alert('Restore', ok ? 'Database restored from backup.' : 'Restore failed or no backup found.');
-        } catch (err) {
-            Alert.alert('Restore', 'Restore failed.');
-        } finally {
-            setLoadingRestore(false);
-        }
     };
 
     return (
@@ -106,32 +67,19 @@ export default function SettingsScreen() {
                         </View>
                         <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
                     </TouchableOpacity>
-                </View>
 
-                {/* Database Section */}
-                <View style={[styles.section, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-                    <View style={styles.sectionHeader}>
-                        <Ionicons name="server-outline" size={24} color={theme.colors.primary} />
-                        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.database')}</Text>
-                    </View>
-                    <Text style={[styles.sectionDesc, { color: theme.colors.textSecondary }]}>
-                        {t('settings.databaseDesc')}
-                    </Text>
+                    <Divider style={styles.divider} />
 
-                    <CustomButton
-                        onPress={onBackup}
-                        title={t('settings.backupDb')}
-                        loading={loadingBackup}
-                        style={styles.button}
-                    />
-
-                    <CustomButton
-                        onPress={confirmAndRestore}
-                        title={t('settings.restoreDb')}
-                        loading={loadingRestore}
-                        style={styles.button}
-                        variant="outline"
-                    />
+                    <TouchableOpacity
+                        style={styles.menuRow}
+                        onPress={() => navigation.navigate("Database" as any)}
+                    >
+                        <View style={styles.menuLeft}>
+                            <Ionicons name="server-outline" size={22} color={theme.colors.text} />
+                            <Text style={[styles.menuLabel, { color: theme.colors.text }]}>{t('settings.database')}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+                    </TouchableOpacity>
                 </View>
 
                 <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>

@@ -1,6 +1,5 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { DashboardHabit } from '../assets/types/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,8 +17,6 @@ Notifications.setNotificationHandler({
  * Request notification permissions and return the token.
  */
 export async function registerForPushNotificationsAsync() {
-  let token;
-
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',
@@ -37,21 +34,12 @@ export async function registerForPushNotificationsAsync() {
       finalStatus = status;
     }
     if (finalStatus !== 'granted') {
-      console.log('Failed to get push token for push notification!');
-      return;
-    }
-    
-    try {
-        const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-        if (projectId) {
-            token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-        }
-    } catch (e) {
-        console.warn("Could not get push token", e);
+      console.log('Notification permission was not granted.');
+      return null;
     }
   }
 
-  return token;
+  return null;
 }
 
 /**

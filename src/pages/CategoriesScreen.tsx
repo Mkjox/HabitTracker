@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, Keyboard, Platform, ToastAndroid, Dimensions, SafeAreaView } from 'react-native';
 import { fonts } from '../assets/fonts/fonts';
-import { Modal } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Entypo, Ionicons } from '@expo/vector-icons';
+import ConfirmModal from '../components/ConfirmModal';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../assets/types/navigationTypes';
 import { Divider, TextInput } from 'react-native-paper';
 import CustomButton from '../components/CustomButton';
 import { useHabitStore } from '../store/useHabitStore';
+import { showErrorToast, showSuccessToast } from '../lib/toast';
 
 const { height } = Dimensions.get("window");
 
@@ -18,36 +19,25 @@ const CategoriesScreen = () => {
     const { t } = useTranslation();
     const [categoryName, setCategoryName] = useState("");
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [toDelete, setToDelete] = useState<{ id: number; name: string } | null>(null);
     const { theme } = useTheme();
     const { categories, addCategory, removeCategory } = useHabitStore();
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-    const showToastAdd = () => {
-        if (Platform.OS === 'android') {
-            ToastAndroid.show(t('categories.successAdd'), ToastAndroid.SHORT);
-        }
-    };
-
-    const showToastDelete = () => {
-        if (Platform.OS === 'android') {
-            ToastAndroid.show(t('categories.successDelete'), ToastAndroid.SHORT);
-        }
-    };
-
     const handleAddCategory = async () => {
         if (!categoryName.trim()) {
-            Alert.alert(t('common.error'), t('categories.errEmpty'));
+            showErrorToast(t('categories.errEmpty'), t('common.error'));
             return;
         }
         try {
             await addCategory(categoryName);
             Keyboard.dismiss();
-            showToastAdd();
+            showSuccessToast(t('categories.successAdd'), t('common.success'));
             setCategoryName("");
         }
         catch (error) {
-            Alert.alert(t('common.error'), t('categories.errExists'));
+            showErrorToast(t('categories.errExists'), t('common.error'));
         }
     };
 
@@ -58,12 +48,14 @@ const CategoriesScreen = () => {
 
     const confirmDeleteCategory = async () => {
         if (!toDelete) return;
+        setDeleteLoading(true);
         try {
             await removeCategory(toDelete.id);
-            showToastDelete();
+            showSuccessToast(t('categories.successDelete'), t('common.success'));
         } catch (error) {
-            Alert.alert(t('common.error'), t('categories.errDelete'));
+            showErrorToast(t('categories.errDelete'), t('common.error'));
         } finally {
+            setDeleteLoading(false);
             setDeleteModalVisible(false);
             setToDelete(null);
         }
@@ -142,29 +134,16 @@ const CategoriesScreen = () => {
                         </View>
                     }
                 />
-                <Modal
+                <ConfirmModal
                     visible={deleteModalVisible}
-                    transparent={true}
-                    animationType="fade"
-                    onRequestClose={cancelDelete}
-                >
-                    <View style={styles.modalContainer}>
-                        <View style={[styles.modalContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}> 
-                            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('categories.deleteTitle')}</Text>
-                            <Text style={{ color: theme.colors.textSecondary, textAlign: 'center' }}>
-                                {t('categories.deleteConfirm', { name: toDelete?.name })}
-                            </Text>
-                            <View style={styles.modalButtons}>
-                                <TouchableOpacity style={[styles.modalCancel, { borderColor: theme.colors.border }]} onPress={cancelDelete}>
-                                    <Text style={{ color: theme.colors.textSecondary, fontFamily: fonts.bold }}>{t('categories.cancelBtn')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.modalDelete, { backgroundColor: theme.colors.error }]} onPress={confirmDeleteCategory}>
-                                    <Text style={{ color: '#fff', fontFamily: fonts.bold }}>{t('categories.deleteBtn')}</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                </Modal>
+                    title={t('categories.deleteTitle')}
+                    message={t('categories.deleteConfirm', { name: toDelete?.name })}
+                    confirmText={t('categories.deleteBtn')}
+                    cancelText={t('categories.cancelBtn')}
+                    onCancel={cancelDelete}
+                    onConfirm={confirmDeleteCategory}
+                    loading={deleteLoading}
+                />
             </View>
         </SafeAreaView>
     )

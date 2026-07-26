@@ -25,6 +25,7 @@ import { RootStackParamList } from "../assets/types/navigationTypes";
 import CustomButton from "../components/CustomButton";
 import { useHabitStore } from "../store/useHabitStore";
 import Animated, { FadeInUp, FadeInDown } from "react-native-reanimated";
+import { showErrorToast, showSuccessToast } from "../lib/toast";
 
 const { width } = Dimensions.get("window");
 
@@ -52,22 +53,24 @@ export default function AddHabitScreen() {
     }
   }, [categories, selectedCat]);
 
-  const showToast = (msg: string) => {
-    if (Platform.OS === "android") ToastAndroid.show(msg, ToastAndroid.SHORT);
-  };
-
   const onAdd = async () => {
-    if (!name.trim()) return Alert.alert(t('common.error'), t('addHabit.errNoName'));
-    if (!selectedCat) return Alert.alert(t('common.error'), t('addHabit.errNoCat'));
+    if (!name.trim()) {
+      showErrorToast(t('addHabit.errNoName'), t('common.error'));
+      return;
+    }
+    if (!selectedCat) {
+      showErrorToast(t('addHabit.errNoCat'), t('common.error'));
+      return;
+    }
     
     setLoading(true);
     try {
       await addHabitStore(name, description, selectedCat, selectedIcon, frequencyType, frequencyValue);
       Keyboard.dismiss();
-      showToast(t('addHabit.successMsg'));
+      showSuccessToast(t('addHabit.successMsg'), t('common.success'));
       nav.goBack();
     } catch (error) {
-      Alert.alert(t('common.error'), t('addHabit.errMsg'));
+      showErrorToast(t('addHabit.errMsg'), t('common.error'));
     } finally {
       setLoading(false);
     }

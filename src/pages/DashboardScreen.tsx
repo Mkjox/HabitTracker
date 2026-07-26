@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '../assets/fonts/fonts';
 import {
@@ -10,7 +10,6 @@ import {
     RefreshControl,
     SafeAreaView,
     TouchableOpacity,
-    Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -20,12 +19,16 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../assets/types/navigationTypes';
 import { useHabitStore } from '../store/useHabitStore';
 import DailyProgressCircle from '../components/DailyProgressCircle';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function DashboardScreen() {
     const { t } = useTranslation();
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { isDark, theme, toggleTheme } = useTheme();
     const { habits, loading, toggleHabit, refresh, weeklyProgress, categories, removeHabit } = useHabitStore();
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [selectedHabit, setSelectedHabit] = useState<{ id: number; name: string } | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const completedCount = habits.filter(h => h.completedToday).length;
     const totalCount = habits.length;
@@ -40,6 +43,29 @@ export default function DashboardScreen() {
 
     const onRefresh = () => {
         refresh();
+    };
+
+    const openDeleteModal = (habit: { id: number; name: string }) => {
+        setSelectedHabit(habit);
+        setDeleteModalVisible(true);
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteModalVisible(false);
+        setSelectedHabit(null);
+    };
+
+    const confirmDeleteHabit = async () => {
+        if (!selectedHabit) return;
+        setDeleteLoading(true);
+        try {
+            await removeHabit(selectedHabit.id);
+        } catch (e) {
+            console.error('Failed to delete habit', e);
+        } finally {
+            setDeleteLoading(false);
+            closeDeleteModal();
+        }
     };
 
     const renderHeader = () => (
@@ -76,6 +102,18 @@ export default function DashboardScreen() {
                     </TouchableOpacity>
                 </View>
             )}
+
+            {/* Modal doesn't show up inside Safeareaview but it does work it (breaks UI right after deleting the habit for some reason although still works properly overall) */}
+            <ConfirmModal
+                visible={deleteModalVisible}
+                title={t('habitDetails.deleteTitle')}
+                message={t('categories.deleteConfirm', { name: selectedHabit?.name })}
+                confirmText={t('common.delete')}
+                cancelText={t('common.cancel')}
+                onCancel={closeDeleteModal}
+                onConfirm={confirmDeleteHabit}
+                loading={deleteLoading}
+            />
         </View>
     );
 
@@ -150,22 +188,7 @@ export default function DashboardScreen() {
                                 frequencyType: item.frequency_type,
                                 frequencyValue: item.frequency_value
                             })}
-                            onDelete={() => {
-                                Alert.alert(
-                                    t('habitDetails.deleteTitle'),
-                                    t('categories.deleteConfirm', { name: item.name }),
-                                    [
-                                        { text: t('common.cancel'), style: 'cancel' },
-                                        { text: t('common.delete'), style: 'destructive', onPress: async () => {
-                                            try {
-                                                await removeHabit(item.id);
-                                            } catch (e) {
-                                                console.error('Failed to delete habit', e);
-                                            }
-                                        } }
-                                    ]
-                                );
-                            }}
+                            onDelete={() => openDeleteModal(item)}
                         />
                     )}
                 />

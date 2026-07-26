@@ -13,6 +13,7 @@ import HabitDetailsScreen from "../pages/HabitDetailsScreen";
 import NotificationsScreen from "../pages/NotificationsScreen";
 import NotificationSettingsScreen from "../pages/NotificationSettingsScreen";
 import LanguageScreen from "../pages/LanguageScreen";
+import DatabaseScreen from "../pages/DatabaseScreen";
 import CustomTabBar from "../components/CustomTabBar";
 import { RootStackParamList } from "../assets/types/navigationTypes";
 
@@ -44,6 +45,7 @@ function StackNavigator() {
             <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Language" component={LanguageScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Database" component={DatabaseScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 }

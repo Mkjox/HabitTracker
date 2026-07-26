@@ -14,6 +14,7 @@ import { registerForPushNotificationsAsync } from './src/lib/notifications';
 import { saveNotificationToHistory, syncPresentedNotifications } from './src/lib/notificationHistory';
 import * as Notifications from 'expo-notifications';
 import { initI18n } from './src/lib/i18n';
+import Toast from 'react-native-toast-message';
 import {
   useFonts,
   Inter_400Regular,
@@ -105,6 +106,7 @@ export default function App() {
             ) : (
               <AppContent />
             )}
+            <Toast />
           </ThemeProvider>
         </PaperProvider>
       </SafeAreaProvider>

@@ -26,7 +26,13 @@
     "database": "Database",
     "databaseDesc": "Backup your habits and progress to a local file or restore from a previous backup.",
     "backupDb": "Backup Database",
+    "exportDb": "Export Database",
+    "restoreDbAuto": "Restore Database Automatically",
+    "restoreDbManual": "Select Database Manually",
+    "databaseManualDesc": "You can also manually select a previously exported database file to restore your data.",
     "restoreDb": "Restore Database",
+    "defaultSaveLocation": "Default Save Location: ",
+    "internalStorage": "App's Internal Storage",
     "language": "Language",
     "languageDesc": "Choose your preferred language for the application interface."
   },
@@ -153,6 +159,7 @@
     "save": "Save",
     "delete": "Delete",
     "ok": "OK",
+    "success": "Success",
     "error": "Error"
   }
 }

@@ -1,8 +1,9 @@
 import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 
 const dbPath = `${FileSystem.documentDirectory}SQLite/habits.db`;
 const backupDir = `${FileSystem.documentDirectory}Backup`;
-const backupPath = `${backupDir}/habits_backup.db`;
+export const backupPath = `${backupDir}/habits_backup.db`;
 
 export const DEFAULT_BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -68,6 +69,50 @@ export const restoreDatabase = async () => {
     }
     catch (error) {
         console.error('Failed to restore database:', error);
+        return false;
+    }
+};
+
+export const restoreDatabaseManually = async () => {
+    try {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: '*/*',
+            copyToCacheDirectory: true,
+        });
+
+        if (result.canceled || !result.assets || result.assets.length === 0) {
+            return false;
+        }
+
+        const asset = result.assets[0];
+        
+        if (asset.size === 0) {
+             console.error('Selected file is empty! Aborting restore.');
+             return false;
+        }
+        
+        await FileSystem.copyAsync({ from: asset.uri, to: dbPath });
+        console.log(`Database restored manually from ${asset.uri}`);
+        return true;
+    } catch (error) {
+        console.error('Failed to restore database manually:', error);
+        return false;
+    }
+};
+
+export const exportDatabaseManually = async () => {
+    try {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (permissions.granted) {
+            const dbData = await FileSystem.readAsStringAsync(dbPath, { encoding: FileSystem.EncodingType.Base64 });
+            const uri = await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, 'habits_backup.db', 'application/octet-stream');
+            await FileSystem.writeAsStringAsync(uri, dbData, { encoding: FileSystem.EncodingType.Base64 });
+            console.log(`Database exported manually to ${uri}`);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('Failed to export database manually:', error);
         return false;
     }
 };

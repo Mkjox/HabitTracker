@@ -16,6 +16,7 @@ export type RootStackParamList = {
   Notifications: undefined;
   NotificationSettings: undefined;
   Language: undefined;
+  Database: undefined;
 };
 
 export type HabitDetailsScreenProps = NativeStackScreenProps<

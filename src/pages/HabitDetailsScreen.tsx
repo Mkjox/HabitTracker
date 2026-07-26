@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
 import { hapticFeedback } from "../lib/haptics";
 import { useHabitStore } from "../store/useHabitStore";
+import { showErrorToast, showSuccessToast } from "../lib/toast";
 
 type HabitDetailsScreenRouteProp = RouteProp<RootStackParamList, "HabitDetails">;
 
@@ -155,7 +156,10 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
                 <CustomButton
                   title={t('habitDetails.saveBtn')}
                   onPress={async () => {
-                    if (!name.trim()) return Alert.alert(t('common.error'), t('habitDetails.errEmptyName'));
+                    if (!name.trim()) {
+                      showErrorToast(t('habitDetails.errEmptyName'), t('common.error'));
+                      return;
+                    }
                     try {
                       // find existing category id from store
                       const storeHabits = useHabitStore.getState().habits;
@@ -165,10 +169,10 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
                       await refreshStore();
                       setEditing(false);
                       hapticFeedback.success();
-                      if (Platform.OS === 'android') ToastAndroid.show(t('habitDetails.successRename'), ToastAndroid.SHORT);
+                      showSuccessToast(t('habitDetails.successRename'), t('common.success'));
                     } catch (err) {
                       console.error('Rename failed', err);
-                      Alert.alert(t('common.error'), t('habitDetails.errRename'));
+                      showErrorToast(t('habitDetails.errRename'), t('common.error'));
                     }
                   }}
                   style={{ paddingHorizontal: 12, alignSelf: 'flex-start', width: width / 2.5 }}

@@ -5,10 +5,7 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Alert,
   StyleSheet,
-  Platform,
-  ToastAndroid,
   SafeAreaView,
 } from "react-native";
 import { fonts } from '../assets/fonts/fonts';
@@ -25,6 +22,8 @@ import {
 } from "../assets/data/database";
 import { useFocusEffect } from "@react-navigation/native";
 import CustomButton from "../components/CustomButton";
+import ConfirmModal from '../components/ConfirmModal';
+import { showErrorToast, showSuccessToast } from '../lib/toast';
 
 type Habit = {
   id: number;
@@ -35,6 +34,9 @@ type Habit = {
 const RecycleBinScreen: React.FC = () => {
   const { t } = useTranslation();
   const [deletedHabits, setDeletedHabits] = useState<Habit[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const { theme } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -43,12 +45,6 @@ const RecycleBinScreen: React.FC = () => {
       fetchDeletedHabits();
     }, [])
   );
-
-  const showToastDelete = () => {
-    if (Platform.OS === 'android') {
-      ToastAndroid.show(t('recycleBin.successDelete'), ToastAndroid.SHORT);
-    }
-  };
 
   const fetchDeletedHabits = async (): Promise<void> => {
     try {
@@ -69,38 +65,45 @@ const RecycleBinScreen: React.FC = () => {
     }
   };
 
-  const handleDeletePermanently = (habitId: number): void => {
-    Alert.alert(t('recycleBin.confirmDeleteTitle'), t('recycleBin.confirmDelete'), [
-      { text: t('recycleBin.cancelBtn'), style: "cancel" },
-      {
-        text: t('recycleBin.deleteBtn'),
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteHabitPermanently(habitId);
-            showToastDelete();
-            fetchDeletedHabits();
-          } catch (error) {
-            console.error("Error deleting habit permanently:", error);
-          }
-        },
-      },
-    ]);
+  const openDeleteModal = (habit: Habit) => {
+    setDeleteTarget(habit);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDeletePermanently = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      await deleteHabitPermanently(deleteTarget.id);
+      showSuccessToast(t('recycleBin.successDelete'), t('common.success'));
+      fetchDeletedHabits();
+    } catch (error) {
+      console.error("Error deleting habit permanently:", error);
+      showErrorToast(t('recycleBin.errDelete') ?? 'Failed to delete habit.', t('common.error'));
+    } finally {
+      setDeleteLoading(false);
+      setDeleteModalVisible(false);
+      setDeleteTarget(null);
+    }
   };
 
   const handleCleanBin = (): void => {
     if (deletedHabits.length === 0) return;
-    Alert.alert(t('recycleBin.confirmEmptyTitle'), t('recycleBin.confirmEmpty'), [
-      { text: t('recycleBin.cancelBtn'), style: "cancel" },
-      {
-        text: t('recycleBin.deleteAllBtn'),
-        style: "destructive",
-        onPress: async () => {
-          await cleanRecycleBin();
-          fetchDeletedHabits();
-        }
-      }
-    ]);
+    setDeleteTarget(null);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmCleanBin = async () => {
+    setDeleteLoading(true);
+    try {
+      await cleanRecycleBin();
+      fetchDeletedHabits();
+    } catch (error) {
+      console.error("Error emptying recycle bin:", error);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteModalVisible(false);
+    }
   };
 
   return (
@@ -147,7 +150,7 @@ const RecycleBinScreen: React.FC = () => {
                   <Ionicons name="refresh-outline" size={20} color={theme.colors.success} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => handleDeletePermanently(item.id)}
+                  onPress={() => openDeleteModal(item)}
                   style={[styles.actionButton, { backgroundColor: theme.colors.error + '15' }]}
                 >
                   <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
@@ -155,6 +158,17 @@ const RecycleBinScreen: React.FC = () => {
               </View>
             </View>
           )}
+        />
+        <ConfirmModal
+          visible={deleteModalVisible}
+          title={deleteTarget ? t('recycleBin.confirmDeleteTitle') : t('recycleBin.confirmEmptyTitle')}
+          message={deleteTarget ? t('recycleBin.confirmDelete') : t('recycleBin.confirmEmpty')}
+          confirmText={deleteTarget ? t('recycleBin.deleteBtn') : t('recycleBin.deleteAllBtn')}
+          cancelText={t('recycleBin.cancelBtn')}
+          onCancel={() => setDeleteModalVisible(false)}
+          onConfirm={deleteTarget ? confirmDeletePermanently : confirmCleanBin}
+          confirmButtonColor={theme.colors.error}
+          loading={deleteLoading}
         />
       </View>
     </SafeAreaView>

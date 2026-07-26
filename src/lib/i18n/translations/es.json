@@ -26,7 +26,13 @@
     "database": "Base de datos",
     "databaseDesc": "Haz una copia de seguridad de tus hábitos y progreso en un archivo local o restaura desde una copia anterior.",
     "backupDb": "Respaldar base de datos",
+    "exportDb": "Exportar base de datos",
+    "restoreDbAuto": "Restaurar base de datos automáticamente",
+    "restoreDbManual": "Seleccionar base de datos manualmente",
+    "databaseManualDesc": "También puedes seleccionar manualmente un archivo de base de datos exportado previamente para restaurar tus datos.",
     "restoreDb": "Restaurar base de datos",
+    "defaultSaveLocation": "Ubicación de guardado predeterminada: ",
+    "internalStorage": "Almacenamiento interno de la aplicación",
     "language": "Idioma",
     "languageDesc": "Elige tu idioma preferido para la interfaz de la aplicación."
   },
@@ -153,6 +159,7 @@
     "save": "Guardar",
     "delete": "Eliminar",
     "ok": "OK",
+    "success": "Éxito",
     "error": "Error"
   }
 }

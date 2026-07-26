@@ -26,7 +26,13 @@
     "database": "Veritabanı",
     "databaseDesc": "Alışkanlıklarınızı ve ilerlemenizi yerel bir dosyaya yedekleyin veya önceki bir yedekten geri yükleyin.",
     "backupDb": "Veritabanını Yedekle",
+    "exportDb": "Veritabanını Dışa Aktar",
+    "restoreDbAuto": "Veritabanını Otomatik Geri Yükle",
+    "restoreDbManual": "Veritabanını Manuel Seç",
+    "databaseManualDesc": "Verilerinizi geri yüklemek için önceden dışa aktarılmış bir veritabanı dosyasını manuel olarak da seçebilirsiniz.",
     "restoreDb": "Veritabanını Geri Yükle",
+    "defaultSaveLocation": "Varsayılan Kayıt Konumu: ",
+    "internalStorage": "Uygulamanın Dahili Depolaması",
     "language": "Dil",
     "languageDesc": "Uygulama arayüzü için tercih ettiğiniz dili seçin."
   },
@@ -153,6 +159,7 @@
     "save": "Kaydet",
     "delete": "Sil",
     "ok": "Tamam",
+    "success": "Başarılı",
     "error": "Hata"
   }
 }
