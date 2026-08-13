@@ -20,6 +20,7 @@ export default function LanguageScreen() {
         { code: 'en', name: 'English' },
         { code: 'es', name: 'Español' },
         { code: 'tr', name: 'Türkçe' },
+        { code: 'zh', name: '中文' },
     ];
 
     const handleSelectLanguage = (code: string) => {

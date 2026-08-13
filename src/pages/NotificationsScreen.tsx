@@ -64,27 +64,52 @@ export default function NotificationsScreen() {
         return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    const renderItem = ({ item }: { item: NotificationItem }) => (
-        <View style={[styles.notificationCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-            <View style={[styles.iconBox, { backgroundColor: theme.colors.primary + '20' }]}>
-                <Ionicons name="leaf-outline" size={24} color={theme.colors.primary} />
-            </View>
-            <View style={styles.notificationContent}>
-                <View style={styles.notificationHeader}>
-                    <Text style={[styles.notificationTitle, { color: theme.colors.text }]}>
-                        {item.title || "Habit Reminder"}
-                    </Text>
-                    {!item.read && <View style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]} />}
+    const getLocalizedNotification = (item: NotificationItem) => {
+        let title = item.title || t('notifications.defaultTitle');
+        let body = item.body || '';
+
+        if (title === 'Habit Reminder') {
+            title = t('notifications.defaultTitle');
+        }
+
+        const englishSingle = /^You still have one habit to complete today!.*$/i;
+        const englishMany = /^You still have (\d+) habits to complete today!.*$/i;
+
+        if (englishSingle.test(body)) {
+            body = t('notifications.reminderOne');
+        } else if (englishMany.test(body)) {
+            const match = body.match(englishMany);
+            body = t('notifications.reminderMany', { count: Number(match?.[1] ?? 0) });
+        }
+
+        return { title, body };
+    };
+
+    const renderItem = ({ item }: { item: NotificationItem }) => {
+        const localized = getLocalizedNotification(item);
+
+        return (
+            <View style={[styles.notificationCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <View style={[styles.iconBox, { backgroundColor: theme.colors.primary + '20' }]}>
+                    <Ionicons name="leaf-outline" size={ 24} color={theme.colors.primary} />
                 </View>
-                <Text style={[styles.notificationBody, { color: theme.colors.textSecondary }]}>
-                    {item.body}
-                </Text>
-                <Text style={[styles.notificationTime, { color: theme.colors.textSecondary }]}>
-                    {formatDate(item.date)}
-                </Text>
+                <View style={styles.notificationContent}>
+                    <View style={styles.notificationHeader}>
+                        <Text style={[styles.notificationTitle, { color: theme.colors.text }]}>
+                            {localized.title}
+                        </Text>
+                        {!item.read && <View style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]} />}
+                    </View>
+                    <Text style={[styles.notificationBody, { color: theme.colors.textSecondary }]}>
+                        {localized.body}
+                    </Text>
+                    <Text style={[styles.notificationTime, { color: theme.colors.textSecondary }]}>
+                        {formatDate(item.date)}
+                    </Text>
+                </View>
             </View>
-        </View>
-    );
+        );
+    };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>

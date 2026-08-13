@@ -145,6 +145,8 @@
     "emptySubtitle": "No tienes notificaciones en este momento. ¡Vuelve a revisar más tarde!",
     "settingsTitle": "Configuración de notificaciones",
     "dailyReminder": "Recordatorio diario",
+    "reminderOne": "Todavía tienes un hábito por completar hoy! 🌿",
+    "reminderMany": "Todavía tienes {{count}} hábitos por completar hoy! 🌿",
     "reminderAt": "Recibirás un recordatorio a las {{time}} para completar tus hábitos del día.",
     "changeTimeTitle": "Cambiar hora del recordatorio",
     "changeTimeDesc": "Toca el texto de la hora para abrir el selector y elegir tu hora de recordatorio preferida."

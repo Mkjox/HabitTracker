@@ -145,6 +145,8 @@
     "emptySubtitle": "You don't have any notifications at the moment. Check back later!",
     "settingsTitle": "Notification Settings",
     "dailyReminder": "Daily Reminder",
+    "reminderOne": "You still have one habit to complete today! 🌿",
+    "reminderMany": "You still have {{count}} habits to complete today! 🌿",
     "reminderAt": "Get reminded at {{time}} to complete your habits for the day.",
     "changeTimeTitle": "Change Reminder Time",
     "changeTimeDesc": "Tap the time text to open the time picker and select your preferred reminder time."

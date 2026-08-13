@@ -145,6 +145,8 @@
     "emptySubtitle": "Şu anda herhangi bir bildiriminiz yok. Daha sonra tekrar kontrol edin!",
     "settingsTitle": "Bildirim Ayarları",
     "dailyReminder": "Günlük Hatırlatıcı",
+    "reminderOne": "Bugün tamamlamadığınız bir alışkanlığınız kaldı! 🌿",
+    "reminderMany": "Bugün tamamlamadığınız {{count}} alışkanlığınız kaldı! 🌿",
     "reminderAt": "Alışkanlıklarınızı tamamlamanız için size {{time}}'de hatırlatma gönderilecek.",
     "changeTimeTitle": "Hatırlatma Saatini Değiştir",
     "changeTimeDesc": "Zaman metnine dokunarak saat seçiciyi açın ve tercih ettiğiniz hatırlatma saatini seçin."

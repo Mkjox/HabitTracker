@@ -7,6 +7,7 @@ import { LocaleConfig } from 'react-native-calendars';
 import en from './translations/en.json';
 import tr from './translations/tr.json';
 import es from './translations/es.json';
+import zh from './translations/zh.json';
 
 const LANGUAGE_KEY = '@app_language';
 
@@ -14,6 +15,7 @@ const resources = {
   en: { translation: en },
   tr: { translation: tr },
   es: { translation: es },
+  zh: { translation: zh },
 };
 
 LocaleConfig.locales['en'] = {
@@ -40,6 +42,14 @@ LocaleConfig.locales['es'] = {
   today: 'Hoy'
 };
 
+LocaleConfig.locales['zh'] = {
+  monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+  monthNamesShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  dayNames: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+  dayNamesShort: ['日', '一', '二', '三', '四', '五', '六'],
+  today: '今天'
+};
+
 const initI18n = async () => {
   let savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
 
@@ -60,14 +70,14 @@ const initI18n = async () => {
       },
     });
 
-  LocaleConfig.defaultLocale = ['tr', 'es'].includes(savedLanguage) ? savedLanguage : 'en';
+  LocaleConfig.defaultLocale = ['tr', 'es', 'zh'].includes(savedLanguage) ? savedLanguage : 'en';
 };
 
 // Custom wrapper to change language and persist it
 export const changeLanguage = async (lng: string) => {
   await i18n.changeLanguage(lng);
   await AsyncStorage.setItem(LANGUAGE_KEY, lng);
-  LocaleConfig.defaultLocale = ['tr', 'es'].includes(lng) ? lng : 'en';
+  LocaleConfig.defaultLocale = ['tr', 'es', 'zh'].includes(lng) ? lng : 'en';
 };
 
 export { initI18n };
