@@ -80,5 +80,20 @@ export const changeLanguage = async (lng: string) => {
   LocaleConfig.defaultLocale = ['tr', 'es', 'zh'].includes(lng) ? lng : 'en';
 };
 
+// Returns the app's effective language for use in background tasks (notifications, widgets)
+export const getEffectiveLanguage = async (): Promise<string> => {
+  const saved = await AsyncStorage.getItem(LANGUAGE_KEY);
+  if (saved) return saved;
+
+  // Try device locale if it's a supported resource
+  const locales = Localization.getLocales();
+  const deviceLang = locales[0]?.languageCode;
+  if (deviceLang && Object.prototype.hasOwnProperty.call(resources, deviceLang)) {
+    return deviceLang;
+  }
+
+  return 'en';
+};
+
 export { initI18n };
 export default i18n;

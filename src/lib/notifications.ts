@@ -3,7 +3,7 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { DashboardHabit } from '../assets/types/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import i18n from './i18n';
+import i18n, { getEffectiveLanguage } from './i18n';
 
 // Configure how notifications should be handled when the app is running
 Notifications.setNotificationHandler({
@@ -103,12 +103,16 @@ export function getHabitReminderText(
  * Schedule a daily reminder at the stored time (default 8:00 PM).
  */
 async function scheduleDailyReminder(count: number) {
-  const message = getHabitReminderText(count);
+  const lang = await getEffectiveLanguage();
+  const translate = (key: string, options?: Record<string, unknown>) => i18n.t(key, { ...(options || {}), lng: lang });
+
+  const message = getHabitReminderText(count, translate);
+  const title = i18n.t('notifications.defaultTitle', { lng: lang });
   const { hour, minute } = await getStoredReminderTime();
 
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: i18n.t('notifications.defaultTitle'),
+      title,
       body: message,
       data: { type: 'habit_reminder' },
     },
