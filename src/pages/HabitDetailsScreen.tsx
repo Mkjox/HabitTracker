@@ -40,6 +40,9 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   const [name, setName] = useState(habitName);
   const [desc, setDesc] = useState(habitDescription || "");
   const refreshStore = useHabitStore(state => state.refresh);
+  const habits = useHabitStore(state => state.habits);
+  const categories = useHabitStore(state => state.categories);
+  const fetchCategories = useHabitStore(state => state.fetchCategories);
 
   const fetchProgress = async (): Promise<void> => {
     try {
@@ -54,6 +57,11 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
   useEffect(() => {
     fetchProgress();
   }, [habitId]);
+
+  useEffect(() => {
+    // Ensure categories are available for display
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleToggleDate = async (date: string): Promise<void> => {
     const today = new Date().toISOString().split("T")[0];
@@ -107,6 +115,17 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
     return marked;
   }, [progressHistory, selectedDate, theme]);
 
+  const categoryName = useMemo(() => {
+    try {
+      const current = habits.find(h => h.id === habitId as number);
+      const catId = current ? (current.category_id ?? (current as any).categoryId ?? null) : null;
+      const cat = categories.find(c => c.id === catId);
+      return cat ? cat.name : '';
+    } catch (err) {
+      return '';
+    }
+  }, [habits, categories, habitId]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -116,7 +135,7 @@ const HabitDetailsScreen = ({ route }: { route: HabitDetailsScreenRouteProp }) =
           </View>
           {!editing ? (
             <>
-
+              <Text style={[styles.categoryText, { color: theme.colors.textSecondary }]}>{categoryName}</Text>
             </>
           ) : (
             <>
@@ -339,6 +358,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 12,
     fontStyle: 'italic',
+  },
+  categoryText: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    marginBottom: 8,
   },
   actionCard: {
     padding: 20,
