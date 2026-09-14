@@ -47,10 +47,16 @@ export async function registerForPushNotificationsAsync() {
  * Schedule or cancel reminders based on habit progress.
  */
 export async function updateHabitReminders(habits: DashboardHabit[]) {
-  const incompleteHabits = habits.filter(h => !h.completedToday);
-
   // Clear existing reminders
   await cancelAllReminders();
+
+  const remindersEnabled = await getStoredReminderEnabled();
+  if (!remindersEnabled) {
+    console.log('[Notifications] Daily reminders are disabled.');
+    return;
+  }
+
+  const incompleteHabits = habits.filter(h => !h.completedToday);
 
   if (incompleteHabits.length > 0) {
     console.log(`[Notifications] Scheduling reminder for ${incompleteHabits.length} habits.`);
@@ -82,6 +88,16 @@ async function getStoredReminderTime(): Promise<{ hour: number; minute: number }
   } catch (e) {
     console.warn('[Notifications] Failed to read stored reminder time:', e);
     return { hour: 20, minute: 0 };
+  }
+}
+
+async function getStoredReminderEnabled(): Promise<boolean> {
+  try {
+    const enabled = await AsyncStorage.getItem('dailyReminderEnabled');
+    return enabled !== 'false';
+  } catch (e) {
+    console.warn('[Notifications] Failed to read reminder enabled state:', e);
+    return true;
   }
 }
 
